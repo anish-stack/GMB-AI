@@ -1,0 +1,307 @@
+[
+  {
+    "business_name": "ABC Dental Clinic",
+    "business_category": "Dental Clinic",
+    "city": "Rohini",
+    "state": "Delhi",
+    "address": "Sector 7, Rohini",
+    "phone": "+91 98110 22001",
+    "website": "https://abcdental.example.in",
+    "tone": "Professional",
+    "description": "Multi-speciality dental clinic in Rohini offering implants, root canal, braces and whitening.",
+    "services": [
+      "Dental Implant",
+      "Root Canal",
+      "Braces",
+      "Teeth Whitening"
+    ],
+    "locations": [
+      "Rohini",
+      "Sector 7",
+      "Sector 8",
+      "Pitampura"
+    ],
+    "keywords": [
+      "dentist rohini",
+      "dental implant rohini",
+      "root canal rohini"
+    ],
+    "posts": [
+      "Root Canal Treatment in Rohini",
+      "Braces Consultation for Teens in Rohini"
+    ]
+  },
+  {
+    "business_name": "Glow Studio Salon",
+    "business_category": "Beauty Salon",
+    "city": "Lajpat Nagar",
+    "state": "Delhi",
+    "address": "Central Market, Lajpat Nagar",
+    "phone": "+91 98110 22002",
+    "website": "https://glowstudio.example.in",
+    "tone": "Friendly",
+    "description": "Unisex salon offering hair, skin and bridal services in South Delhi.",
+    "services": [
+      "Hair Smoothening",
+      "Bridal Makeup",
+      "Hair Colour",
+      "Facial"
+    ],
+    "locations": [
+      "Lajpat Nagar",
+      "Defence Colony",
+      "Amar Colony"
+    ],
+    "keywords": [
+      "salon lajpat nagar",
+      "bridal makeup delhi",
+      "hair smoothening lajpat nagar"
+    ],
+    "posts": [
+      "Bridal Makeup Packages in Lajpat Nagar"
+    ]
+  },
+  {
+    "business_name": "Spice Route Restaurant",
+    "business_category": "Restaurant",
+    "city": "Connaught Place",
+    "state": "Delhi",
+    "address": "Block C, Connaught Place",
+    "phone": "+91 98110 22003",
+    "website": "https://spiceroute.example.in",
+    "tone": "Casual",
+    "description": "North Indian and Mughlai dine-in restaurant with family seating and party bookings.",
+    "services": [
+      "Family Dining",
+      "Party Booking",
+      "Home Delivery",
+      "Corporate Lunch"
+    ],
+    "locations": [
+      "Connaught Place",
+      "Barakhamba",
+      "Janpath"
+    ],
+    "keywords": [
+      "restaurant connaught place",
+      "family restaurant cp delhi",
+      "party booking cp"
+    ],
+    "posts": [
+      "Corporate Lunch Menu at Connaught Place"
+    ]
+  },
+  {
+    "business_name": "IronCore Fitness Gym",
+    "business_category": "Gym",
+    "city": "Dwarka",
+    "state": "Delhi",
+    "address": "Sector 12, Dwarka",
+    "phone": "+91 98110 22004",
+    "website": "https://ironcore.example.in",
+    "tone": "Informative",
+    "description": "Strength and conditioning gym with certified trainers, cardio zone and group classes.",
+    "services": [
+      "Personal Training",
+      "Weight Loss Program",
+      "Zumba Classes",
+      "CrossFit"
+    ],
+    "locations": [
+      "Dwarka",
+      "Sector 12",
+      "Sector 10",
+      "Janakpuri"
+    ],
+    "keywords": [
+      "gym dwarka",
+      "personal trainer dwarka",
+      "weight loss gym dwarka"
+    ],
+    "posts": [
+      "Personal Training Programs in Dwarka"
+    ]
+  },
+  {
+    "business_name": "Skyline Realty",
+    "business_category": "Real Estate Agency",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "address": "Sector 62, Noida",
+    "phone": "+91 98110 22005",
+    "website": "https://skylinerealty.example.in",
+    "tone": "Professional",
+    "description": "Residential and commercial property consultants for Noida and Greater Noida.",
+    "services": [
+      "Property Buying",
+      "Property Selling",
+      "Rental Services",
+      "Commercial Leasing"
+    ],
+    "locations": [
+      "Noida",
+      "Sector 62",
+      "Sector 137",
+      "Greater Noida"
+    ],
+    "keywords": [
+      "property dealer noida",
+      "flats in sector 62 noida",
+      "commercial office noida"
+    ],
+    "posts": [
+      "Commercial Office Leasing in Sector 62 Noida"
+    ]
+  },
+  {
+    "business_name": "Hover Media Digital",
+    "business_category": "Digital Marketing Agency",
+    "city": "Rohini",
+    "state": "Delhi",
+    "address": "Sector 3, Rohini",
+    "phone": "+91 98110 22006",
+    "website": "https://hovermedia.in",
+    "tone": "Professional",
+    "description": "Digital agency offering web development, mobile apps and local SEO for small businesses.",
+    "services": [
+      "Local SEO",
+      "Web Development",
+      "Google Ads",
+      "Social Media Marketing"
+    ],
+    "locations": [
+      "Rohini",
+      "Pitampura",
+      "Delhi NCR"
+    ],
+    "keywords": [
+      "digital marketing agency delhi",
+      "local seo delhi",
+      "website development rohini"
+    ],
+    "posts": [
+      "Local SEO Services for Delhi Businesses"
+    ]
+  },
+  {
+    "business_name": "Verma & Associates Law Firm",
+    "business_category": "Law Firm",
+    "city": "Saket",
+    "state": "Delhi",
+    "address": "District Centre, Saket",
+    "phone": "+91 98110 22007",
+    "website": "https://vermalaw.example.in",
+    "tone": "Professional",
+    "description": "Civil, corporate and property law practice serving clients across Delhi NCR.",
+    "services": [
+      "Property Documentation",
+      "Corporate Advisory",
+      "Civil Litigation",
+      "Family Law"
+    ],
+    "locations": [
+      "Saket",
+      "Malviya Nagar",
+      "Hauz Khas"
+    ],
+    "keywords": [
+      "property lawyer saket",
+      "corporate lawyer delhi",
+      "civil case lawyer saket"
+    ],
+    "posts": [
+      "Property Documentation Support in Saket"
+    ]
+  },
+  {
+    "business_name": "AutoFix Car Workshop",
+    "business_category": "Car Repair Shop",
+    "city": "Ghaziabad",
+    "state": "Uttar Pradesh",
+    "address": "Vaishali, Ghaziabad",
+    "phone": "+91 98110 22008",
+    "website": "https://autofix.example.in",
+    "tone": "Friendly",
+    "description": "Multi-brand car service centre offering periodic servicing, denting and painting.",
+    "services": [
+      "Car Servicing",
+      "Denting and Painting",
+      "AC Repair",
+      "Wheel Alignment"
+    ],
+    "locations": [
+      "Vaishali",
+      "Indirapuram",
+      "Ghaziabad"
+    ],
+    "keywords": [
+      "car service vaishali",
+      "denting painting ghaziabad",
+      "car ac repair indirapuram"
+    ],
+    "posts": [
+      "Car AC Repair Service in Indirapuram"
+    ]
+  },
+  {
+    "business_name": "Hotel Green Palm",
+    "business_category": "Hotel",
+    "city": "Karol Bagh",
+    "state": "Delhi",
+    "address": "Ajmal Khan Road, Karol Bagh",
+    "phone": "+91 98110 22009",
+    "website": "https://greenpalm.example.in",
+    "tone": "Premium",
+    "description": "Business hotel with conference hall, airport transfers and rooftop dining.",
+    "services": [
+      "Business Rooms",
+      "Conference Hall",
+      "Airport Transfer",
+      "Rooftop Dining"
+    ],
+    "locations": [
+      "Karol Bagh",
+      "Rajendra Place",
+      "Patel Nagar"
+    ],
+    "keywords": [
+      "hotel karol bagh",
+      "business hotel delhi",
+      "conference hall karol bagh"
+    ],
+    "posts": [
+      "Conference Hall Booking in Karol Bagh"
+    ]
+  },
+  {
+    "business_name": "QuickFix Home Services",
+    "business_category": "Home Services",
+    "city": "Gurugram",
+    "state": "Haryana",
+    "address": "Sector 45, Gurugram",
+    "phone": "+91 98110 22010",
+    "website": "https://quickfix.example.in",
+    "tone": "Friendly",
+    "description": "On-demand plumbing, electrical, carpentry and deep cleaning services across Gurugram.",
+    "services": [
+      "Plumbing",
+      "Electrical Repair",
+      "Carpentry",
+      "Deep Cleaning"
+    ],
+    "locations": [
+      "Gurugram",
+      "Sector 45",
+      "Sohna Road",
+      "DLF Phase 3"
+    ],
+    "keywords": [
+      "plumber gurugram",
+      "electrician sector 45",
+      "deep cleaning gurugram"
+    ],
+    "posts": [
+      "Deep Cleaning Services in Sector 45 Gurugram"
+    ]
+  }
+]
