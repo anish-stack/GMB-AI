@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --color-brand-50: #fef1f1;
+  --color-brand-100: #fddedf;
+  --color-brand-200: #fab8ba;
+  --color-brand-300: #f68388;
+  --color-brand-400: #f24f55;
+  --color-brand-500: #f03138;
+  --color-brand-600: #e71119;
+  --color-brand-700: #c10e15;
+  --color-brand-800: #9b0b11;
+  --color-brand-900: #75090d;
 }
 
 html, body {
@@ -10,17 +23,45 @@ html, body {
 }
 
 body {
-  background-color: #f1f5f9;
+  background-color: #f6f7fb;
+  background-image:
+    radial-gradient(1200px 600px at 100% -10%, rgba(240, 49, 56, 0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 0%, rgba(124, 58, 237, 0.08), transparent 55%);
+  background-attachment: fixed;
   color: #0f172a;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background-color: #0b0c0f;
+  background-image:
+    radial-gradient(1200px 600px at 100% -10%, rgba(240, 49, 56, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 0%, rgba(124, 58, 237, 0.10), transparent 55%);
+  color: #f4f4f5;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fade-in-up 0.28s ease both;
 }
 
 :focus-visible {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid #e71119;
   outline-offset: 2px;
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}

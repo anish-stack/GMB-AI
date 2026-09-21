@@ -1,34 +1,56 @@
 /**
- * Nightly scheduler (prototype). Runs in a separate terminal:  npm run scheduler
- * It calls the app's API route, so the same code path as the admin
- * "Run AI Nightly Job Now" button is used.
+ * Nightly scheduler (prototype). Run in a separate terminal:  npm run scheduler
  *
- * Production path: replace node-cron with BullMQ + Redis workers.
- * The queue payload would be { type: "NIGHTLY", date } and each client
- * would be a separate job for retries and concurrency control.
+ * Two jobs:
+ *   1. AI content job - generates every SCHEDULED calendar entry across ALL tenants.
+ *      Suspended tenants, expired subscriptions and out-of-credit tenants are skipped
+ *      by the orchestrator itself, so nothing is charged that should not be.
+ *   2. Billing sweep - renews free plans, raises renewal invoices, moves unpaid
+ *      subscriptions to PAST_DUE and then EXPIRED after the grace period.
+ *
+ * Production path: replace node-cron with BullMQ + Redis workers, one job per client.
  */
 import "dotenv/config";
 import cron from "node-cron";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
-const EXPR = process.env.NIGHTLY_CRON || "0 0 * * *";
+const AI_EXPR = process.env.NIGHTLY_CRON || "0 0 * * *";
+const BILLING_EXPR = process.env.BILLING_CRON || "30 1 * * *";
+const KEY = process.env.SESSION_SECRET || "";
 
-async function run() {
-  const started = new Date();
-  console.log(`[scheduler] nightly job start ${started.toISOString()}`);
+async function runAiJob() {
+  console.log(`[scheduler] AI job start ${new Date().toISOString()}`);
   try {
     const res = await fetch(`${APP_URL}/api/ai/nightly`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-scheduler-key": process.env.SESSION_SECRET || "" },
+      headers: { "Content-Type": "application/json", "x-scheduler-key": KEY },
       body: JSON.stringify({ source: "cron" }),
     });
-    const data = await res.json();
-    console.log("[scheduler] result:", JSON.stringify(data));
+    console.log("[scheduler] AI result:", JSON.stringify(await res.json()));
   } catch (err) {
-    console.error("[scheduler] failed:", err.message);
+    console.error("[scheduler] AI job failed:", err.message);
   }
 }
 
-cron.schedule(EXPR, run);
-console.log(`[scheduler] armed with "${EXPR}" -> ${APP_URL}/api/ai/nightly`);
-if (process.argv.includes("--now")) run();
+/**
+ * The billing sweep runs directly against the database - it needs no session,
+ * and it must keep working even if the web app is momentarily down.
+ */
+async function runBilling() {
+  console.log(`[scheduler] billing sweep start ${new Date().toISOString()}`);
+  try {
+    const { runBillingCycle } = await import("../lib/saas/billing.js");
+    const result = await runBillingCycle();
+    console.log("[scheduler] billing result:", JSON.stringify(result));
+  } catch (err) {
+    console.error("[scheduler] billing sweep failed:", err.message);
+  }
+}
+
+cron.schedule(AI_EXPR, runAiJob);
+cron.schedule(BILLING_EXPR, runBilling);
+console.log(`[scheduler] AI job "${AI_EXPR}" -> ${APP_URL}/api/ai/nightly`);
+console.log(`[scheduler] billing sweep "${BILLING_EXPR}" -> direct database`);
+
+if (process.argv.includes("--now")) runAiJob();
+if (process.argv.includes("--billing")) runBilling();

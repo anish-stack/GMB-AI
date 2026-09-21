@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3258",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:setup": "node scripts/seed.js",
+    "scheduler": "node scripts/scheduler.js",
+    "billing": "node scripts/scheduler.js --billing"
   },
   "dependencies": {
     "@huggingface/inference": "^4.13.28",

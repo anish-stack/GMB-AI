@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
+import { requireTenantContext } from "@/lib/saas/context.js";
 import { dashboardStats, performanceTotals, topClients, statusBreakdown } from "@/lib/repo/stats.js";
 import { Card, CardBody, CardHeader, Stat, Table, EmptyRow, Badge } from "@/components/ui";
 import { StatusBadge } from "@/components/status-badge";
@@ -7,15 +8,18 @@ import { StatusBadge } from "@/components/status-badge";
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
+  const ctx = await requireTenantContext();
+  const T = ctx.tenantId;
   const [stats, perf, clients, breakdown, daily] = await Promise.all([
-    dashboardStats(),
-    performanceTotals(),
-    topClients(10),
-    statusBreakdown(),
+    dashboardStats(T),
+    performanceTotals(T),
+    topClients(10, T),
+    statusBreakdown(T),
     query(
       `SELECT DATE(created_at) day, COUNT(*) tasks, ROUND(AVG(qa_score),1) avg_score,
               SUM(status='PUBLISHED') published, SUM(status='REJECTED') rejected
-         FROM ai_tasks GROUP BY DATE(created_at) ORDER BY day DESC LIMIT 14`
+         FROM ai_tasks WHERE tenant_id=? GROUP BY DATE(created_at) ORDER BY day DESC LIMIT 14`,
+      [T]
     ),
   ]);
 
@@ -24,8 +28,8 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-lg font-semibold text-slate-900">Analytics</h1>
-        <p className="text-sm text-slate-500">AI throughput, human decisions and mock GMB performance.</p>
+        <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Analytics</h1>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">AI throughput, human decisions and mock GMB performance.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -41,16 +45,16 @@ export default async function AnalyticsPage() {
           <CardBody className="space-y-1.5">
             {daily.map((d) => (
               <div key={String(d.day)} className="flex items-center gap-3 text-xs">
-                <span className="w-24 shrink-0 text-slate-500">{String(d.day).slice(0, 10)}</span>
-                <div className="h-3 flex-1 rounded bg-slate-100">
+                <span className="w-24 shrink-0 text-zinc-500 dark:text-zinc-400">{String(d.day).slice(0, 10)}</span>
+                <div className="h-3 flex-1 rounded bg-zinc-100 dark:bg-zinc-800">
                   <div className="h-3 rounded bg-indigo-500" style={{ width: `${(Number(d.tasks) / maxTasks) * 100}%` }} />
                 </div>
-                <span className="w-28 shrink-0 text-right text-slate-600">
+                <span className="w-28 shrink-0 text-right text-zinc-600 dark:text-zinc-400">
                   {d.tasks} tasks &middot; {d.avg_score ?? "-"}
                 </span>
               </div>
             ))}
-            {!daily.length ? <p className="text-sm text-slate-500">No task history yet.</p> : null}
+            {!daily.length ? <p className="text-sm text-zinc-500 dark:text-zinc-400">No task history yet.</p> : null}
           </CardBody>
         </Card>
 
@@ -60,7 +64,7 @@ export default async function AnalyticsPage() {
             {breakdown.map((b) => (
               <div key={b.status} className="flex items-center justify-between text-sm">
                 <StatusBadge status={b.status} />
-                <span className="text-slate-700">{b.total}</span>
+                <span className="text-zinc-700 dark:text-zinc-300">{b.total}</span>
               </div>
             ))}
           </CardBody>
@@ -72,23 +76,23 @@ export default async function AnalyticsPage() {
         <Table head={["Client", "City", "Tasks", "Published", "Average score", ""]}
           empty={!clients.length ? <EmptyRow colSpan={6}>No data yet.</EmptyRow> : null}>
           {clients.map((c) => (
-            <tr key={c.id} className="hover:bg-slate-50">
-              <td className="px-4 py-2 font-medium text-slate-800">{c.business_name}</td>
-              <td className="px-4 py-2 text-slate-600">{c.city}</td>
-              <td className="px-4 py-2 text-slate-600">{c.tasks}</td>
-              <td className="px-4 py-2 text-slate-600">{c.published || 0}</td>
+            <tr key={c.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
+              <td className="px-4 py-2 font-medium text-zinc-800 dark:text-zinc-100">{c.business_name}</td>
+              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{c.city}</td>
+              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{c.tasks}</td>
+              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{c.published || 0}</td>
               <td className="px-4 py-2">
                 <Badge tone={Number(c.avg_score) >= 80 ? "emerald" : "amber"}>{c.avg_score ?? "-"}</Badge>
               </td>
               <td className="px-4 py-2 text-right">
-                <Link href={`/clients/${c.id}`} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">Open</Link>
+                <Link href={`/clients/${c.id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Open</Link>
               </td>
             </tr>
           ))}
         </Table>
       </Card>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">
         Performance numbers come from the mock GMB provider. Connect the Google Business Profile API to replace them.
       </p>
     </div>

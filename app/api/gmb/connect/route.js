@@ -21,7 +21,13 @@ export async function GET(request) {
 
   if (!clientId && searchParams.get("client")) {
     const session = await getSession();
-    if (session) clientId = Number(searchParams.get("client"));
+    if (session) {
+      const wanted = Number(searchParams.get("client"));
+      const owned = session.tenantId
+        ? await one("SELECT id FROM clients WHERE id=? AND tenant_id=?", [wanted, session.tenantId])
+        : await one("SELECT id FROM clients WHERE id=?", [wanted]);
+      if (owned) clientId = wanted;
+    }
   }
 
   if (!clientId) {

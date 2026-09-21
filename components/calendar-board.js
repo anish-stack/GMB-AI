@@ -81,7 +81,7 @@ export function CalendarBoard({ days, clients }) {
               </Button>
             </div>
           </form>
-          {msg ? <p className="mt-2 text-xs text-slate-600">{msg}</p> : null}
+          {msg ? <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">{msg}</p> : null}
         </CardBody>
       </Card>
 
@@ -98,11 +98,11 @@ export function CalendarBoard({ days, clients }) {
           />
           <CardBody className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {day.entries.map((e) => (
-              <div key={e.id} className="rounded border border-slate-200 p-2.5">
+              <div key={e.id} className="rounded border border-zinc-200 dark:border-zinc-800 p-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-800">{e.business_name}</p>
-                    <p className="truncate text-xs text-slate-500">{e.topic || "Topic chosen by AI"}</p>
+                    <p className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-100">{e.business_name}</p>
+                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{e.topic || "Topic chosen by AI"}</p>
                   </div>
                   <Badge tone={e.status === "GENERATED" ? "emerald" : "slate"}>{e.status}</Badge>
                 </div>
@@ -110,10 +110,10 @@ export function CalendarBoard({ days, clients }) {
                   <Badge tone="blue">{e.post_type}</Badge>
                   <div className="flex items-center gap-2">
                     {e.task_id ? (
-                      <Link href={`/gmb/tasks/${e.task_id}`} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">View task</Link>
+                      <Link href={`/gmb/tasks/${e.task_id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">View task</Link>
                     ) : null}
                     {e.status === "SCHEDULED" ? (
-                      <button onClick={() => removeEntry(e.id)} className="text-slate-400 hover:text-red-600" aria-label="Remove entry">
+                      <button onClick={() => removeEntry(e.id)} className="text-zinc-400 dark:text-zinc-500 hover:text-red-600" aria-label="Remove entry">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     ) : null}
@@ -121,7 +121,7 @@ export function CalendarBoard({ days, clients }) {
                 </div>
               </div>
             ))}
-            {!day.entries.length ? <p className="text-sm text-slate-500">Nothing scheduled.</p> : null}
+            {!day.entries.length ? <p className="text-sm text-zinc-500 dark:text-zinc-400">Nothing scheduled.</p> : null}
           </CardBody>
         </Card>
       ))}

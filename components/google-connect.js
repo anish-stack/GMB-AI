@@ -91,12 +91,12 @@ export function GoogleConnect({ client }) {
       />
       <CardBody className="space-y-3 text-sm">
         {connected ? (
-          <div className="space-y-1 text-xs text-slate-600">
-            <p>Google account: <span className="font-medium text-slate-800">{client.google_email || "unknown"}</span></p>
+          <div className="space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+            <p>Google account: <span className="font-medium text-zinc-800 dark:text-zinc-100">{client.google_email || "unknown"}</span></p>
             <p>Location: <span className="font-mono">{client.google_location_name || "not selected"}</span></p>
           </div>
         ) : (
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">
             Send this link to the client. They sign in with their own Gmail and approve once - no panel
             login, no password sharing. The token is stored against this client only.
           </p>
@@ -119,8 +119,8 @@ export function GoogleConnect({ client }) {
         </div>
 
         {link ? (
-          <div className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 p-2">
-            <input readOnly value={link} className="min-w-0 flex-1 bg-transparent font-mono text-xs text-slate-700" />
+          <div className="flex items-center gap-2 rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-2">
+            <input readOnly value={link} className="min-w-0 flex-1 bg-transparent font-mono text-xs text-zinc-700 dark:text-zinc-300" />
             <Button variant="secondary" onClick={copy}>
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "Copied" : "Copy"}
@@ -143,7 +143,7 @@ export function GoogleConnect({ client }) {
           </Select>
         ) : null}
 
-        {msg ? <p className="text-xs text-slate-600">{msg}</p> : null}
+        {msg ? <p className="text-xs text-zinc-600 dark:text-zinc-400">{msg}</p> : null}
       </CardBody>
     </Card>
   );

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { guard } from "@/lib/saas/guard.js";
+import { assertClientInTenant } from "@/lib/repo/clients.js";
+import { assertFeature } from "@/lib/saas/entitlements.js";
 import { update, one } from "@/lib/db";
 import { GoogleGMBProvider } from "@/lib/gmb/googleProvider.js";
 import { connectLink, disconnectClient } from "@/lib/gmb/googleAuth.js";
@@ -9,14 +11,16 @@ export const maxDuration = 300;
 
 /** Staff endpoint: list a connected client's locations, pick one, or disconnect. */
 export async function POST(request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const g = await guard(request, { permission: "gmb.connect" });
+  if (g.error) return g.error;
 
   const body = await request.json();
   const clientId = Number(body.clientId);
   if (!clientId) return NextResponse.json({ error: "clientId is required" }, { status: 400 });
 
   try {
+    await assertClientInTenant(clientId, g.ctx.tenantId);
+    if (g.ctx.ent) assertFeature(g.ctx.ent, "f_google_publish");
     if (body.action === "link") {
       return NextResponse.json({ ok: true, link: connectLink(clientId) });
     }

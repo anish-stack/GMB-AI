@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, CardHeader, Field, Input, Select, Textarea } from "@/components/ui";
 import { POST_TYPES, TONES, FREQUENCIES } from "@/lib/constants";
 
-export function ClientForm({ client }) {
+export function ClientForm({ client, employees = [] }) {
   const router = useRouter();
   const editing = Boolean(client);
   const [busy, setBusy] = useState(false);
@@ -24,6 +24,7 @@ export function ClientForm({ client }) {
     content_tone: client?.content_tone || "Professional",
     posting_frequency: client?.posting_frequency || "WEEKLY",
     gmb_location_id: client?.gmb_location_id || "",
+    assigned_employee_id: client?.assigned_employee_id || "",
     services: (client?.services || []).map((s) => s.name).join("\n"),
     target_locations: (client?.locations || []).map((l) => l.name).join("\n"),
     target_keywords: (client?.keywords || []).filter((k) => k.source === "CLIENT").map((k) => k.keyword).join("\n"),
@@ -63,6 +64,12 @@ export function ClientForm({ client }) {
           <Field label="State"><Input value={form.state} onChange={set("state")} /></Field>
           <Field label="GMB location id" hint="Mock id is generated if left empty">
             <Input value={form.gmb_location_id} onChange={set("gmb_location_id")} />
+          </Field>
+          <Field label="Assigned employee">
+            <Select value={form.assigned_employee_id} onChange={set("assigned_employee_id")}>
+              <option value="">Unassigned</option>
+              {employees.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </Select>
           </Field>
           <Field label="Description" className="sm:col-span-2">
             <Textarea value={form.description} onChange={set("description")} />
@@ -105,7 +112,7 @@ export function ClientForm({ client }) {
         <Button type="submit" disabled={busy}>{busy ? "Saving..." : editing ? "Save changes" : "Create client"}</Button>
         <Button type="button" variant="secondary" onClick={() => router.back()}>Cancel</Button>
       </div>
-      <p className="text-xs text-slate-500">Post types available in the calendar: {POST_TYPES.join(", ")}.</p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">Post types available in the calendar: {POST_TYPES.join(", ")}.</p>
     </form>
   );
 }
