@@ -1,0 +1,35 @@
+<svg viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD166"/>
+      <stop offset="1" stop-color="#F53236"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="110" cy="120" r="100" fill="#ffffff" opacity="0.06"/>
+  <circle cx="110" cy="120" r="72" fill="#ffffff" opacity="0.08"/>
+
+  <!-- fins -->
+  <path d="M92 150 L54 200 L92 190 Z" fill="#e81d22"/>
+  <path d="M128 150 L166 200 L128 190 Z" fill="#e81d22"/>
+
+  <!-- body -->
+  <path d="M110 18c26 24 38 62 38 100 0 26-10 46-38 58-28-12-38-32-38-58 0-38 12-76 38-100z" fill="#ffffff"/>
+  <path d="M110 18c26 24 38 62 38 100 0 26-10 46-38 58V18z" fill="#F1F1F4"/>
+
+  <!-- window -->
+  <circle cx="110" cy="106" r="22" fill="#F53236"/>
+  <circle cx="110" cy="106" r="13" fill="#ffffff"/>
+
+  <!-- nose stripe -->
+  <path d="M110 18c14 13 24 32 30 54h-60c6-22 16-41 30-54z" fill="#F53236" opacity="0.9"/>
+
+  <!-- flame -->
+  <path d="M110 176c10 14 16 28 16 42-6 8-12 14-16 18-4-4-10-10-16-18 0-14 6-28 16-42z" fill="url(#flame)"/>
+
+  <!-- stars -->
+  <circle cx="24" cy="40" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="190" cy="60" r="2.5" fill="#ffffff" opacity="0.7"/>
+  <circle cx="30" cy="150" r="2" fill="#ffffff" opacity="0.6"/>
+  <circle cx="196" cy="170" r="3" fill="#ffffff" opacity="0.7"/>
+</svg>

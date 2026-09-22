@@ -17,6 +17,7 @@ const STATUS_COLOR = {
   NEEDS_REVIEW: "bg-amber-500",
   APPROVED: "bg-violet-500",
   PUBLISHED: "bg-brand-500",
+  POST_DELETED: "bg-rose-500",
   REJECTED: "bg-rose-500",
   FAILED: "bg-rose-700",
 };

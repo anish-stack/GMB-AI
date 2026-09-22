@@ -4,12 +4,12 @@ import { Fragment, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Check, X, RefreshCw, Send, Save, AlertTriangle, CheckCircle2, ImageIcon, ArrowLeft,
+  Check, X, RefreshCw, Send, Save, AlertTriangle, CheckCircle2, ImageIcon, ArrowLeft, Trash2,
 } from "lucide-react";
 import { Badge, Button, Card, CardBody, CardHeader, Field, Input, ScoreRing, Select, Textarea } from "@/components/ui";
 import { StatusBadge, MockBadge } from "@/components/status-badge";
 import { formatDate } from "@/lib/utils";
-import { POST_TYPES } from "@/lib/constants";
+import { POST_TYPES, IMAGE_REGEN_LIMIT } from "@/lib/constants";
 
 const CHECK_LABELS = {
   business_accuracy: "Business verified",
@@ -73,8 +73,8 @@ export function TaskReview({ task: initial }) {
     scheduled_date: form.scheduled_date || null,
   });
 
-  async function act(action, extra = {}) {
-    setBusy(action);
+  async function act(action, extra = {}, busyKey = action) {
+    setBusy(busyKey);
     setNotice(null);
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
@@ -105,6 +105,16 @@ export function TaskReview({ task: initial }) {
           text: `Published ${formatDate(new Date(), true)} to ${task.business_name}${task.city ? " - " + task.city : ""}`,
           mock: data.published?.is_mock,
         });
+      } else if (action === "update_post") {
+        setNotice({ tone: "success", text: "Live post updated on Google.", mock: data.updated?.is_mock });
+      } else if (action === "delete_post") {
+        setNotice({ tone: "success", text: "Post deleted from Google.", mock: data.deleted?.is_mock });
+      } else if (action === "regenerate_image") {
+        setNotice({ tone: "success", text: "Image regenerated." });
+      } else if (action === "generate_image_options") {
+        setNotice({ tone: "success", text: `${data.candidates?.length || 0} image option(s) ready - pick one below.` });
+      } else if (action === "select_image") {
+        setNotice({ tone: "success", text: "Image selected. The other options were deleted." });
       } else {
         setNotice({ tone: "success", text: `${action} done` });
       }
@@ -140,6 +150,14 @@ export function TaskReview({ task: initial }) {
   }
 
   const canPublish = ["APPROVED", "PUBLISHED"].includes(task.status);
+  const isPublished = task.status === "PUBLISHED";
+  const isPostDeleted = task.status === "POST_DELETED";
+  const livePostRemoved = task.post?.status === "DELETED";
+
+  async function deleteLivePost() {
+    if (!window.confirm("Delete this post from Google Business Profile? This cannot be undone.")) return;
+    await act("delete_post");
+  }
 
   return (
     <div className="space-y-4">
@@ -171,6 +189,13 @@ export function TaskReview({ task: initial }) {
               {notice.mock ? <p className="mt-1 text-xs font-medium">Prototype / mock publishing - this post was not sent to Google.</p> : null}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {isPostDeleted ? (
+        <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">
+          <p className="font-medium">Post deleted from Google</p>
+          <p className="mt-1 text-xs">This post was removed from Google Business Profile and can no longer be edited or re-published from here.</p>
         </div>
       ) : null}
 
@@ -246,24 +271,45 @@ export function TaskReview({ task: initial }) {
               ) : null}
 
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button variant="secondary" onClick={() => act("edit", { fields: fields() })} disabled={!dirty || busy}>
-                  <Save className="h-3.5 w-3.5" /> Save edits
-                </Button>
-                <Button variant="success" onClick={() => act("approve", dirty ? { fields: fields() } : {})} disabled={busy || task.status === "PUBLISHED"}>
-                  <Check className="h-3.5 w-3.5" /> Approve
-                </Button>
-                <Button variant="secondary" onClick={() => act("regenerate")} disabled={busy}>
-                  <RefreshCw className={busy === "regenerate" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} /> Regenerate
-                </Button>
-                <Button variant="danger" onClick={() => act("reject", { reason: "Rejected by employee" })} disabled={busy || task.status === "PUBLISHED"}>
-                  <X className="h-3.5 w-3.5" /> Reject
-                </Button>
-                <Button onClick={() => act("publish")} disabled={busy || !canPublish || task.status === "PUBLISHED"} title={canPublish ? "" : "Approve the post first"}>
-                  <Send className="h-3.5 w-3.5" /> Publish to GMB
-                </Button>
+                {isPublished ? (
+                  <>
+                    <Button variant="secondary" onClick={() => act("update_post", { fields: fields() })} disabled={!dirty || busy || livePostRemoved}>
+                      <Save className="h-3.5 w-3.5" /> {busy === "update_post" ? "Updating..." : "Update live post"}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={deleteLivePost}
+                      disabled={busy || livePostRemoved}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> {livePostRemoved ? "Already deleted" : "Delete live post"}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="secondary" onClick={() => act("edit", { fields: fields() })} disabled={!dirty || busy || isPostDeleted}>
+                      <Save className="h-3.5 w-3.5" /> Save edits
+                    </Button>
+                    <Button variant="success" onClick={() => act("approve", dirty ? { fields: fields() } : {})} disabled={busy || isPostDeleted}>
+                      <Check className="h-3.5 w-3.5" /> Approve
+                    </Button>
+                    <Button variant="secondary" onClick={() => act("regenerate")} disabled={busy || isPostDeleted}>
+                      <RefreshCw className={busy === "regenerate" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} /> Regenerate
+                    </Button>
+                    <Button variant="danger" onClick={() => act("reject", { reason: "Rejected by employee" })} disabled={busy || isPostDeleted}>
+                      <X className="h-3.5 w-3.5" /> Reject
+                    </Button>
+                    <Button onClick={() => act("publish")} disabled={busy || !canPublish || isPostDeleted} title={canPublish ? "" : "Approve the post first"}>
+                      <Send className="h-3.5 w-3.5" /> Publish to GMB
+                    </Button>
+                  </>
+                )}
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Publishing uses the mock GMB provider in this prototype. Approve first, then publish.
+                {isPublished
+                  ? "This post is live on Google - edits and the delete button here are pushed straight to GMB."
+                  : isPostDeleted
+                  ? "This post was deleted from Google and can no longer be edited or re-published from here."
+                  : "Approve the post, then publish it to GMB."}
               </p>
             </CardBody>
           </Card>
@@ -390,7 +436,10 @@ export function TaskReview({ task: initial }) {
           </Card>
 
           <Card>
-            <CardHeader title="Image" subtitle={task.image_provider} />
+            <CardHeader
+              title="Image"
+              subtitle={task.image_provider ? `${task.image_provider}${task.image_storage_provider ? ` \u00b7 stored on ${task.image_storage_provider}` : ""}` : null}
+            />
             <CardBody className="space-y-2">
               {task.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -410,6 +459,62 @@ export function TaskReview({ task: initial }) {
               ) : null}
               <p className="text-xs text-zinc-500 dark:text-zinc-400">{task.image_concept}</p>
 
+              {task.imageCandidates?.length ? (
+                <div className="space-y-1.5 rounded border border-indigo-200 bg-indigo-50/60 p-2 dark:border-indigo-900 dark:bg-indigo-950/30">
+                  <p className="text-xs font-medium text-indigo-800 dark:text-indigo-300">
+                    {task.imageCandidates.length} option{task.imageCandidates.length === 1 ? "" : "s"} waiting for a pick -
+                    everything else gets deleted from storage once you choose.
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {task.imageCandidates.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => act("select_image", { candidateId: c.id }, `select_${c.id}`)}
+                        disabled={Boolean(busy)}
+                        className="group relative overflow-hidden rounded border border-zinc-200 dark:border-zinc-800 disabled:opacity-60"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={c.url} alt={`Option ${c.id}`} className="aspect-[4/3] w-full object-cover" />
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-center text-[11px] font-medium text-white opacity-0 group-hover:opacity-100">
+                          {busy === `select_${c.id}` ? "Using..." : "Use this"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {!isPublished ? (
+                <>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => act("regenerate_image")}
+                      disabled={busy || (task.image_regen_count || 0) >= IMAGE_REGEN_LIMIT}
+                    >
+                      <RefreshCw className={busy === "regenerate_image" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
+                      {busy === "regenerate_image" ? "..." : "Regenerate"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => act("generate_image_options", { count: 3 })}
+                      disabled={Boolean(busy)}
+                    >
+                      <ImageIcon className={busy === "generate_image_options" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
+                      {busy === "generate_image_options" ? "..." : "Generate 3 options"}
+                    </Button>
+                  </div>
+                  <p className="text-center text-[11px] text-zinc-400">
+                    {(task.image_regen_count || 0) >= IMAGE_REGEN_LIMIT
+                      ? `Regeneration limit reached (${IMAGE_REGEN_LIMIT}/${IMAGE_REGEN_LIMIT}) for this post - upload your own image instead.`
+                      : `${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0)} AI regeneration${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0) === 1 ? "" : "s"} left. "Generate options" doesn't count against this.`}
+                  </p>
+                </>
+              ) : null}
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -421,13 +526,20 @@ export function TaskReview({ task: initial }) {
                 type="button"
                 variant={task.image_provider === "placeholder" || !task.image_url ? "primary" : "secondary"}
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImage}
+                disabled={uploadingImage || livePostRemoved}
                 className="w-full"
               >
                 <ImageIcon className="h-3.5 w-3.5" />
                 {uploadingImage ? "Uploading..." : task.image_url ? "Replace with my own image" : "Upload an image"}
               </Button>
-              <p className="text-center text-[11px] text-zinc-400">PNG, JPEG or WebP, up to 8 MB. Saved to this task immediately.</p>
+              <p className="text-center text-[11px] text-zinc-400">
+                PNG, JPEG or WebP, up to 8 MB.{" "}
+                {isPublished
+                  ? livePostRemoved
+                    ? "This post was deleted from Google - upload won't reach it."
+                    : "Uploading here pushes straight to your live GMB post."
+                  : "Saved to this task immediately."}
+              </p>
             </CardBody>
           </Card>
 

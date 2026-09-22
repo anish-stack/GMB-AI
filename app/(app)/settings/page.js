@@ -1,5 +1,6 @@
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { providerInfo } from "@/lib/ai/index.js";
+import { storageInfo } from "@/lib/storage/index.js";
 import { gmbProviderInfo } from "@/lib/gmb/provider.js";
 import { Card, CardBody, CardHeader, Badge } from "@/components/ui";
 import { QA_PASS_SCORE, DUPLICATE_THRESHOLD } from "@/lib/constants";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const ctx = await requireTenantContext();
   const ai = providerInfo();
+  const storage = storageInfo();
   const gmb = gmbProviderInfo();
   const users = await listTenantUsers(ctx.tenantId);
 
@@ -59,6 +61,7 @@ export default async function SettingsPage() {
             <Row label="Duplicate threshold" value={`${(DUPLICATE_THRESHOLD * 100).toFixed(0)}% similarity`} />
             <Row label="Auto publish" value={ctx.features.f_auto_publish ? "Allowed by plan" : "Disabled - a human approves every post"} />
             <Row label="AI provider" value={`${ai.name} / ${ai.textModel}`} />
+            <Row label="Image storage" value={storage.primary} />
             <Row label="GMB provider" value={`${gmb.name}${gmb.isMock ? " (mock)" : ""}`} />
           </CardBody>
         </Card>

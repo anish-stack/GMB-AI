@@ -2,6 +2,7 @@ import { getSettings } from "@/lib/saas/settings.js";
 import { listPlans } from "@/lib/saas/billing.js";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { providerInfo } from "@/lib/ai/index.js";
+import { storageInfo } from "@/lib/storage/index.js";
 import { gmbProviderInfo } from "@/lib/gmb/provider.js";
 import { Card, CardBody, CardHeader } from "@/components/ui";
 
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminSettingsPage() {
   const [settings, plans] = await Promise.all([getSettings({ fresh: true }), listPlans({ activeOnly: true })]);
   const ai = providerInfo();
+  const storage = storageInfo();
   const gmb = gmbProviderInfo();
 
   return (
@@ -32,6 +34,9 @@ export default async function AdminSettingsPage() {
           <Row label="AI provider" value={`${ai.name} (${ai.configured ? "configured" : "local fallback"})`} />
           <Row label="Text model" value={ai.textModel} />
           <Row label="Image model" value={ai.imageModel || "not configured"} />
+          <Row label="AI fallback chain" value={ai.fallbackChain.join(" \u2192 ")} />
+          <Row label="Image storage" value={storage.primary} />
+          <Row label="Storage fallback chain" value={storage.fallbackChain.join(" \u2192 ")} />
           <Row label="GMB provider" value={`${gmb.name}${gmb.isMock ? " - mock, nothing reaches Google" : ""}`} />
         </CardBody>
       </Card>

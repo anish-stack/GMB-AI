@@ -12,6 +12,56 @@ import { requireTenantContext } from "@/lib/saas/context.js";
 
 export const dynamic = "force-dynamic";
 
+function formatTime(t) {
+  if (t == null || t === "") return "";
+  if (typeof t === "string" || typeof t === "number") return String(t);
+  if (typeof t === "object") {
+    const h = String(t.hours ?? 0).padStart(2, "0");
+    const m = String(t.minutes ?? 0).padStart(2, "0");
+    return `${h}:${m}`;
+  }
+  return "";
+}
+
+function formatHoursValue(v) {
+  if (v == null || v === "") return "";
+  if (typeof v === "string" || typeof v === "number") return String(v);
+  if (Array.isArray(v)) return v.map(formatHoursValue).filter(Boolean).join(", ");
+  if (typeof v === "object") {
+    if ("openTime" in v || "closeTime" in v) {
+      const open = formatTime(v.openTime);
+      const close = formatTime(v.closeTime);
+      const crossDay = v.closeDay && v.openDay && v.closeDay !== v.openDay;
+      return crossDay ? `${open} - ${v.closeDay} ${close}` : `${open} - ${close}`;
+    }
+    if ("open" in v || "close" in v) {
+      return `${formatTime(v.open)} - ${formatTime(v.close)}`;
+    }
+    return "";
+  }
+  return "";
+}
+
+function hoursRows(oh) {
+  if (!oh) return [];
+  const periods = Array.isArray(oh) ? oh : Array.isArray(oh.periods) ? oh.periods : null;
+  if (periods) {
+    return periods.map((p, i) => ({
+      key: `${p?.openDay || "period"}-${i}`,
+      label: String(p?.openDay || `period ${i + 1}`).toLowerCase(),
+      value: formatHoursValue(p),
+    }));
+  }
+  if (typeof oh === "object") {
+    return Object.entries(oh).map(([k, v]) => ({
+      key: k,
+      label: k.replaceAll("_", " "),
+      value: formatHoursValue(v),
+    }));
+  }
+  return [];
+}
+
 export default async function GmbProfilePage({ params, searchParams }) {
   const ctx = await requireTenantContext();
   const { id } = await params;
@@ -50,6 +100,8 @@ export default async function GmbProfilePage({ params, searchParams }) {
     }),
     { views: 0, clicks: 0, calls: 0 }
   );
+
+  const hours = hoursRows(profile.opening_hours);
 
   return (
     <div className="space-y-5">
@@ -91,10 +143,10 @@ export default async function GmbProfilePage({ params, searchParams }) {
         <Card>
           <CardHeader title="Opening hours" />
           <CardBody className="space-y-1.5 text-sm">
-            {Object.entries(profile.opening_hours || {}).map(([k, v]) => (
-              <Row key={k} label={k.replaceAll("_", " ")} value={v} />
+            {hours.map((h) => (
+              <Row key={h.key} label={h.label} value={h.value} />
             ))}
-            {!Object.keys(profile.opening_hours || {}).length ? <p className="text-zinc-500 dark:text-zinc-400">Not set.</p> : null}
+            {!hours.length ? <p className="text-zinc-500 dark:text-zinc-400">Not set.</p> : null}
           </CardBody>
         </Card>
 

@@ -16,6 +16,7 @@ import cron from "node-cron";
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 const AI_EXPR = process.env.NIGHTLY_CRON || "0 0 * * *";
 const BILLING_EXPR = process.env.BILLING_CRON || "30 1 * * *";
+const IMAGE_CLEANUP_EXPR = process.env.IMAGE_CLEANUP_CRON || "0 2 * * *";
 const KEY = process.env.SESSION_SECRET || "";
 
 async function runAiJob() {
@@ -47,10 +48,29 @@ async function runBilling() {
   }
 }
 
+/**
+ * Deletes AI-generated/uploaded images older than IMAGE_RETENTION_DAYS (default
+ * 90) from whichever storage provider holds them. Runs directly against the
+ * database + storage, same as billing - no session needed.
+ */
+async function runImageCleanup() {
+  console.log(`[scheduler] image cleanup start ${new Date().toISOString()}`);
+  try {
+    const { cleanupOldImages } = await import("../lib/images/cleanup.js");
+    const result = await cleanupOldImages();
+    console.log("[scheduler] image cleanup result:", JSON.stringify(result));
+  } catch (err) {
+    console.error("[scheduler] image cleanup failed:", err.message);
+  }
+}
+
 cron.schedule(AI_EXPR, runAiJob);
 cron.schedule(BILLING_EXPR, runBilling);
+cron.schedule(IMAGE_CLEANUP_EXPR, runImageCleanup);
 console.log(`[scheduler] AI job "${AI_EXPR}" -> ${APP_URL}/api/ai/nightly`);
 console.log(`[scheduler] billing sweep "${BILLING_EXPR}" -> direct database`);
+console.log(`[scheduler] image cleanup "${IMAGE_CLEANUP_EXPR}" -> direct storage (retention: ${process.env.IMAGE_RETENTION_DAYS || 90} days)`);
 
 if (process.argv.includes("--now")) runAiJob();
 if (process.argv.includes("--billing")) runBilling();
+if (process.argv.includes("--cleanup-images")) runImageCleanup();

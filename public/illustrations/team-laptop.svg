@@ -1,0 +1,58 @@
+<svg viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="deskGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDE4E4"/>
+      <stop offset="1" stop-color="#FBD0D1"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="240" cy="380" rx="190" ry="26" fill="#F1F1F4"/>
+
+  <!-- chair back -->
+  <rect x="150" y="150" width="150" height="160" rx="40" fill="#E4E4EA"/>
+
+  <!-- desk -->
+  <rect x="60" y="300" width="360" height="18" rx="9" fill="#1F2430"/>
+  <rect x="90" y="318" width="16" height="60" fill="#2B3040"/>
+  <rect x="374" y="318" width="16" height="60" fill="#2B3040"/>
+
+  <!-- plant -->
+  <rect x="352" y="258" width="46" height="42" rx="8" fill="#F53236"/>
+  <path d="M375 258c0-26-22-40-30-46 4 20 8 34 30 46z" fill="#34A853"/>
+  <path d="M375 258c0-30 26-46 36-52-2 24-8 40-36 52z" fill="#2E9448"/>
+  <path d="M375 258c-2-22 10-34 16-40 2 18 0 30-16 40z" fill="#3FB859"/>
+
+  <!-- laptop -->
+  <g>
+    <path d="M188 220 h104 l14 78 h-132 z" fill="url(#deskGrad)" stroke="#F03138" stroke-width="3"/>
+    <rect x="170" y="298" width="150" height="12" rx="6" fill="#1F2430"/>
+    <rect x="198" y="232" width="94" height="4" rx="2" fill="#F03138" opacity="0.5"/>
+    <rect x="198" y="242" width="70" height="4" rx="2" fill="#F03138" opacity="0.35"/>
+  </g>
+
+  <!-- person body -->
+  <path d="M170 300c-6-58 24-104 70-104s76 46 70 104z" fill="#F53236"/>
+  <circle cx="240" cy="150" r="42" fill="#3A2E2A"/>
+  <circle cx="240" cy="156" r="34" fill="#F2C6A0"/>
+  <path d="M206 140c4-24 20-38 34-38s30 14 34 38c-10-10-22-14-34-14s-24 4-34 14z" fill="#3A2E2A"/>
+
+  <!-- arms typing -->
+  <path d="M198 240c-10 20-14 40-10 58" stroke="#F53236" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <path d="M282 240c10 20 14 40 10 58" stroke="#F53236" stroke-width="18" stroke-linecap="round" fill="none"/>
+  <circle cx="186" cy="300" r="10" fill="#F2C6A0"/>
+  <circle cx="294" cy="300" r="10" fill="#F2C6A0"/>
+
+  <!-- floating UI chips -->
+  <g>
+    <rect x="40" y="90" width="92" height="34" rx="10" fill="#ffffff" stroke="#F1D8D9"/>
+    <circle cx="58" cy="107" r="7" fill="#34A853"/>
+    <rect x="72" y="101" width="48" height="6" rx="3" fill="#CBD5E1"/>
+    <rect x="72" y="111" width="34" height="5" rx="2.5" fill="#E2E8F0"/>
+  </g>
+  <g>
+    <rect x="352" y="120" width="100" height="38" rx="12" fill="#ffffff" stroke="#F1D8D9"/>
+    <circle cx="372" cy="139" r="9" fill="#F53236"/>
+    <rect x="390" y="132" width="50" height="6" rx="3" fill="#CBD5E1"/>
+    <rect x="390" y="143" width="36" height="5" rx="2.5" fill="#E2E8F0"/>
+  </g>
+</svg>

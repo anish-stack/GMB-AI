@@ -494,12 +494,15 @@ CREATE TABLE `ai_tasks` (
   `image_concept`        VARCHAR(600),
   `image_url`            LONGTEXT,
   `image_provider`       VARCHAR(40) DEFAULT 'placeholder',
+  `image_storage_provider` VARCHAR(20) NULL,
+  `image_storage_key`    VARCHAR(300) NULL,
   `embedding`            LONGTEXT,
   `duplicate_score`      DECIMAL(5,4) DEFAULT 0,
   `duplicate_of`         INT NULL,
   `qa_score`             INT NULL,
   `qa_status`            VARCHAR(20) NULL,
   `regenerate_count`     INT NOT NULL DEFAULT 0,
+  `image_regen_count`    INT NOT NULL DEFAULT 0,
   `credits_used`         INT NOT NULL DEFAULT 0,
   `error_message`        TEXT,
   `published_at`         DATETIME NULL,
@@ -510,6 +513,31 @@ CREATE TABLE `ai_tasks` (
   KEY `idx_task_tenant` (`tenant_id`),
   CONSTRAINT `fk_task_client` FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_task_cal` FOREIGN KEY (`calendar_id`) REFERENCES `content_calendar`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Every AI-generated image for a task, including ones never picked. The
+-- currently-used image is the row with status='SELECTED' (its url/provider
+-- are mirrored onto ai_tasks.image_url/image_provider for fast reads).
+-- 'CANDIDATE' rows are pending options from "generate N images and choose
+-- one"; 'DELETED' rows are kept for the audit trail after their storage
+-- object has been removed (regenerate, un-picked option, or 90-day cleanup).
+CREATE TABLE `task_image_candidates` (
+  `id`                 INT AUTO_INCREMENT PRIMARY KEY,
+  `task_id`            INT NOT NULL,
+  `tenant_id`          INT NULL,
+  `url`                LONGTEXT,
+  `storage_provider`   VARCHAR(20) NULL,
+  `storage_key`        VARCHAR(300) NULL,
+  `ai_provider`        VARCHAR(80) NULL,
+  `ai_model`           VARCHAR(120) NULL,
+  `prompt`             TEXT,
+  `status`             VARCHAR(20) NOT NULL DEFAULT 'CANDIDATE',
+  `created_at`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_at`         DATETIME NULL,
+  KEY `idx_imgcand_task` (`task_id`),
+  KEY `idx_imgcand_status` (`status`),
+  KEY `idx_imgcand_created` (`created_at`),
+  CONSTRAINT `fk_imgcand_task` FOREIGN KEY (`task_id`) REFERENCES `ai_tasks`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `gmb_posts` (

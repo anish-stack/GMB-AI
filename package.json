@@ -9,15 +9,19 @@
     "lint": "eslint",
     "db:setup": "node scripts/seed.js",
     "scheduler": "node scripts/scheduler.js",
-    "billing": "node scripts/scheduler.js --billing"
+    "billing": "node scripts/scheduler.js --billing",
+    "cleanup-images": "node scripts/scheduler.js --cleanup-images"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.685.0",
     "@huggingface/inference": "^4.13.28",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.35.0",
     "mysql2": "^3.24.2",
     "next": "16.3.3",
+    "next-cloudinary": "^6.19.3",
     "node-cron": "^4.6.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
