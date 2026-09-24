@@ -25,7 +25,7 @@ const CHECK_LABELS = {
 };
 const NEGATIVE = ["keyword_stuffing", "duplicate_risk", "unsupported_claims"];
 
-export function TaskReview({ task: initial }) {
+export function TaskReview({ task: initial, backHref = "/gmb/tasks", backLabel = "Back to queue", toolbar = null }) {
   const router = useRouter();
   const [task, setTask] = useState(initial);
   const [form, setForm] = useState({
@@ -163,8 +163,8 @@ export function TaskReview({ task: initial }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/gmb/tasks" className="inline-flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300">
-            <ArrowLeft className="h-3 w-3" /> Back to queue
+          <Link href={backHref} className="inline-flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300">
+            <ArrowLeft className="h-3 w-3" /> {backLabel}
           </Link>
           <h1 className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{task.business_name}</h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -177,6 +177,8 @@ export function TaskReview({ task: initial }) {
           {task.published_at ? <MockBadge>Mock publish</MockBadge> : null}
         </div>
       </div>
+
+      {toolbar}
 
       {notice ? (
         <div className={notice.tone === "error"

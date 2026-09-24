@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, Layers, CreditCard, Receipt, Coins, TicketPercent,
-  Activity, ScrollText, UsersRound, Settings, ShieldCheck, LogOut, Menu, X,
+  Activity, ScrollText, UsersRound, Settings, ShieldCheck, LogOut, Menu, X, Send, MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
@@ -19,6 +19,8 @@ const NAV = [
   { href: "/admin/invoices", label: "Invoices", icon: Receipt },
   { href: "/admin/credits", label: "Credits", icon: Coins },
   { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
+  { href: "/admin/gmb-posts", label: "GMB postings", icon: Send },
+  { href: "/admin/gmb-profiles", label: "GMB profiles", icon: MapPin },
   { href: "/admin/usage", label: "Platform usage", icon: Activity },
   { href: "/admin/users", label: "Users", icon: UsersRound },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
