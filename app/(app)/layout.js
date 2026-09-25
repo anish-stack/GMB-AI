@@ -1,9 +1,9 @@
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { providerInfo } from "@/lib/ai/index.js";
 import { gmbProviderInfo } from "@/lib/gmb/provider.js";
-import { AppShell } from "@/components/app-shell";
 import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { PERMISSIONS, ROLES } from "@/lib/saas/constants.js";
+import { AppShell } from "@/components/app-shell";
 
 export const dynamic = "force-dynamic";
 

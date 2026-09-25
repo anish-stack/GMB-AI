@@ -124,6 +124,10 @@ CREATE TABLE `users` (
   `role`          VARCHAR(20)  NOT NULL DEFAULT 'MEMBER', -- SUPER_ADMIN | OWNER | MANAGER | MEMBER
   `avatar_url`    VARCHAR(500),
   `active`        TINYINT(1)   NOT NULL DEFAULT 1,
+  `two_factor_enabled` TINYINT(1) NOT NULL DEFAULT 1,     -- email OTP required at login
+  `otp_verified_once`  TINYINT(1) NOT NULL DEFAULT 0,     -- has completed at least one OTP challenge
+  `failed_login_count` INT NOT NULL DEFAULT 0,
+  `locked_until`       DATETIME NULL,                     -- brute-force lockout
   `last_login_at` DATETIME NULL,
   `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -531,12 +535,14 @@ CREATE TABLE `task_image_candidates` (
   `ai_provider`        VARCHAR(80) NULL,
   `ai_model`           VARCHAR(120) NULL,
   `prompt`             TEXT,
+  `content_hash`       VARCHAR(64) NULL,
   `status`             VARCHAR(20) NOT NULL DEFAULT 'CANDIDATE',
   `created_at`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at`         DATETIME NULL,
   KEY `idx_imgcand_task` (`task_id`),
   KEY `idx_imgcand_status` (`status`),
   KEY `idx_imgcand_created` (`created_at`),
+  KEY `idx_imgcand_hash` (`content_hash`),
   CONSTRAINT `fk_imgcand_task` FOREIGN KEY (`task_id`) REFERENCES `ai_tasks`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -633,4 +639,52 @@ CREATE TABLE `gmb_performance` (
   KEY `idx_perf_tenant` (`tenant_id`),
   CONSTRAINT `fk_perf_client` FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_perf_post` FOREIGN KEY (`post_id`) REFERENCES `gmb_posts`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================================
+-- Security / notifications: OTP 2FA challenges + background email queue
+-- (kept in sync with db/upgrade-security-mail.sql for existing installs)
+-- =====================================================================
+CREATE TABLE `otp_codes` (
+  `id`           INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id`      INT NOT NULL,
+  `purpose`      VARCHAR(20) NOT NULL DEFAULT 'LOGIN', -- LOGIN | RESET_PASSWORD
+  `challenge`    VARCHAR(64) NOT NULL,
+  `code_hash`    VARCHAR(255) NOT NULL,
+  `attempts`     INT NOT NULL DEFAULT 0,
+  `max_attempts` INT NOT NULL DEFAULT 5,
+  `consumed_at`  DATETIME NULL,
+  `expires_at`   DATETIME NOT NULL,
+  `ip`           VARCHAR(64) NULL,
+  `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_otp_user` (`user_id`),
+  KEY `idx_otp_challenge` (`challenge`),
+  CONSTRAINT `fk_otp_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `email_queue` (
+  `id`           INT AUTO_INCREMENT PRIMARY KEY,
+  `to_email`     VARCHAR(255) NOT NULL,
+  `subject`      VARCHAR(255) NOT NULL,
+  `html`         MEDIUMTEXT NOT NULL,
+  `text`         MEDIUMTEXT NULL,
+  `template`     VARCHAR(60) NOT NULL DEFAULT 'generic',
+  `tenant_id`    INT NULL,
+  `meta`         TEXT NULL,
+  `status`       VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING | SENT | FAILED
+  `attempts`     INT NOT NULL DEFAULT 0,
+  `max_attempts` INT NOT NULL DEFAULT 5,
+  `last_error`   VARCHAR(500) NULL,
+  `available_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sent_at`      DATETIME NULL,
+  `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_email_status` (`status`, `available_at`),
+  KEY `idx_email_tenant` (`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `rate_limit_hits` (
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `rkey`       VARCHAR(160) NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_rate_key_time` (`rkey`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

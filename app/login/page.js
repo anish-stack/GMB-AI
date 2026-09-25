@@ -20,11 +20,19 @@ import { Button, Field, Input } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [step, setStep] = useState("credentials"); // "credentials" | "otp"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // OTP step state
+  const [challenge, setChallenge] = useState("");
+  const [code, setCode] = useState("");
+  const [maskedEmail, setMaskedEmail] = useState("");
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
 
   async function submit(e) {
     e.preventDefault();
@@ -38,8 +46,47 @@ export default function LoginPage() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) return setError(data.error || "Sign in failed");
+
+    if (data.otpRequired) {
+      setChallenge(data.challenge);
+      setMaskedEmail(data.maskedEmail || email);
+      setStep("otp");
+      return;
+    }
     router.push(data.redirect || "/dashboard");
     router.refresh();
+  }
+
+  async function submitOtp(e) {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    const res = await fetch("/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challenge, code }),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!res.ok) return setError(data.error || "Verification failed");
+    router.push(data.redirect || "/dashboard");
+    router.refresh();
+  }
+
+  async function resendOtp() {
+    setResendBusy(true);
+    setResendMsg("");
+    setError("");
+    const res = await fetch("/api/auth/resend-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challenge }),
+    });
+    const data = await res.json();
+    setResendBusy(false);
+    if (!res.ok) return setError(data.error || "Could not resend code");
+    setChallenge(data.challenge);
+    setResendMsg("A new code has been sent.");
   }
 
   return (
@@ -227,7 +274,7 @@ export default function LoginPage() {
         />
 
         <form
-          onSubmit={submit}
+          onSubmit={step === "otp" ? submitOtp : submit}
           className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-white p-7 shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
         >
           {/* mobile-only logo */}
@@ -240,141 +287,227 @@ export default function LoginPage() {
             </span>
           </Link>
 
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Welcome back
-          </h1>
-          <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-            Sign in to your workspace to keep posts flowing.
-          </p>
+          {step === "otp" ? (
+            <>
+              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                Verify it&apos;s you
+              </h1>
+              <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+                We emailed a 6-digit code to <strong>{maskedEmail}</strong>.
+                Enter it below to finish signing in.
+              </p>
 
-          <div className="mt-6 space-y-4">
-            <Field label="Email">
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@agency.com"
-                  className="pl-9"
-                  required
-                  autoFocus
-                />
+              <div className="mt-6 space-y-4">
+                <Field label="Verification code">
+                  <div className="relative">
+                    <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      placeholder="000000"
+                      className="pl-9 tracking-[0.4em] text-center text-lg"
+                      maxLength={6}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                </Field>
               </div>
-            </Field>
 
-            <Field label="Password">
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-9 pr-9"
-                  required
-                />
+              {error ? (
+                <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                  {error}
+                </p>
+              ) : null}
+              {resendMsg ? (
+                <p className="mt-4 rounded-xl bg-emerald-50 px-3 py-2.5 text-xs text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                  {resendMsg}
+                </p>
+              ) : null}
+
+              <Button
+                type="submit"
+                className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]"
+                disabled={busy || code.length !== 6}
+              >
+                {busy ? (
+                  <>
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify &amp; sign in <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+
+              <div className="mt-5 flex items-center justify-between text-xs">
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => {
+                    setStep("credentials");
+                    setCode("");
+                    setError("");
+                    setResendMsg("");
+                  }}
+                  className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={resendOtp}
+                  disabled={resendBusy}
+                  className="font-medium text-[#F53236] hover:underline disabled:opacity-50"
+                >
+                  {resendBusy ? "Sending..." : "Resend code"}
                 </button>
               </div>
-            </Field>
+            </>
+          ) : (
+            <>
+              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                Welcome back
+              </h1>
+              <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+                Sign in to your workspace to keep posts flowing.
+              </p>
 
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
-                <input
-                  type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-zinc-300 text-[#F53236] focus:ring-[#F53236] dark:border-zinc-700"
-                />
-                Remember me
-              </label>
-              <Link
-                href="/forgot-password"
-                className="font-medium text-[#F53236] hover:underline"
+              <div className="mt-6 space-y-4">
+                <Field label="Email">
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@agency.com"
+                      className="pl-9"
+                      required
+                      autoFocus
+                    />
+                  </div>
+                </Field>
+
+                <Field label="Password">
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-9 pr-9"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </Field>
+
+                <div className="flex items-center justify-between text-xs">
+                  <label className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5 rounded border-zinc-300 text-[#F53236] focus:ring-[#F53236] dark:border-zinc-700"
+                    />
+                    Remember me
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="font-medium text-[#F53236] hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
+
+              {error ? (
+                <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                  {error}
+                </p>
+              ) : null}
+
+              <Button
+                type="submit"
+                className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]"
+                disabled={busy}
               >
-                Forgot password?
-              </Link>
-            </div>
-          </div>
+                {busy ? (
+                  <>
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign in <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
 
-          {error ? (
-            <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
-              {error}
-            </p>
-          ) : null}
+              <div className="my-5 flex items-center gap-3">
+                <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                <span className="text-[11px] text-zinc-400">or</span>
+                <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+              </div>
 
-          <Button
-            type="submit"
-            className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]"
-            disabled={busy}
-          >
-            {busy ? (
-              <>
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                Sign in <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+              <button
+                type="button"
+                onClick={() => setError("Google sign-in isn't set up yet - use email and password for now.")}
+                className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-zinc-200 bg-white py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0 0 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.11A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.44.35-2.11V7.04H2.18A11 11 0 0 0 1 12c0 1.77.42 3.45 1.18 4.96z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.04l3.66 2.85C6.71 7.3 9.14 5.38 12 5.38z"
+                  />
+                </svg>
+                Continue with Google
+              </button>
 
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
-            <span className="text-[11px] text-zinc-400">or</span>
-            <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
-          </div>
-
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-zinc-200 bg-white py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0 0 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.11A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.44.35-2.11V7.04H2.18A11 11 0 0 0 1 12c0 1.77.42 3.45 1.18 4.96z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.04l3.66 2.85C6.71 7.3 9.14 5.38 12 5.38z"
-              />
-            </svg>
-            Continue with Google
-          </button>
-
-          <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-            No account yet?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-[#F53236] hover:underline"
-            >
-              Create a workspace
-            </Link>
-          </p>
-          <p className="mt-1.5 text-center text-xs text-zinc-400 dark:text-zinc-500">
-            <Link href="/pricing" className="hover:underline">
-              See plans and pricing
-            </Link>
-          </p>
+              <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                No account yet?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-[#F53236] hover:underline"
+                >
+                  Create a workspace
+                </Link>
+              </p>
+              <p className="mt-1.5 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                <Link href="/pricing" className="hover:underline">
+                  See plans and pricing
+                </Link>
+              </p>
+            </>
+          )}
         </form>
       </div>
     </div>

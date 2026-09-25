@@ -5,6 +5,7 @@ import { runTaskPipeline, regenerateTaskImage, generateTaskImageOptions, selectT
 import { assertCan } from "@/lib/saas/rbac.js";
 import { assertFeature } from "@/lib/saas/entitlements.js";
 import { audit } from "@/lib/saas/audit.js";
+import { rateLimit } from "@/lib/security/rateLimit.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -31,6 +32,15 @@ export async function POST(request, { params }) {
   try {
     await assertTaskInTenant(taskId, tenantId);
     const body = await request.json();
+
+    // Defense-in-depth on top of the credit system (which already blocks
+    // out-of-credit tenants): stop a runaway UI retry loop or script from
+    // hammering the AI provider with regenerate calls.
+    const AI_HEAVY_ACTIONS = new Set(["regenerate", "regenerate_image", "generate_image_options"]);
+    if (AI_HEAVY_ACTIONS.has(body.action)) {
+      const rl = await rateLimit(`ai-action:${tenantId}:${body.action}`, { max: 20, windowSec: 300 });
+      if (!rl.allowed) return NextResponse.json({ error: rl.message }, { status: 429 });
+    }
 
     switch (body.action) {
       case "edit":

@@ -20,13 +20,16 @@ export function GlobalSearch() {
   }, []);
 
   useEffect(() => {
-    if (q.trim().length < 2) {
-      setResults({ clients: [], tasks: [] });
-      return;
-    }
+    const term = q.trim();
+    // Both branches setState from inside the timeout callback (not directly in
+    // the effect body), so a fast keystroke can't trigger a synchronous cascade.
     const t = setTimeout(async () => {
+      if (term.length < 2) {
+        setResults({ clients: [], tasks: [] });
+        return;
+      }
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(term)}`);
         if (res.ok) setResults(await res.json());
       } catch {}
     }, 250);

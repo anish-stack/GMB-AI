@@ -17,6 +17,7 @@ const APP_URL = process.env.APP_URL || "http://localhost:3000";
 const AI_EXPR = process.env.NIGHTLY_CRON || "0 0 * * *";
 const BILLING_EXPR = process.env.BILLING_CRON || "30 1 * * *";
 const IMAGE_CLEANUP_EXPR = process.env.IMAGE_CLEANUP_CRON || "0 2 * * *";
+const MAIL_EXPR = process.env.MAIL_CRON || "*/2 * * * * *";
 const KEY = process.env.SESSION_SECRET || "";
 
 async function runAiJob() {
@@ -64,13 +65,74 @@ async function runImageCleanup() {
   }
 }
 
+/**
+ * Background email worker. Every route in the app (signup, login OTP, payment,
+ * post publish, GMB connect, nightly summary) only INSERTs a row into
+ * email_queue and returns immediately - this is the worker that actually
+ * talks to SMTP, on its own short cron, completely decoupled from user
+ * requests. Runs every minute by default; safe to run more than once
+ * concurrently (rows are claimed atomically in lib/mail/queue.js).
+ */
+let mailWorkerRunning = false;
+async function runMailWorker() {
+  const startedAt = new Date();
+
+  console.log(
+    `\n[scheduler][mail] ▶ START ${startedAt.toISOString()}`
+  );
+
+  // Prevent overlap if previous run takes > 2 seconds
+  if (mailWorkerRunning) {
+    console.log(
+      `[scheduler][mail] ⏭ SKIPPED - previous worker is still running`
+    );
+    return;
+  }
+
+  mailWorkerRunning = true;
+
+  try {
+    console.log("[scheduler][mail] Loading email queue...");
+
+    const { processEmailQueue } = await import("../lib/mail/queue.js");
+
+    console.log("[scheduler][mail] Processing max 25 emails...");
+
+    const result = await processEmailQueue(25);
+
+    console.log(
+      "[scheduler][mail] ✅ RESULT:",
+      JSON.stringify(result, null, 2)
+    );
+  } catch (err) {
+    console.error("[scheduler][mail] ❌ FAILED:", err);
+
+    console.error(
+      "[scheduler][mail] Error message:",
+      err?.message || "Unknown error"
+    );
+  } finally {
+    mailWorkerRunning = false;
+
+    const finishedAt = new Date();
+    const duration = finishedAt.getTime() - startedAt.getTime();
+
+    console.log(
+      `[scheduler][mail] ■ END ${finishedAt.toISOString()} (${duration}ms)\n`
+    );
+  }
+}
+
 cron.schedule(AI_EXPR, runAiJob);
 cron.schedule(BILLING_EXPR, runBilling);
 cron.schedule(IMAGE_CLEANUP_EXPR, runImageCleanup);
+cron.schedule(MAIL_EXPR, runMailWorker);
 console.log(`[scheduler] AI job "${AI_EXPR}" -> ${APP_URL}/api/ai/nightly`);
 console.log(`[scheduler] billing sweep "${BILLING_EXPR}" -> direct database`);
 console.log(`[scheduler] image cleanup "${IMAGE_CLEANUP_EXPR}" -> direct storage (retention: ${process.env.IMAGE_RETENTION_DAYS || 90} days)`);
+console.log(`[scheduler] mail worker "${MAIL_EXPR}" -> direct database + SMTP (queue: email_queue)`);
 
 if (process.argv.includes("--now")) runAiJob();
 if (process.argv.includes("--billing")) runBilling();
 if (process.argv.includes("--cleanup-images")) runImageCleanup();
+if (process.argv.includes("--mail")) runMailWorker();

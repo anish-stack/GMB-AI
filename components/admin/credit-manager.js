@@ -211,7 +211,7 @@ export function CreditManager({ wallets, packs, tenants, costs }) {
           <CardHeader title="Credit packs on sale" subtitle="Tenants buy these from their billing page" />
           <Table
             head={["Pack", "Credits", "Price", "Per credit", "Status", ""]}
-            empty={!packs.length ? <EmptyRow colSpan={6}>No packs yet. Click "New Pack" to add one.</EmptyRow> : null}
+            empty={!packs.length ? <EmptyRow colSpan={6}>No packs yet. Click &quot;New Pack&quot; to add one.</EmptyRow> : null}
           >
             {packs.map((p) => (
               <tr key={p.id}>
