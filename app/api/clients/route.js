@@ -3,6 +3,7 @@ import { guard, apiError } from "@/lib/saas/guard.js";
 import { listClients, createClient } from "@/lib/repo/clients.js";
 import { assertLimit } from "@/lib/saas/entitlements.js";
 import { audit } from "@/lib/saas/audit.js";
+import { savePlan, normalizePlanInput } from "@/lib/posting/plan.js";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,12 @@ export async function POST(request) {
     if (!body.business_name || !body.business_category) {
       return NextResponse.json({ error: "Business name and category are required" }, { status: 400 });
     }
+    if (!body.posting_plan) {
+      return NextResponse.json({ error: "Posting plan (start date, duration, posts per week) is required" }, { status: 400 });
+    }
+    normalizePlanInput(body.posting_plan); // validate before creating anything
     const id = await createClient(body, ctx.tenantId);
+    await savePlan(id, ctx.tenantId, body.posting_plan, ctx.name);
     await audit(ctx, "CLIENT_CREATED", { entity: "client", entityId: id, meta: { name: body.business_name } });
     return NextResponse.json({ ok: true, id });
   } catch (err) {

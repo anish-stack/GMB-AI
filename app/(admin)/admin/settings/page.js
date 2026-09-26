@@ -24,7 +24,7 @@ export default async function AdminSettingsPage() {
       </div>
 
       <SettingsForm
-        settings={JSON.parse(JSON.stringify({ ...settings, razorpay_key_secret: settings.razorpay_key_secret ? "********" : "" }))}
+        settings={JSON.parse(JSON.stringify({ ...settings, razorpay_key_secret: settings.razorpay_key_secret ? "********" : "", razorpay_webhook_secret: settings.razorpay_webhook_secret ? "********" : "" }))}
         plans={JSON.parse(JSON.stringify(plans))}
       />
 

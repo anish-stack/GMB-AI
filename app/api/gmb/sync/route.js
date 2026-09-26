@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { guard } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { assertFeature } from "@/lib/saas/entitlements.js";
-import { update, one } from "@/lib/db";
+import { one } from "@/lib/db";
+import { linkGoogleLocation, unlinkGoogle } from "@/lib/repo/gmb.js";
 import { GoogleGMBProvider } from "@/lib/gmb/googleProvider.js";
 import { connectLink, disconnectClient } from "@/lib/gmb/googleAuth.js";
 
@@ -27,6 +28,7 @@ export async function POST(request) {
 
     if (body.action === "disconnect") {
       await disconnectClient(clientId);
+      await unlinkGoogle(clientId);
       return NextResponse.json({ ok: true });
     }
 
@@ -36,22 +38,19 @@ export async function POST(request) {
       const { locations } = await provider.syncClient(clientId, { locationName: body.locationName });
       const match = locations.find((l) => l.location.name === body.locationName);
       if (!match) return NextResponse.json({ error: "That location is not available on the connected account" }, { status: 400 });
-      await update("clients", clientId, {
-        google_account_id: match.account,
-        google_location_name: match.location.name,
-      });
-      return NextResponse.json({ ok: true, linked: match.location.title || match.location.name });
+      const linked = await linkGoogleLocation(clientId, match.account, match.location);
+      return NextResponse.json({ ok: true, linked: linked.title, location_id: linked.locationId });
     }
 
     // default: refresh the location list and cache performance
     const { accounts, locations, chosen } = await provider.syncClient(clientId);
+    // keep the current location if it still exists, else take the first one;
+    // always re-link so gmb_profiles/provider/location id are repaired on every sync
     const row = await one("SELECT google_location_name FROM clients WHERE id=?", [clientId]);
-    if (!row?.google_location_name && chosen) {
-      await update("clients", clientId, {
-        google_account_id: chosen.account,
-        google_location_name: chosen.location.name,
-      });
-    }
+    const current = row?.google_location_name ? locations.find((l) => l.location.name === row.google_location_name) : null;
+    const target = current || chosen;
+    let linked = null;
+    if (target) linked = await linkGoogleLocation(clientId, target.account, target.location);
 
     let cached = 0;
     try {
@@ -70,6 +69,8 @@ export async function POST(request) {
         address: (l.location.storefrontAddress?.addressLines || []).join(", "),
       })),
       performance_days_cached: cached,
+      linked: linked ? { title: linked.title, location_id: linked.locationId } : null,
+      warning: locations.length ? null : "No locations on this Google account - sign in with the account that manages the business profile.",
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

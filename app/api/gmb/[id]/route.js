@@ -7,7 +7,7 @@ import {
 } from "@/lib/repo/gmb.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { one } from "@/lib/db";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +19,9 @@ const GOOGLE_FIELDS = [
   "category_id",
   "opening_hours",
   "services",
+  "description",
+  "special_hours",
+  "additional_category_ids",
 ];
 
 function pick(obj, keys) {
@@ -56,8 +59,7 @@ export async function PATCH(request, { params }) {
   try {
     await assertClientInTenant(clientId, g.ctx.tenantId);
 
-    const body = await request.json();
-    console.log(body)
+    const body = await request.json().catch(() => ({}));
     /* CONNECTION ACTIONS */
     if (body.action === "activate") {
       await setGmbConnectionStatus(clientId, "MOCK_CONNECTED");
@@ -80,22 +82,14 @@ export async function PATCH(request, { params }) {
 
     let googleResult = null;
 
-    if (
-      profile?.provider === "google" &&
-      profile?.connection_status === "GOOGLE_CONNECTED"
-    ) {
-      const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
+    if (!provider.isMock) {
 
       if (typeof provider.updateProfile !== "function") {
         throw new Error("The active GMB provider does not support profile updates.");
       }
 
       const googlePayload = pick(body, GOOGLE_FIELDS);
-
-      console.log(
-        `[GMB PATCH] client=${clientId} fields=`,
-        Object.keys(googlePayload),
-      );
 
       try {
         googleResult = await provider.updateProfile(clientId, googlePayload);
@@ -110,12 +104,6 @@ export async function PATCH(request, { params }) {
         return googleError(err);
       }
 
-      console.log(
-        `[GMB PATCH] Google ok client=${clientId} changed=`,
-        googleResult?.changed,
-        "skipped=",
-        googleResult?.skipped,
-      );
     }
 
     /* LOCAL DB SYNC */

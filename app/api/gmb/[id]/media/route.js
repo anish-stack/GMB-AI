@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
       g.ctx.tenantId,
     );
 
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
 
     const items =
       await provider.getMedia(clientId);
@@ -75,7 +75,7 @@ export async function POST(request, { params }) {
       g.ctx.tenantId,
     );
 
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
 
     const contentType =
       request.headers.get("content-type") || "";
@@ -303,7 +303,7 @@ export async function POST(request, { params }) {
       },
     );
   } catch (err) {
-    console.log(err)
+    console.error("[gmb media]", err?.message || err)
     return apiError(err);
   }
 }

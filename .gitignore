@@ -38,3 +38,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# runtime data (uploads, generated reports, support attachments)
+/storage/*
+!/storage/.gitkeep
+.env.local
+.env.*.local

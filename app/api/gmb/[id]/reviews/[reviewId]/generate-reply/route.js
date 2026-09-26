@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 import { buildKnowledge } from "@/lib/repo/knowledge.js";
 import { runReviewReplyAgent } from "@/lib/ai/agents/reviewReply.js";
 
@@ -18,7 +18,7 @@ export async function POST(request, { params }) {
     await assertClientInTenant(clientId, g.ctx.tenantId);
 
     const body = await request.json().catch(() => ({}));
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
 
     const [review, kb] = await Promise.all([
       provider.getReview(clientId, reviewId),
@@ -29,6 +29,10 @@ export async function POST(request, { params }) {
       {
         business: kb?.business || null,
         category: kb?.category || null,
+        city: kb?.city || null,
+        services: kb?.services || [],
+        prohibited: kb?.prohibited_claims || [],
+        reviewer: review.author || null,
         rating: review.rating,
         comment: review.comment,
       },

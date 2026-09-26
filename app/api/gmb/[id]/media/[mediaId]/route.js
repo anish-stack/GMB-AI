@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ export async function DELETE(request, { params }) {
 
   try {
     await assertClientInTenant(clientId, g.ctx.tenantId);
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
     await provider.deleteMedia(clientId, decodeURIComponent(mediaId));
     return NextResponse.json({ ok: true });
   } catch (err) {

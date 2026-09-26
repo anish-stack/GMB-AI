@@ -84,19 +84,9 @@ export function SettingsForm({ settings, plans }) {
       </Card>
 
       <Card>
-        <CardHeader
-          title="Payment gateway"
-          subtitle="With the gateway off, invoices are settled manually from the Invoices screen and credit packs release instantly."
-        />
-        <CardBody className="grid gap-3 sm:grid-cols-3">
-          <Field label="Razorpay">
-            <Select value={String(form.razorpay_enabled)} onChange={(e) => set("razorpay_enabled", Number(e.target.value))}>
-              <option value="0">Off - manual settlement</option>
-              <option value="1">On - collect before releasing</option>
-            </Select>
-          </Field>
-          <Field label="Key id"><Input value={form.razorpay_key_id || ""} onChange={(e) => set("razorpay_key_id", e.target.value)} /></Field>
-          <Field label="Key secret"><Input type="password" value={form.razorpay_key_secret || ""} onChange={(e) => set("razorpay_key_secret", e.target.value)} /></Field>
+        <CardHeader title="Payment gateway" subtitle="Razorpay keys, webhook secret and on/off switch now live in Integrations (encrypted)." />
+        <CardBody>
+          <a href="/admin/integrations" className="text-sm font-semibold text-[#F53236] hover:underline">Open Integrations → Razorpay</a>
         </CardBody>
       </Card>
 

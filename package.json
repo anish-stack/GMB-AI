@@ -1,6 +1,6 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "gmb-ai-cloud",
+  "version": "5.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,30 +8,25 @@
     "start": "next start -p 3258",
     "lint": "eslint",
     "db:setup": "node scripts/seed.js",
-    "scheduler": "node scripts/scheduler.js",
-    "billing": "node scripts/scheduler.js --billing",
-    "cleanup-images": "node scripts/scheduler.js --cleanup-images",
-    "mail-worker": "node scripts/mailWorker.mjs",
-    "queue-dashboard": "node scripts/queueDashboard.mjs"
+    "scheduler": "node --conditions=react-server scripts/scheduler.js",
+    "billing": "node --conditions=react-server scripts/scheduler.js --billing",
+    "cleanup-images": "node --conditions=react-server scripts/scheduler.js --cleanup-images",
+    "mail-worker": "node --conditions=react-server scripts/mailWorker.js",
+    "postman": "node scripts/build-postman.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.685.0",
-    "@bull-board/api": "^9.10.1",
-    "@bull-board/express": "^9.10.1",
     "@huggingface/inference": "^4.13.28",
     "bcryptjs": "^3.0.3",
-    "bullmq": "^6.3.8",
     "cloudinary": "^2.11.0",
     "dotenv": "^17.4.2",
-    "express": "^4.21.2",
-    "express-basic-auth": "^1.2.1",
-    "ioredis": "^6.0.0",
+    "firebase": "^12.19.0",
     "lucide-react": "^1.35.0",
     "mysql2": "^3.24.2",
     "next": "16.3.3",
-    "next-cloudinary": "^6.19.3",
     "node-cron": "^4.6.0",
     "nodemailer": "^6.10.1",
+    "pdfkit": "^0.17.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1"
@@ -43,5 +38,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }

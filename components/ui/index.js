@@ -8,6 +8,7 @@ const TONES = {
   amber: "bg-amber-50 text-amber-800 ring-amber-200",
   red: "bg-rose-50 text-rose-700 ring-rose-200",
   indigo: "bg-violet-50 text-violet-700 ring-violet-200",
+  violet: "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-200",
 };
 
 export function Badge({ tone = "slate", children, className }) {
@@ -165,13 +166,13 @@ export function ScoreRing({ score, size = 56 }) {
   const c = 2 * Math.PI * r;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`AI score ${value} of 100`}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e4e4e7" strokeWidth="5" />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth="5" className="text-zinc-200 dark:text-zinc-800" />
       <circle
         cx={size / 2} cy={size / 2} r={r} fill="none" stroke={tone} strokeWidth="5" strokeLinecap="round"
         strokeDasharray={c} strokeDashoffset={c - (c * Math.min(100, value)) / 100}
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
       />
-      <text x="50%" y="53%" textAnchor="middle" dominantBaseline="middle" fontSize={size / 3.6} fontWeight="600" fill="#18181b">
+      <text x="50%" y="53%" textAnchor="middle" dominantBaseline="middle" fontSize={size / 3.6} fontWeight="600" fill="currentColor" className="text-zinc-900 dark:text-zinc-100">
         {value}
       </text>
     </svg>
@@ -185,5 +186,201 @@ export function EmptyRow({ colSpan, children }) {
         {children}
       </td>
     </tr>
+  );
+}
+
+
+/* ---------- small shared building blocks ---------- */
+
+export function Alert({ tone = "red", children, action, className }) {
+  const tones = {
+    red: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300",
+    amber: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300",
+    green: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300",
+    blue: "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-300",
+  };
+  return (
+    <div role="status" className={cn("flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-xs leading-5", tones[tone] || tones.red, className)}>
+      <div className="min-w-0">{children}</div>
+      {action}
+    </div>
+  );
+}
+
+export function Skeleton({ className }) {
+  return <div className={cn("animate-pulse rounded-lg bg-zinc-200/80 dark:bg-zinc-800", className)} />;
+}
+
+export function EmptyState({ icon: Icon, title, text, action }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
+      {Icon ? (
+        <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400 dark:bg-zinc-800">
+          <Icon className="h-5 w-5" />
+        </span>
+      ) : null}
+      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{title}</p>
+      {text ? <p className="mt-1 max-w-sm text-xs text-zinc-500 dark:text-zinc-400">{text}</p> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
+    </div>
+  );
+}
+
+export function PanelHeader({ icon: Icon, tone = "red", title, subtitle, count, actions }) {
+  const tones = {
+    red: "bg-red-50 text-[#F53236] dark:bg-red-950/30",
+    amber: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400",
+    violet: "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400",
+    blue: "bg-sky-50 text-sky-600 dark:bg-sky-950/30 dark:text-sky-400",
+    green: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400",
+  };
+  return (
+    <div className="flex flex-col gap-3 border-b border-zinc-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 dark:border-zinc-800">
+      <div className="flex min-w-0 items-center gap-3">
+        {Icon ? (
+          <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", tones[tone] || tones.red)}>
+            <Icon className="h-5 w-5" />
+          </span>
+        ) : null}
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-white">
+            <span className="truncate">{title}</span>
+            {count ? (
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{count}</span>
+            ) : null}
+          </h2>
+          {subtitle ? <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{subtitle}</p> : null}
+        </div>
+      </div>
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    </div>
+  );
+}
+
+export function Modal({
+  open,
+  title,
+  onClose,
+  children,
+  footer,
+  size = "md",
+}) {
+  if (!open) return null;
+
+  const width =
+    {
+      sm: "max-w-md",
+      md: "max-w-lg",
+      lg: "max-w-2xl",
+    }[size] || "max-w-lg";
+
+  return (
+    <div
+      className="
+        fixed inset-0 z-50
+        flex items-end justify-center
+        overflow-y-auto
+        px-0 py-0
+        sm:items-center sm:px-4 sm:py-6
+      "
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      {/* Overlay */}
+      <button
+        type="button"
+        aria-label="Close"
+        className="fixed inset-0 bg-zinc-950/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div
+        className={cn(
+          `
+            page-enter
+            relative z-10
+            flex w-full flex-col
+            overflow-hidden
+            bg-white shadow-2xl
+            dark:bg-zinc-900
+
+            max-h-[95dvh]
+            rounded-t-2xl
+
+            sm:max-h-[calc(100dvh-48px)]
+            sm:rounded-2xl
+          `,
+          width
+        )}
+      >
+        {/* Header */}
+        <div
+          className="
+            flex shrink-0 items-center justify-between
+            border-b border-zinc-100
+            bg-white
+            px-5 py-4
+            dark:border-zinc-800
+            dark:bg-zinc-900
+          "
+        >
+          <h3 className="pr-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            {title}
+          </h3>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="
+              flex h-8 w-8 shrink-0
+              items-center justify-center
+              rounded-lg
+              text-zinc-400
+              transition-colors
+              hover:bg-zinc-100
+              hover:text-zinc-700
+              dark:hover:bg-zinc-800
+              dark:hover:text-zinc-200
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            overscroll-contain
+            px-5 py-4
+          "
+        >
+          {children}
+        </div>
+
+        {/* Footer */}
+        {footer ? (
+          <div
+            className="
+              shrink-0
+              border-t border-zinc-100
+              bg-white
+              px-5 py-3
+              dark:border-zinc-800
+              dark:bg-zinc-900
+            "
+          >
+            <div className="flex justify-end gap-2">
+              {footer}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { one } from "@/lib/db";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -31,14 +31,10 @@ export async function GET(request, { params }) {
     );
 
     // mock / disconnected -> nothing locked
-    if (
-      profile?.provider !== "google" ||
-      profile?.connection_status !== "GOOGLE_CONNECTED"
-    ) {
-      return NextResponse.json({ ok: true, provider: profile?.provider || null, ...EMPTY });
+    const provider = await providerFor(clientId);
+    if (provider.isMock) {
+      return NextResponse.json({ ok: true, provider: profile?.provider || "mock", ...EMPTY });
     }
-
-    const provider = getGMBProvider();
 
     if (typeof provider.diagnose !== "function") {
       return NextResponse.json({ ok: true, ...EMPTY });

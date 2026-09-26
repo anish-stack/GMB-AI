@@ -3,19 +3,21 @@ import { BillingClient } from "@/components/billing-client";
 import { listPlans, listCreditPacks, listInvoices, getSubscription } from "@/lib/saas/billing.js";
 import { quotaSummary } from "@/lib/saas/entitlements.js";
 import { listLedger, estimatePostCost } from "@/lib/saas/credits.js";
+import { razorpayConfig } from "@/lib/payments/razorpay.js";
 
 export const dynamic = "force-dynamic";
 
 export default async function BillingPage() {
   const ctx = await requireTenantContext();
 
-  const [plans, packs, invoices, ledger, subscription, postCost] = await Promise.all([
+  const [plans, packs, invoices, ledger, subscription, postCost, rp] = await Promise.all([
     listPlans({ publicOnly: true }),
     listCreditPacks(),
     listInvoices({ tenantId: ctx.tenantId, limit: 25 }),
     listLedger(ctx.tenantId, 40),
     getSubscription(ctx.tenantId),
     estimatePostCost({ withImage: ctx.features.f_image_generation }),
+    razorpayConfig(),
   ]);
 
   const data = {
@@ -33,6 +35,7 @@ export default async function BillingPage() {
     invoices,
     ledger,
     postCost,
+    onlinePayments: rp.enabled,
   };
 
   return (

@@ -65,3 +65,32 @@ body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
+
+.dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+.dark .glass { background: rgba(24, 24, 27, 0.72); }
+
+/* fixed backgrounds repaint on every scroll on phones - heavy */
+@media (max-width: 768px) {
+  body { background-attachment: scroll; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* CMS / legal pages */
+.cms-content { color: #3f3f46; font-size: 15px; line-height: 1.75; }
+.dark .cms-content { color: #d4d4d8; }
+.cms-content h2 { font-size: 1.3rem; font-weight: 700; margin: 1.8em 0 .6em; color: inherit; }
+.cms-content h3, .cms-content h4 { font-size: 1.08rem; font-weight: 700; margin: 1.4em 0 .5em; }
+.cms-content p { margin: 0 0 1em; }
+.cms-content ul, .cms-content ol { margin: 0 0 1em 1.4em; }
+.cms-content ul { list-style: disc; } .cms-content ol { list-style: decimal; }
+.cms-content a { color: #F53236; text-decoration: underline; }
+.cms-content code { background: #f4f4f5; padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+.dark .cms-content code { background: #27272a; }
+.cms-content hr { border: 0; border-top: 1px solid #e4e4e7; margin: 2em 0; }

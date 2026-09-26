@@ -52,7 +52,7 @@ export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsL
         >
           <Menu className="h-4.5 w-4.5" />
         </button>
-        <div className="hidden lg:block">
+        <div className="hidden min-w-0 flex-1 md:block md:max-w-md">
           <GlobalSearch />
         </div>
       </div>

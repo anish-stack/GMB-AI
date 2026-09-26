@@ -546,7 +546,7 @@ export default async function Home() {
                 <br /> More visibility.
                 <br /> <span className="pl-4">Less work.</span>
               </p>
-              <img src="/illustrations/rocket.svg" alt="" width={220} height={260} className="ml-2 h-40 w-auto" />
+              <Image src="/illustrations/rocket.svg" alt="" width={220} height={260} className="ml-2 h-40 w-auto" />
             </div>
 
             <div className="justify-self-start rounded-xl border border-white/20 bg-black/30 px-5 py-4 text-xl font-semibold leading-tight lg:justify-self-end">

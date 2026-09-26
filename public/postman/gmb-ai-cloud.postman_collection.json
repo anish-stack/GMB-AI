@@ -1,0 +1,1280 @@
+{
+  "info": {
+    "name": "GMB AI Cloud - Public API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Authenticate with an API key from Dashboard → API & developers.\n\nErrors:\n- 400 VALIDATION_ERROR: A parameter is missing or invalid.\n- 401 INVALID_API_KEY: Missing, malformed, revoked or unknown key. Also KEY_DISABLED / KEY_EXPIRED.\n- 403 INSUFFICIENT_SCOPE: The key lacks the scope this endpoint needs. PLAN_NO_API when the plan has no API access.\n- 404 NOT_FOUND: The record doesn't exist in your workspace.\n- 422 WEEKLY_LIMIT: Posting plan cap hit. Also TOTAL_LIMIT, PLAN_EXPIRED, OUTSIDE_PLAN, NOT_A_POSTING_DAY, NO_POSTING_PLAN.\n- 429 RATE_LIMITED: Too many requests. Wait until X-RateLimit-Reset (see Retry-After).\n- 503 MAINTENANCE: Platform maintenance. Retry later. API_DISABLED when the API is switched off."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3258"
+    },
+    {
+      "key": "api_key",
+      "value": "gmbk_xxxxxxxxxx_replace-with-your-key"
+    }
+  ],
+  "item": [
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Who am I",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ],
+              "variable": [],
+              "query": []
+            },
+            "description": "Returns the workspace and key the request is authenticated with. Use it to verify a key."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "me"
+                  ],
+                  "variable": [],
+                  "query": []
+                },
+                "description": "Returns the workspace and key the request is authenticated with. Use it to verify a key."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"workspace\": {\n      \"id\": 3,\n      \"name\": \"Hover Media\",\n      \"status\": \"ACTIVE\",\n      \"plan\": \"Agency\"\n    },\n    \"key\": {\n      \"id\": 7,\n      \"name\": \"Website\",\n      \"prefix\": \"gmbk_1a2b3c4d5e\",\n      \"scopes\": [\n        \"clients:read\",\n        \"posts:read\"\n      ],\n      \"expires_at\": null\n    }\n  },\n  \"request_id\": \"0b6f…\"\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "me"
+                  ],
+                  "variable": [],
+                  "query": []
+                },
+                "description": "Returns the workspace and key the request is authenticated with. Use it to verify a key."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "List clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clients"
+              ],
+              "variable": [],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "description": "Page number, default 1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "description": "1-100, default 20",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Filter by business name or city",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List clients\n\nScope: `clients:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients"
+                  ],
+                  "variable": [],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "description": "Page number, default 1",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "description": "1-100, default 20",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Filter by business name or city",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List clients\n\nScope: `clients:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 14,\n        \"business_name\": \"Smile Dental\",\n        \"category\": \"Dentist\",\n        \"city\": \"Ghaziabad\",\n        \"website\": \"https://smiledental.in\",\n        \"phone\": \"+91…\",\n        \"active\": true,\n        \"gmb_status\": \"GOOGLE_CONNECTED\",\n        \"created_at\": \"2026-08-01T09:00:00.000Z\"\n      }\n    ],\n    \"page\": 1,\n    \"limit\": 20,\n    \"total\": 1\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients"
+                  ],
+                  "variable": [],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "description": "Page number, default 1",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "description": "1-100, default 20",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Filter by business name or city",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List clients\n\nScope: `clients:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clients",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{client_id}}"
+                }
+              ],
+              "query": []
+            },
+            "description": "Client details with its posting plan usage.\n\nScope: `clients:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Client details with its posting plan usage.\n\nScope: `clients:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 14,\n    \"business_name\": \"Smile Dental\",\n    \"posting_plan\": {\n      \"state\": \"ACTIVE\",\n      \"total_posts\": 24,\n      \"used\": 14,\n      \"remaining\": 10\n    }\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Client details with its posting plan usage.\n\nScope: `clients:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Posting plan usage",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients/:id/posting-plan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clients",
+                ":id",
+                "posting-plan"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{client_id}}"
+                }
+              ],
+              "query": []
+            },
+            "description": "Plan window, weekly limit and usage. Counted = scheduled + pending + processing + published (rejected/failed free the slot).\n\nScope: `clients:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/posting-plan",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "posting-plan"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Plan window, weekly limit and usage. Counted = scheduled + pending + processing + published (rejected/failed free the slot).\n\nScope: `clients:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"state\": \"ACTIVE\",\n    \"start_date\": \"2026-09-01\",\n    \"end_date\": \"2026-10-31\",\n    \"duration_months\": 2,\n    \"posts_per_week\": 3,\n    \"posting_days\": [\n      1,\n      3,\n      5\n    ],\n    \"total_posts\": 24,\n    \"used\": 14,\n    \"remaining\": 10,\n    \"breakdown\": {\n      \"published\": 12,\n      \"scheduled\": 0,\n      \"pending\": 2,\n      \"processing\": 0\n    },\n    \"this_week\": {\n      \"index\": 4,\n      \"start\": \"2026-09-22\",\n      \"end\": \"2026-09-28\",\n      \"limit\": 3,\n      \"used\": 2,\n      \"remaining\": 1\n    }\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/posting-plan",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "posting-plan"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Plan window, weekly limit and usage. Counted = scheduled + pending + processing + published (rejected/failed free the slot).\n\nScope: `clients:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts"
+              ],
+              "variable": [],
+              "query": [
+                {
+                  "key": "client_id",
+                  "value": "",
+                  "description": "Only this client",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "PENDING, READY_FOR_REVIEW, NEEDS_REVIEW, APPROVED, REJECTED, PUBLISHED, FAILED",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "description": "1-100",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List posts\n\nScope: `posts:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts"
+                  ],
+                  "variable": [],
+                  "query": [
+                    {
+                      "key": "client_id",
+                      "value": "",
+                      "description": "Only this client",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "description": "PENDING, READY_FOR_REVIEW, NEEDS_REVIEW, APPROVED, REJECTED, PUBLISHED, FAILED",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "description": "1-100",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List posts\n\nScope: `posts:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 812,\n        \"client_id\": 14,\n        \"status\": \"READY_FOR_REVIEW\",\n        \"post_type\": \"Service\",\n        \"topic\": \"Root canal - what to expect\",\n        \"title\": \"Root canal treatment in Indirapuram: what to expect\",\n        \"description\": \"Worried about a root canal? …\",\n        \"cta\": \"Book a visit\",\n        \"image_url\": \"https://cdn.example.com/p/812.jpg\",\n        \"qa_score\": 88,\n        \"scheduled_date\": \"2026-10-02\",\n        \"published_at\": null,\n        \"created_at\": \"2026-09-25T10:20:11.000Z\",\n        \"source\": \"api\"\n      }\n    ],\n    \"page\": 1,\n    \"limit\": 20,\n    \"total\": 1\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts"
+                  ],
+                  "variable": [],
+                  "query": [
+                    {
+                      "key": "client_id",
+                      "value": "",
+                      "description": "Only this client",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "description": "PENDING, READY_FOR_REVIEW, NEEDS_REVIEW, APPROVED, REJECTED, PUBLISHED, FAILED",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "description": "1-100",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List posts\n\nScope: `posts:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts"
+              ],
+              "variable": [],
+              "query": []
+            },
+            "description": "Creates a post slot and (by default) starts AI generation in the background. Enforces the client's posting plan: weekly cap, total cap, plan window, posting days and expiry - exactly like the dashboard. Poll GET /posts/{id} until status is READY_FOR_REVIEW. Limited to 10 requests/min per key.\n\nScope: `posts:write`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_id\": 14,\n  \"topic\": \"Root canal - what to expect\",\n  \"post_type\": \"Service\",\n  \"scheduled_date\": \"2026-10-02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts"
+                  ],
+                  "variable": [],
+                  "query": []
+                },
+                "description": "Creates a post slot and (by default) starts AI generation in the background. Enforces the client's posting plan: weekly cap, total cap, plan window, posting days and expiry - exactly like the dashboard. Poll GET /posts/{id} until status is READY_FOR_REVIEW. Limited to 10 requests/min per key.\n\nScope: `posts:write`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"client_id\": 14,\n  \"topic\": \"Root canal - what to expect\",\n  \"post_type\": \"Service\",\n  \"scheduled_date\": \"2026-10-02\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 812,\n    \"client_id\": 14,\n    \"status\": \"PENDING\",\n    \"post_type\": \"Service\",\n    \"topic\": \"Root canal - what to expect\",\n    \"title\": null,\n    \"description\": \"Worried about a root canal? …\",\n    \"cta\": \"Book a visit\",\n    \"image_url\": \"https://cdn.example.com/p/812.jpg\",\n    \"qa_score\": 88,\n    \"scheduled_date\": \"2026-10-02\",\n    \"published_at\": null,\n    \"created_at\": \"2026-09-25T10:20:11.000Z\",\n    \"source\": \"api\",\n    \"generation\": \"started\"\n  }\n}"
+            },
+            {
+              "name": "Plan limit",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts"
+                  ],
+                  "variable": [],
+                  "query": []
+                },
+                "description": "Creates a post slot and (by default) starts AI generation in the background. Enforces the client's posting plan: weekly cap, total cap, plan window, posting days and expiry - exactly like the dashboard. Poll GET /posts/{id} until status is READY_FOR_REVIEW. Limited to 10 requests/min per key.\n\nScope: `posts:write`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"client_id\": 14,\n  \"topic\": \"Root canal - what to expect\",\n  \"post_type\": \"Service\",\n  \"scheduled_date\": \"2026-10-02\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"WEEKLY_LIMIT\",\n    \"message\": \"Weekly limit reached: 3 posts per week (week of 2026-09-29 - 2026-10-05).\",\n    \"details\": {\n      \"limit\": 3,\n      \"weekStart\": \"2026-09-29\",\n      \"weekEnd\": \"2026-10-05\"\n    }\n  },\n  \"request_id\": \"a1c2…\"\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts"
+                  ],
+                  "variable": [],
+                  "query": []
+                },
+                "description": "Creates a post slot and (by default) starts AI generation in the background. Enforces the client's posting plan: weekly cap, total cap, plan window, posting days and expiry - exactly like the dashboard. Poll GET /posts/{id} until status is READY_FOR_REVIEW. Limited to 10 requests/min per key.\n\nScope: `posts:write`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"client_id\": 14,\n  \"topic\": \"Root canal - what to expect\",\n  \"post_type\": \"Service\",\n  \"scheduled_date\": \"2026-10-02\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{post_id}}"
+                }
+              ],
+              "query": []
+            },
+            "description": "Get post\n\nScope: `posts:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{post_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Get post\n\nScope: `posts:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": 812,\n    \"client_id\": 14,\n    \"status\": \"READY_FOR_REVIEW\",\n    \"post_type\": \"Service\",\n    \"topic\": \"Root canal - what to expect\",\n    \"title\": \"Root canal treatment in Indirapuram: what to expect\",\n    \"description\": \"Worried about a root canal? …\",\n    \"cta\": \"Book a visit\",\n    \"image_url\": \"https://cdn.example.com/p/812.jpg\",\n    \"qa_score\": 88,\n    \"scheduled_date\": \"2026-10-02\",\n    \"published_at\": null,\n    \"created_at\": \"2026-09-25T10:20:11.000Z\",\n    \"source\": \"api\"\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/posts/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "posts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{post_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "Get post\n\nScope: `posts:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "List reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients/:id/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clients",
+                ":id",
+                "reviews"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{client_id}}"
+                }
+              ],
+              "query": []
+            },
+            "description": "List reviews\n\nScope: `reviews:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/reviews",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "reviews"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "List reviews\n\nScope: `reviews:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"average_rating\": 4.6,\n    \"total\": 212,\n    \"items\": [\n      {\n        \"id\": \"AbFvOq…\",\n        \"author\": \"Rahul\",\n        \"rating\": 5,\n        \"comment\": \"Great service\",\n        \"created_at\": \"2026-09-20T08:00:00Z\",\n        \"reply\": null\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/reviews",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "reviews"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": []
+                },
+                "description": "List reviews\n\nScope: `reviews:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients/:id/performance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "clients",
+                ":id",
+                "performance"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{client_id}}"
+                }
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "description": "7-365, default 30",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Performance\n\nScope: `reports:read`"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/performance",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "performance"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "",
+                      "description": "7-365, default 30",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Performance\n\nScope: `reports:read`"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-RateLimit-Remaining",
+                  "value": "59"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"days\": 30,\n    \"is_sample_data\": false,\n    \"totals\": {\n      \"views\": 4210,\n      \"website_clicks\": 180,\n      \"calls\": 96,\n      \"directions\": 140\n    },\n    \"series\": [\n      {\n        \"date\": \"2026-09-01\",\n        \"views\": 120,\n        \"search_views\": 80,\n        \"maps_views\": 40,\n        \"website_clicks\": 6,\n        \"calls\": 3,\n        \"directions\": 4\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "Invalid key",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/clients/:id/performance",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "clients",
+                    ":id",
+                    "performance"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{client_id}}"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "",
+                      "description": "7-365, default 30",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Performance\n\nScope: `reports:read`"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"error\": {\n    \"code\": \"INVALID_API_KEY\",\n    \"message\": \"Invalid API key.\"\n  },\n  \"request_id\": \"…\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

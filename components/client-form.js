@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, CardHeader, Field, Input, Select, Textarea } from "@/components/ui";
+import { PostingPlanFields, emptyPlan } from "@/components/posting/plan-fields";
 import { POST_TYPES, TONES, FREQUENCIES } from "@/lib/constants";
 
 export function ClientForm({ client, employees = [] }) {
@@ -31,6 +32,7 @@ export function ClientForm({ client, employees = [] }) {
     prohibited_claims: (client?.prohibited_claims || []).join("\n"),
   });
 
+  const [plan, setPlan] = useState(emptyPlan);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   async function submit(e) {
@@ -41,7 +43,7 @@ export function ClientForm({ client, employees = [] }) {
     const res = await fetch(url, {
       method: editing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(editing ? form : { ...form, posting_plan: plan }),
     });
     const data = await res.json();
     setBusy(false);
@@ -105,6 +107,15 @@ export function ClientForm({ client, employees = [] }) {
           </Field>
         </CardBody>
       </Card>
+
+      {!editing ? (
+        <Card>
+          <CardHeader title="Posting plan" subtitle="What the client purchased - scheduling and AI generation are capped to this." />
+          <CardBody>
+            <PostingPlanFields value={plan} onChange={setPlan} />
+          </CardBody>
+        </Card>
+      ) : null}
 
       {error ? <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
 

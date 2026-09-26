@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Plus, Trash2, Sparkles, Calendar, ChevronLeft, ChevronRight, X, Loader2 } from "lucide-react";
 import { Badge, Button, Card, CardBody, CardHeader, Field, Input, Select } from "@/components/ui";
 import { POST_TYPES } from "@/lib/constants";
+import { usePlanUsage, PlanUsageInline } from "@/components/posting/plan-usage";
 
 const TYPE_COLORS = [
   { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", ring: "ring-blue-200 dark:ring-blue-900" },
@@ -39,6 +40,25 @@ export function CalendarBoard({ entries, clients }) {
     post_type: "Service",
     topic: "",
   });
+  const { data: usage } = usePlanUsage(showAdd ? form.client_id : null);
+  const planBlock = (() => {
+    if (!usage) return "";
+    if (!usage.plan) return usage.required ? "Set a posting plan for this client first (Clients → client → Posting plan)." : "";
+    if (usage.state === "EXPIRED") return `Plan expired on ${usage.plan.end_date}. Extend it to schedule.`;
+    const n = Math.min(Math.max(Number(form.repeat_weeks || 1), 1), 52);
+    if (usage.remaining < n) return `Only ${usage.remaining} post(s) left in this plan.`;
+    const start = new Date(`${usage.plan.start_date}T00:00:00`);
+    for (let i = 0; i < n; i++) {
+      const d = new Date(`${form.scheduled_date}T00:00:00`);
+      d.setDate(d.getDate() + i * 7);
+      const iso = d.toLocaleDateString("en-CA");
+      if (iso < usage.plan.start_date || iso > usage.plan.end_date) return `${iso} is outside the plan (${usage.plan.start_date} → ${usage.plan.end_date}).`;
+      if (usage.plan.posting_days?.length && !usage.plan.posting_days.includes(d.getDay())) return `${iso} is not a posting day for this client.`;
+      const w = Math.floor((d - start) / 86400000 / 7) + 1;
+      if ((usage.weeks?.[w] || 0) + 1 > usage.plan.posts_per_week) return `Week of ${iso} already has ${usage.weeks[w]} of ${usage.plan.posts_per_week} posts.`;
+    }
+    return "";
+  })();
 
   const byDate = useMemo(() => {
     const m = new Map();
@@ -88,7 +108,13 @@ export function CalendarBoard({ entries, clients }) {
   async function addEntry(e) {
     e.preventDefault();
     setBusy("add"); setMsg("");
-    const res = await fetch("/api/calendar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    const n = Math.min(Math.max(Number(form.repeat_weeks || 1), 1), 52);
+    const dates = Array.from({ length: n }, (_, i) => {
+      const d = new Date(`${form.scheduled_date}T00:00:00`);
+      d.setDate(d.getDate() + i * 7);
+      return d.toLocaleDateString("en-CA");
+    });
+    const res = await fetch("/api/calendar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, dates }) });
     const data = await res.json();
     setBusy("");
     if (!res.ok) return setMsg(data.error);
@@ -286,6 +312,12 @@ export function CalendarBoard({ entries, clients }) {
               <Field label="Date">
                 <Input type="date" value={form.scheduled_date} onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
               </Field>
+              <Field label="Repeat weekly" hint="1 = just this date. Every week is checked against the plan.">
+                <Input type="number" min={1} max={52} value={form.repeat_weeks || 1} onChange={(e) => setForm({ ...form, repeat_weeks: e.target.value })} />
+              </Field>
+              <PlanUsageInline usage={usage} />
+              {planBlock ? <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">{planBlock}</p> : null}
+              {msg ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">{msg}</p> : null}
               <Field label="Post type">
                 <Select value={form.post_type} onChange={(e) => setForm({ ...form, post_type: e.target.value })}>
                   {POST_TYPES.map((t) => <option key={t}>{t}</option>)}
@@ -294,7 +326,7 @@ export function CalendarBoard({ entries, clients }) {
               <Field label="Topic" hint="Leave empty to let the Topic Agent choose">
                 <Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} placeholder="AI picks if empty" />
               </Field>
-              <Button type="submit" disabled={busy === "add"} className="w-full justify-center">
+              <Button type="submit" disabled={busy === "add" || Boolean(planBlock)} className="w-full justify-center">
                 {busy === "add" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 Add
               </Button>

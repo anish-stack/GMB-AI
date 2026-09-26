@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
-import { GoogleGMBProvider } from "@/lib/gmb/googleProvider.js";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
 
   try {
     await assertClientInTenant(clientId, g.ctx.tenantId);
-    const provider = new GoogleGMBProvider();
+    const provider = await providerFor(clientId);
     const data = await provider.getAvailableServiceTypes(clientId);
     return NextResponse.json({ ok: true, ...data });
   } catch (err) {

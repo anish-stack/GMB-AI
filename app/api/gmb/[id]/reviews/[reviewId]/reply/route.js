@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
-import { getGMBProvider } from "@/lib/gmb/provider";
+import { providerFor } from "@/lib/gmb/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export async function POST(request, { params }) {
   try {
     await assertClientInTenant(clientId, g.ctx.tenantId);
     const body = await request.json();
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
     const result = await provider.replyToReview(clientId, reviewId, body.reply);
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
@@ -32,7 +32,7 @@ export async function DELETE(request, { params }) {
 
   try {
     await assertClientInTenant(clientId, g.ctx.tenantId);
-    const provider = getGMBProvider();
+    const provider = await providerFor(clientId);
     await provider.deleteReviewReply(clientId, reviewId);
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -4,6 +4,7 @@ import { getClient } from "@/lib/repo/clients.js";
 import { Card, CardBody, CardHeader, Table, Badge, EmptyRow } from "@/components/ui";
 import { StatusBadge } from "@/components/status-badge";
 import { GenerateNow } from "@/components/generate-now";
+import { PostingPlanCard } from "@/components/posting/plan-usage";
 import { ClientForm } from "@/components/client-form";
 import { GoogleConnect } from "@/components/google-connect";
 import { DangerActions } from "@/components/danger-actions";
@@ -56,6 +57,8 @@ export default async function ClientDetailPage({ params, searchParams }) {
           />
         </div>
       </div>
+
+      <PostingPlanCard clientId={client.id} canEdit={ctx.can("client.edit")} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>

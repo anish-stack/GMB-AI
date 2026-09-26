@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { update } from "@/lib/db";
+import { linkGoogleLocation } from "@/lib/repo/gmb.js";
 import {
   verifyInviteToken, exchangeCode, fetchGoogleEmail, saveClientTokens,
 } from "@/lib/gmb/googleAuth.js";
@@ -33,10 +33,7 @@ export async function GET(request) {
       const provider = new GoogleGMBProvider();
       const { locations, chosen } = await provider.syncClient(clientId);
       if (chosen) {
-        await update("clients", clientId, {
-          google_account_id: chosen.account,
-          google_location_name: chosen.location.name,
-        });
+        await linkGoogleLocation(clientId, chosen.account, chosen.location);
         locationLine = `${locations.length} location(s) found. Linked: ${chosen.location.title || chosen.location.name}.`;
       } else {
         locationLine = "No locations were found on this Google account. Please sign in with the account that manages the business.";

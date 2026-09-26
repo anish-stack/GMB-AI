@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, Layers, CreditCard, Receipt, Coins, TicketPercent,
   Activity, ScrollText, UsersRound, Settings, ShieldCheck, LogOut, Menu, X, Send, MapPin,
+  Megaphone, LifeBuoy, FileText, PlugZap, Globe, HeartPulse, Gauge, KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
@@ -22,9 +23,17 @@ const NAV = [
   { href: "/admin/gmb-posts", label: "GMB postings", icon: Send },
   { href: "/admin/gmb-profiles", label: "GMB profiles", icon: MapPin },
   { href: "/admin/usage", label: "Platform usage", icon: Activity },
+  { href: "/admin/client-usage", label: "Client usage", icon: Gauge },
+  { href: "/admin/api-usage", label: "API usage", icon: KeyRound },
+  { href: "/admin/support", label: "Support tickets", icon: LifeBuoy },
+  { href: "/admin/notifications", label: "Notifications", icon: Megaphone },
+  { href: "/admin/cms", label: "CMS pages", icon: FileText },
   { href: "/admin/users", label: "Users", icon: UsersRound },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/settings", label: "Billing settings", icon: Settings },
+  { href: "/admin/web-settings", label: "Web & maintenance", icon: Globe },
+  { href: "/admin/integrations", label: "Integrations", icon: PlugZap },
+  { href: "/admin/health", label: "System health", icon: HeartPulse },
 ];
 
 function Nav({ pathname, onNavigate }) {

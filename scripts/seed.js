@@ -396,6 +396,11 @@ async function main() {
     );
   }
 
+  // Posting plans for every seeded client (2 months, from the 1st of this month).
+  await conn.query(`INSERT INTO client_posting_plans (tenant_id,client_id,start_date,duration_months,end_date,posts_per_week,total_posts,status,notes,created_by)
+    SELECT c.tenant_id, c.id, DATE_FORMAT(CURDATE(),'%Y-%m-01'), 2, DATE_SUB(DATE_ADD(DATE_FORMAT(CURDATE(),'%Y-%m-01'), INTERVAL 2 MONTH), INTERVAL 1 DAY), 3, 24, 'ACTIVE', 'Seed plan', 'seed'
+      FROM clients c WHERE NOT EXISTS (SELECT 1 FROM client_posting_plans p WHERE p.client_id=c.id)`);
+
   await conn.end();
   console.log("\nDone.\n");
   console.log("SUPER ADMIN   superadmin@gmbai.cloud / super123      -> /admin");

@@ -21,7 +21,7 @@ export async function GET(_request, { params }) {
   if (!type) return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
 
   try {
-    const data = await fs.readFile(path.join(STORAGE_DIR, name));
+    const data = await fs.readFile(path.join(/*turbopackIgnore: true*/ STORAGE_DIR, name));
     return new NextResponse(data, {
       headers: {
         "Content-Type": type,

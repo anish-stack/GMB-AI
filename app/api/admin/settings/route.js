@@ -9,7 +9,7 @@ export async function GET(request) {
   const g = await guard(request, { superAdmin: true });
   if (g.error) return g.error;
   const s = await getSettings({ fresh: true });
-  return NextResponse.json({ settings: { ...s, razorpay_key_secret: s.razorpay_key_secret ? "********" : "" } });
+  return NextResponse.json({ settings: { ...s, razorpay_key_secret: s.razorpay_key_secret ? "********" : "", razorpay_webhook_secret: s.razorpay_webhook_secret ? "********" : "" } });
 }
 
 export async function PATCH(request) {
@@ -18,6 +18,7 @@ export async function PATCH(request) {
   try {
     const body = await request.json();
     if (body.razorpay_key_secret === "********") delete body.razorpay_key_secret;
+    if (body.razorpay_webhook_secret === "********") delete body.razorpay_webhook_secret;
     const settings = await setSettings(body);
     await audit(g.ctx, "ADMIN_SETTINGS_UPDATED", { meta: Object.keys(body) });
     return NextResponse.json({ ok: true, settings });

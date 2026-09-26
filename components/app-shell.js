@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 
 export function AppShell({ session, aiProvider, gmbProvider, workspace, plan, perms, creditsLeft, banner, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMenu = useCallback(() => setMobileOpen(false), []);
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         mobileOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+        onClose={closeMenu}
+        gmbMock={gmbProvider?.isMock !== false}
         workspace={workspace}
         plan={plan}
         perms={perms}

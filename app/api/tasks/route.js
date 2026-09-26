@@ -4,6 +4,7 @@ import { listTasks } from "@/lib/repo/tasks.js";
 import { createTask, runTaskPipeline } from "@/lib/ai/orchestrator.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { audit } from "@/lib/saas/audit.js";
+import { assertUserRate } from "@/lib/api/rateLimiter.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -29,12 +30,15 @@ export async function POST(request) {
     const body = await request.json();
     if (!body.clientId) return NextResponse.json({ error: "clientId is required" }, { status: 400 });
     await assertClientInTenant(Number(body.clientId), ctx.tenantId);
+    await assertUserRate(ctx.userId, "generate", 10, 60);
 
     const taskId = await createTask({
       clientId: Number(body.clientId),
       postType: body.postType || "Service",
       topic: body.topic || null,
-      scheduledDate: body.scheduledDate || new Date().toISOString().slice(0, 10),
+      scheduledDate: body.scheduledDate || new Date().toLocaleDateString("en-CA"),
+      createdBy: ctx.userId,
+      source: "app",
     });
     const result = await runTaskPipeline(taskId);
     await audit(ctx, "TASK_GENERATED", { entity: "task", entityId: taskId, meta: { credits: result.credits } });

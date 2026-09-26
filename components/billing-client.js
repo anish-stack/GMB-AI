@@ -6,6 +6,7 @@ import { Check, Minus } from "lucide-react";
 import { Card, CardBody, CardHeader, Button, Badge, Table, EmptyRow, Select, Input, Field } from "@/components/ui";
 import { LIMIT_LABEL, FEATURE_LABEL, FEATURE_KEYS, isUnlimited } from "@/lib/saas/constants.js";
 import { formatDate } from "@/lib/utils";
+import { openRazorpay } from "@/lib/hooks/razorpay-checkout";
 
 function money(v, cur = "INR") {
   const n = Number(v || 0);
@@ -40,6 +41,23 @@ export function BillingClient({ data, canManage }) {
       router.refresh();
     } catch (e) {
       setErr(e.message);
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function payInvoice(inv) {
+    setBusy(`inv-${inv.id}`);
+    setErr("");
+    setMsg("");
+    try {
+      const order = await post(`/api/billing/invoices/${inv.id}/pay`, {});
+      const resp = await openRazorpay(order);
+      const json = await post(`/api/billing/invoices/${inv.id}/pay`, resp);
+      setMsg(json.message);
+      router.refresh();
+    } catch (e) {
+      if (!e.cancelled) setErr(e.message);
     } finally {
       setBusy("");
     }
@@ -208,7 +226,13 @@ export function BillingClient({ data, canManage }) {
                 <td className="px-4 py-2 text-xs text-zinc-500">{i.type}</td>
                 <td className="px-4 py-2 text-zinc-700 dark:text-zinc-300">{money(i.total, i.currency)}</td>
                 <td className="px-4 py-2">
-                  <Badge tone={i.status === "PAID" ? "emerald" : i.status === "DUE" ? "amber" : "slate"}>{i.status}</Badge>
+                  {i.status === "DUE" && data.onlinePayments && canManage ? (
+                    <Button className="!px-2.5 !py-1 text-xs" disabled={busy === `inv-${i.id}`} onClick={() => payInvoice(i)}>
+                      {busy === `inv-${i.id}` ? "Opening..." : "Pay now"}
+                    </Button>
+                  ) : (
+                    <Badge tone={i.status === "PAID" ? "emerald" : i.status === "DUE" ? "amber" : "slate"}>{i.status}</Badge>
+                  )}
                 </td>
                 <td className="px-4 py-2 text-xs text-zinc-500">{formatDate(i.created_at)}</td>
               </tr>

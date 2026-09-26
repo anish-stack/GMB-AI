@@ -16,13 +16,15 @@ export default async function GmbListPage() {
     [ctx.tenantId]
   );
   const provider = gmbProviderInfo();
+  const live = rows.filter((r) => r.provider === "google" && r.connection_status === "GOOGLE_CONNECTED").length;
 
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">GMB profiles</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Provider: {provider.name}{provider.isMock ? " - mock data, nothing is read from or written to Google." : ""}
+          {live} of {rows.length} profile(s) live on Google.
+          {rows.length - live ? ` Others use ${provider.isMock ? "demo (mock) data" : "Google once connected"} - connect them from the client page.` : ""}
         </p>
       </div>
 

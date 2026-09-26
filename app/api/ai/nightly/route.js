@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import { safeEqual } from "@/lib/security/crypto.js";
+import { beat } from "@/lib/system/heartbeat.js";
+import { maintenanceState } from "@/lib/system/maintenance.js";
+import { sendNotification } from "@/lib/notifications/service.js";
 import { getContext } from "@/lib/saas/context.js";
 import { apiError } from "@/lib/saas/guard.js";
 import { runNightlyJob } from "@/lib/ai/orchestrator.js";
@@ -16,7 +20,7 @@ export const maxDuration = 800;
 export async function POST(request) {
   const ctx = await getContext();
   const key = request.headers.get("x-scheduler-key");
-  const fromScheduler = key && process.env.SESSION_SECRET && key === process.env.SESSION_SECRET;
+  const fromScheduler = Boolean(key && process.env.SESSION_SECRET && safeEqual(key, process.env.SESSION_SECRET));
 
   if (!ctx && !fromScheduler) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   if (ctx && !fromScheduler && !can(ctx.role, "task.generate")) {
@@ -30,6 +34,14 @@ export async function POST(request) {
     body = {};
   }
 
+  if (fromScheduler) {
+    const m = await maintenanceState();
+    if (m.enabled) {
+      await beat("nightly_job", { ok: true, message: "skipped - maintenance mode" });
+      return NextResponse.json({ skipped: "maintenance" });
+    }
+  }
+
   try {
     const result = await runNightlyJob({
       date: body.date || null,
@@ -37,7 +49,13 @@ export async function POST(request) {
       tenantId: fromScheduler ? (body.tenantId ? Number(body.tenantId) : null) : ctx?.tenantId || null,
       limit: Number(body.limit || 100),
     });
-    if (ctx) await audit(ctx, "AI_JOB_RUN", { meta: { generated: result.generated, credits: result.credits } });
+    if (fromScheduler) await beat("nightly_job", { ok: true, message: `${result.generated}/${result.scheduled} generated, ${result.skipped} skipped` });
+    if (ctx) {
+      await audit(ctx, "AI_JOB_RUN", { meta: { generated: result.generated, credits: result.credits } });
+      if (result.scheduled) {
+        await sendNotification({ userIds: [ctx.userId], type: "TASK", title: `AI run finished: ${result.generated}/${result.scheduled} posts generated`, body: `${result.ready} ready, ${result.needsReview} need review, ${result.skipped} skipped.`, link: "/gmb/tasks", push: true });
+      }
+    }
     return NextResponse.json(result);
   } catch (err) {
     return apiError(err);
