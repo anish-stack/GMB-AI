@@ -63,7 +63,7 @@ export function RankTracker({ clients }) {
     setMsg("");
     try {
       const r = await apiFetch("/api/rank/scans", { body: form });
-      // router.push(`/rank-tracker/${r.id}`);
+      router.push(`/rank-tracker/${r.id}`);
     } catch (e) {
       setMsg(e.message);
       if (e.status === 409) setLocate(true);
