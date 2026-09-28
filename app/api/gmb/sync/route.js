@@ -4,6 +4,7 @@ import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { assertFeature } from "@/lib/saas/entitlements.js";
 import { one } from "@/lib/db";
 import { linkGoogleLocation, unlinkGoogle } from "@/lib/repo/gmb.js";
+import { importFromGoogle } from "@/lib/gmb/importFromGoogle.js";
 import { GoogleGMBProvider } from "@/lib/gmb/googleProvider.js";
 import { connectLink, disconnectClient } from "@/lib/gmb/googleAuth.js";
 
@@ -39,7 +40,8 @@ export async function POST(request) {
       const match = locations.find((l) => l.location.name === body.locationName);
       if (!match) return NextResponse.json({ error: "That location is not available on the connected account" }, { status: 400 });
       const linked = await linkGoogleLocation(clientId, match.account, match.location);
-      return NextResponse.json({ ok: true, linked: linked.title, location_id: linked.locationId });
+      const imported = await importFromGoogle(clientId).catch((e) => ({ error: e.message }));
+      return NextResponse.json({ ok: true, linked: linked.title, location_id: linked.locationId, imported });
     }
 
     // default: refresh the location list and cache performance
@@ -51,6 +53,7 @@ export async function POST(request) {
     const target = current || chosen;
     let linked = null;
     if (target) linked = await linkGoogleLocation(clientId, target.account, target.location);
+    const imported = linked ? await importFromGoogle(clientId).catch((e) => ({ error: e.message })) : null;
 
     let cached = 0;
     try {
@@ -70,6 +73,7 @@ export async function POST(request) {
       })),
       performance_days_cached: cached,
       linked: linked ? { title: linked.title, location_id: linked.locationId } : null,
+      imported,
       warning: locations.length ? null : "No locations on this Google account - sign in with the account that manages the business profile.",
     });
   } catch (err) {

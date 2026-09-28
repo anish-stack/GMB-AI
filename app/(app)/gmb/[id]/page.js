@@ -22,6 +22,7 @@ import { Badge, Card, Alert, EmptyState } from "@/components/ui";
 import { MockBadge } from "@/components/status-badge";
 import { GenerateNow } from "@/components/generate-now";
 import { GmbReportActions } from "@/components/gmb-report-actions";
+import { GmbSyncButton } from "@/components/gmb/sync-button";
 import { GmbProfileForm } from "@/components/gmb/profile-form";
 import { GmbDetailTabs } from "@/components/gmb/detail-tabs";
 import { DangerActions } from "@/components/danger-actions";
@@ -613,6 +614,8 @@ export default async function GmbProfilePage({ params, searchParams }) {
             </Link>
 
   
+            <GmbSyncButton clientId={clientId} />
+
             <GenerateNow clientId={clientId} />
 
             <DangerActions

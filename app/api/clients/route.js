@@ -22,6 +22,7 @@ export async function POST(request) {
     assertLimit(ctx.ent, "max_clients", 1);
 
     const body = await request.json();
+    if (body.import_from_google && !body.business_category) body.business_category = "Pending Google sync";
     if (!body.business_name || !body.business_category) {
       return NextResponse.json({ error: "Business name and category are required" }, { status: 400 });
     }

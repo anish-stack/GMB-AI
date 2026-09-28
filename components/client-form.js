@@ -33,6 +33,8 @@ export function ClientForm({ client, employees = [] }) {
   });
 
   const [plan, setPlan] = useState(emptyPlan);
+  // New clients: Google fills category, contact details, services, locations & keywords after connect.
+  const [fromGoogle, setFromGoogle] = useState(!editing);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   async function submit(e) {
@@ -43,7 +45,7 @@ export function ClientForm({ client, employees = [] }) {
     const res = await fetch(url, {
       method: editing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editing ? form : { ...form, posting_plan: plan }),
+      body: JSON.stringify(editing ? form : { ...form, business_category: fromGoogle ? form.business_category || "" : form.business_category, import_from_google: fromGoogle, posting_plan: plan }),
     });
     const data = await res.json();
     setBusy(false);
@@ -54,39 +56,58 @@ export function ClientForm({ client, employees = [] }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {!editing ? (
+        <Card>
+          <CardBody>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" className="mt-1 h-4 w-4 accent-[#F53236]" checked={fromGoogle} onChange={(e) => setFromGoogle(e.target.checked)} />
+              <span>
+                <span className="block text-sm font-semibold text-zinc-900 dark:text-white">Import details from Google Business Profile (recommended)</span>
+                <span className="block text-xs text-zinc-500">Only the business name is needed now. After you connect Google on the next screen, category, phone, website, address, description, services, locations, keywords, logo and links are pulled in automatically.</span>
+              </span>
+            </label>
+          </CardBody>
+        </Card>
+      ) : null}
+
       <Card>
-        <CardHeader title="Business information" subtitle="Only these verified details are given to the AI agents" />
+        <CardHeader title="Business information" subtitle={fromGoogle ? "Everything else comes from Google after connecting" : "Only these verified details are given to the AI agents"} />
         <CardBody className="grid gap-3 sm:grid-cols-2">
           <Field label="Business name"><Input value={form.business_name} onChange={set("business_name")} required /></Field>
-          <Field label="Category"><Input value={form.business_category} onChange={set("business_category")} placeholder="Dental Clinic" required /></Field>
-          <Field label="Phone"><Input value={form.phone} onChange={set("phone")} /></Field>
-          <Field label="Website"><Input value={form.website} onChange={set("website")} /></Field>
-          <Field label="Address"><Input value={form.address} onChange={set("address")} /></Field>
-          <Field label="City"><Input value={form.city} onChange={set("city")} /></Field>
-          <Field label="State"><Input value={form.state} onChange={set("state")} /></Field>
-          <Field label="GMB location id" hint="Mock id is generated if left empty">
-            <Input value={form.gmb_location_id} onChange={set("gmb_location_id")} />
-          </Field>
+          {!fromGoogle ? (
+            <>
+              <Field label="Category"><Input value={form.business_category} onChange={set("business_category")} placeholder="Dental Clinic" required /></Field>
+              <Field label="Phone"><Input value={form.phone} onChange={set("phone")} /></Field>
+              <Field label="Website"><Input value={form.website} onChange={set("website")} /></Field>
+              <Field label="Address"><Input value={form.address} onChange={set("address")} /></Field>
+              <Field label="City"><Input value={form.city} onChange={set("city")} /></Field>
+              <Field label="State"><Input value={form.state} onChange={set("state")} /></Field>
+            </>
+          ) : null}
           <Field label="Assigned employee">
             <Select value={form.assigned_employee_id} onChange={set("assigned_employee_id")}>
               <option value="">Unassigned</option>
               {employees.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
             </Select>
           </Field>
-          <Field label="Description" className="sm:col-span-2">
-            <Textarea value={form.description} onChange={set("description")} />
-          </Field>
+          {!fromGoogle ? (
+            <Field label="Description" className="sm:col-span-2">
+              <Textarea value={form.description} onChange={set("description")} />
+            </Field>
+          ) : null}
         </CardBody>
       </Card>
 
-      <Card>
-        <CardHeader title="Services, locations and keywords" subtitle="One per line" />
-        <CardBody className="grid gap-3 sm:grid-cols-3">
-          <Field label="Services"><Textarea className="min-h-32" value={form.services} onChange={set("services")} /></Field>
-          <Field label="Target locations"><Textarea className="min-h-32" value={form.target_locations} onChange={set("target_locations")} /></Field>
-          <Field label="Target keywords"><Textarea className="min-h-32" value={form.target_keywords} onChange={set("target_keywords")} /></Field>
-        </CardBody>
-      </Card>
+      {!fromGoogle ? (
+        <Card>
+          <CardHeader title="Services, locations and keywords" subtitle="One per line (skip if you'll connect Google - they're imported)" />
+          <CardBody className="grid gap-3 sm:grid-cols-3">
+            <Field label="Services"><Textarea className="min-h-32" value={form.services} onChange={set("services")} /></Field>
+            <Field label="Target locations"><Textarea className="min-h-32" value={form.target_locations} onChange={set("target_locations")} /></Field>
+            <Field label="Target keywords"><Textarea className="min-h-32" value={form.target_keywords} onChange={set("target_keywords")} /></Field>
+          </CardBody>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader title="Content rules" subtitle="Tone, language and phrases the AI must never use" />

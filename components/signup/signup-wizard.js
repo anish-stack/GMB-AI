@@ -75,12 +75,12 @@ function SidePanel({ plan, cycle, quote, platformName }) {
   );
 }
 
-export function SignupWizard({ plans, selected, initialCycle, taxPercent, onlinePayments, platformName, supportEmail }) {
+export function SignupWizard({ plans, selected, initialCycle, taxPercent, onlinePayments, platformName, supportEmail, google = null }) {
   const router = useRouter();
   const [step, setStep] = useState("plan"); // plan | details | verify | payment | done
   const [planSlug, setPlanSlug] = useState(selected);
   const [cycle, setCycle] = useState(initialCycle);
-  const [form, setForm] = useState({ company_name: "", name: "", email: "", phone: "", password: "", terms: false });
+  const [form, setForm] = useState({ company_name: "", name: google?.name || "", email: google?.email || "", phone: "", password: "", terms: false });
   const [intent, setIntent] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -113,7 +113,16 @@ export function SignupWizard({ plans, selected, initialCycle, taxPercent, online
   const start = () =>
     run(async () => {
       if (!form.terms) throw new Error("Please accept the terms to continue.");
-      const res = await post("/api/auth/signup/start", { ...form, plan_slug: planSlug, billing_cycle: cycle });
+      const res = await post("/api/auth/signup/start", { ...form, plan_slug: planSlug, billing_cycle: cycle, google_token: google?.token || undefined });
+      if (res.google) {
+        // Google already verified the email -> skip the OTP screen
+        const v = await post("/api/auth/signup/verify", { token: res.token, code: "" });
+        if (v.next === "payment") {
+          setIntent({ ...res, ...v });
+          setStep("payment");
+        } else finish(v);
+        return;
+      }
       setIntent(res);
       setStep("verify");
     });
@@ -156,7 +165,7 @@ export function SignupWizard({ plans, selected, initialCycle, taxPercent, online
         ) : null}
 
         {step === "details" ? (
-          <DetailsStep form={form} setForm={setForm} busy={busy} error={error} onBack={() => { setError(""); setStep("plan"); }} onSubmit={start} />
+          <DetailsStep google={google} form={form} setForm={setForm} busy={busy} error={error} onBack={() => { setError(""); setStep("plan"); }} onSubmit={start} />
         ) : null}
 
         {step === "verify" && intent ? (

@@ -34,6 +34,11 @@ pdfkit · Firebase Cloud Messaging (HTTP v1) · Razorpay · nodemailer · node-c
 | Notifications | Notification center, real-time bell (SSE), **FCM push** when AI generation finishes, admin broadcasts with delivery/read stats |
 | Review inbox | All clients' Google reviews in one place, **real-time via Pub/Sub** (30-min sync fallback), urgent-first, auto AI drafts (Hindi/Hinglish/English), publish/ignore, bulk draft |
 | Listing health | Nightly + real-time monitor: suspended/disabled, lost owner access, ownership conflict, duplicate, verification, closed status, stale posts, unanswered reviews - push alerts when status worsens |
+| Google import | After connect/sync: category, contact, description, services (+description/price), city, keywords (real search terms), logo, Maps/review links - onboarding asks only the business name |
+| Services & products | Google-style services editor (per category, description 300, price) · product catalog (name 58, price, discount, description 1000, landing URL, image) posted to Google as posts |
+| Links & QR | Real Maps / review / profile links · QR codes (PNG, SVG, printable poster) · social profiles, WhatsApp/SMS chat and booking links |
+| Posts | Title ≤ 40 chars, description ≤ 250 chars, primary + secondary + tertiary keywords; **branded image** (client logo + post title + CTA bar over the AI photo) |
+| Auto-reply | Per-client auto-publish of AI review replies for N★+ (admin platform switch) |
 | Rank tracker | **Local rank grid heatmap** (3×3/5×5/7×7, Places API) with average rank, top-3 coverage, competitor table, compare with last scan, map background; included in the PDF report |
 | Reports | Branded multi-page **PDF** (KPIs vs previous period, charts, reviews, keywords, health, next steps); email / WhatsApp / private link; full sharing history with view tracking |
 | Public API | Tenant API keys (hashed, scoped, expiring, regenerable, revocable), per-key/tenant/endpoint rate limits, docs at `/docs/api`, Postman collection |
@@ -103,6 +108,8 @@ mysql -u root -p gmb_ai < db/upgrade-image-dedupe.sql
 mysql -u root -p gmb_ai < db/upgrade-signup-payments.sql
 mysql -u root -p gmb_ai < db/upgrade-v5-platform.sql
 mysql -u root -p gmb_ai < db/upgrade-v6-reviews-rank.sql
+mysql -u root -p gmb_ai < db/upgrade-v6-1-google-link-fix.sql
+mysql -u root -p gmb_ai < db/upgrade-v7-gmb-sync.sql
 ```
 
 `upgrade-v5-platform.sql` is idempotent. It adds: `notification_broadcasts`, `fcm_tokens`,
@@ -164,7 +171,22 @@ credentials, **Test connection**, see configured state, source (database / .env)
 result. Secrets are AES-256-GCM encrypted, only masked values reach the browser, and saved
 values are pushed into `process.env` at boot (`instrumentation.js`) and on every save.
 
+## Sign in / sign up with Google
+
+"Continue with Google" on the login and signup pages uses the same OAuth client as the GMB
+connection. In Google Cloud Console → Credentials → your OAuth client → **Authorized redirect
+URIs**, add `{APP_URL}/api/auth/google/callback` (override with `GOOGLE_LOGIN_REDIRECT_URI`).
+Existing users (matched by Google ID, then email) are signed in directly - Google already
+verified them, so no OTP. New emails go to the signup wizard with the email locked and
+verified: they pick a plan (and pay if needed) but skip the password and OTP steps.
+Google-only users can set a password later with "Forgot password".
+
 ## Real-time reviews (Pub/Sub)
+
+Full step-by-step guide (console + gcloud, testing, troubleshooting): **[PUBSUB_SETUP.md](PUBSUB_SETUP.md)**.
+
+Full step-by-step guide (console + gcloud, testing, troubleshooting): **[PUBSUB_SETUP.md](PUBSUB_SETUP.md)**.
+
 
 1. Google Cloud → Pub/Sub → create topic, e.g. `projects/<project>/topics/gbp-notifications`.
 2. Topic permissions → add `mybusiness-api-pubsub@system.gserviceaccount.com` as **Pub/Sub Publisher**.

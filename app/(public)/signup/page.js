@@ -3,6 +3,7 @@ import { listPlans } from "@/lib/saas/billing.js";
 import { getSettings } from "@/lib/saas/settings.js";
 import { razorpayConfig } from "@/lib/payments/razorpay.js";
 import { SignupWizard } from "@/components/signup/signup-wizard";
+import { readSignupToken } from "@/lib/googleLogin.js";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ export default async function SignupPage({ searchParams }) {
   const [plans, rp] = await Promise.all([listPlans({ publicOnly: true }), razorpayConfig()]);
   const selected = plans.find((p) => p.slug === sp?.plan)?.slug || settings.default_plan_slug || plans[0]?.slug;
   const cycle = sp?.cycle === "YEARLY" ? "YEARLY" : "MONTHLY";
+  const g = sp?.g ? readSignupToken(sp.g) : null;
+  const google = g ? { email: g.email, name: g.name, token: sp.g } : null;
 
   return (
     <SignupWizard
@@ -26,6 +29,7 @@ export default async function SignupPage({ searchParams }) {
       onlinePayments={rp.enabled}
       platformName={settings.platform_name || "GMB AI Cloud"}
       supportEmail={settings.support_email || ""}
+      google={google}
     />
   );
 }

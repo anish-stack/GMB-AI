@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, CreditCard, Eye, EyeOff, Landmark, Loader2, Lock, Mail, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import { money, lim, priceOf, passwordScore } from "./shared";
+import { GoogleButton, GoogleIcon } from "@/components/google-button";
 
 const input =
   "w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[#F53236] focus:ring-4 focus:ring-[#F53236]/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
@@ -97,7 +98,7 @@ export function PlanStep({ plans, planSlug, setPlanSlug, cycle, setCycle, onNext
 }
 
 /* ================= 2. DETAILS ================= */
-export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit }) {
+export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit, google = null }) {
   const [show, setShow] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
   const score = passwordScore(form.password);
@@ -108,6 +109,14 @@ export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit }) {
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4" noValidate={false}>
       <BackLink onClick={onBack}>Change plan</BackLink>
       <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Create your account</h2>
+      {!google ? (
+        <>
+          <GoogleButton label="Sign up with Google" />
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-wide text-zinc-400"><span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />or with email<span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" /></div>
+        </>
+      ) : (
+        <p className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"><GoogleIcon className="h-3.5 w-3.5" /> Signed in with Google as {form.email}</p>
+      )}
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-zinc-600 dark:text-zinc-400">Agency / company name</span>
         <input className={input} value={form.company_name} onChange={set("company_name")} required maxLength={180} autoComplete="organization" placeholder="Hover Media" />
@@ -124,9 +133,10 @@ export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit }) {
       </div>
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-zinc-600 dark:text-zinc-400">Work email</span>
-        <input className={input} value={form.email} onChange={set("email")} type="email" required autoComplete="email" placeholder="you@company.com" />
-        <span className="mt-1 block text-[11px] text-zinc-400">We&apos;ll send a 6-digit code to verify it.</span>
+        <input className={`${input} ${google ? "bg-zinc-50 text-zinc-500 dark:bg-zinc-800" : ""}`} value={form.email} onChange={set("email")} type="email" required readOnly={Boolean(google)} autoComplete="email" placeholder="you@company.com" />
+        <span className="mt-1 block text-[11px] text-zinc-400">{google ? "Verified by Google - no password needed." : "We'll send a 6-digit code to verify it."}</span>
       </label>
+      {!google ? (
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-zinc-600 dark:text-zinc-400">Password</span>
         <div className="relative">
@@ -142,12 +152,13 @@ export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit }) {
           </div>
         ) : null}
       </label>
+      ) : null}
       <label className="flex items-start gap-2 text-xs text-zinc-600 dark:text-zinc-400">
         <input type="checkbox" checked={form.terms} onChange={set("terms")} required className="mt-0.5 h-4 w-4 accent-[#F53236]" />
         <span>I agree to the Terms of Service and Privacy Policy.</span>
       </label>
       <ErrorBox>{error}</ErrorBox>
-      <PrimaryButton type="submit" busy={busy}><Mail className="h-4 w-4" /> Send verification code</PrimaryButton>
+      <PrimaryButton type="submit" busy={busy}><Mail className="h-4 w-4" /> {google ? "Create account" : "Send verification code"}</PrimaryButton>
     </form>
   );
 }

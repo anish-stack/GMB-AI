@@ -7,7 +7,7 @@ import { uploadImage } from "@/lib/storage/index.js";
 export const dynamic = "force-dynamic";
 
 const pick = (s) => Object.fromEntries(WEB_SETTING_KEYS.map((k) => [k, s[k]]));
-const NUMERIC = ["app_disable_right_click", "posting_plan_required", "allow_signup", "maintenance_enabled", "api_enabled", "api_default_rate_per_min", "api_tenant_rate_per_min"];
+const NUMERIC = ["app_disable_right_click", "posting_plan_required", "allow_signup", "maintenance_enabled", "api_enabled", "api_default_rate_per_min", "api_tenant_rate_per_min", "review_auto_draft", "review_auto_reply_enabled", "ai_humanize_enabled", "ai_humanize_threshold", "rank_scans_per_day", "rank_max_grid"];
 
 export const GET = route({ superAdmin: true }, async () => ({ settings: pick(await getSettings({ fresh: true })) }));
 

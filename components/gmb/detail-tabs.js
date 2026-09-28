@@ -16,12 +16,19 @@ const Loading = () => (
 const ReviewsPanel = dynamic(() => import("./reviews-panel").then((m) => m.ReviewsPanel), { loading: Loading });
 const MediaPanel = dynamic(() => import("./media-panel").then((m) => m.MediaPanel), { loading: Loading });
 const KeywordsPanel = dynamic(() => import("./keywords-panel").then((m) => m.KeywordsPanel), { loading: Loading });
+const ServicesPanel = dynamic(() => import("./services-panel").then((m) => m.ServicesPanel), { loading: Loading });
+const ProductsPanel = dynamic(() => import("./products-panel").then((m) => m.ProductsPanel), { loading: Loading });
+const LinksPanel = dynamic(() => import("./links-panel").then((m) => m.LinksPanel), { loading: Loading });
+const AutoReplyCard = dynamic(() => import("./links-panel").then((m) => m.AutoReplyCard), { loading: () => null });
 const BusinessToolsPanel = dynamic(() => import("./business-tools-panel").then((m) => m.BusinessToolsPanel), { loading: Loading });
 
 const TABS = [
   ["overview", "Overview"],
   ["posts", "Posts"],
   ["reviews", "Reviews"],
+  ["services", "Services"],
+  ["products", "Products"],
+  ["links", "Links & QR"],
   ["media", "Photos"],
   ["keywords", "Keywords"],
   ["tools", "Business tools"],
@@ -44,7 +51,15 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
   const panels = {
     overview: overview,
     posts: posts,
-    reviews: <ReviewsPanel clientId={clientId} reviewUrl={reviewUrl} business={business} />,
+    reviews: (
+      <div className="space-y-5">
+        <AutoReplyCard clientId={clientId} />
+        <ReviewsPanel clientId={clientId} reviewUrl={reviewUrl} business={business} />
+      </div>
+    ),
+    services: <ServicesPanel clientId={clientId} />,
+    products: <ProductsPanel clientId={clientId} />,
+    links: <LinksPanel clientId={clientId} />,
     media: <MediaPanel clientId={clientId} />,
     keywords: <KeywordsPanel clientId={clientId} />,
     tools: <BusinessToolsPanel clientId={clientId} canConnect={canConnect} />,

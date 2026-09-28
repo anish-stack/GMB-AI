@@ -31,6 +31,7 @@ export function CalendarBoard({ entries, clients }) {
   const router = useRouter();
   const [cursor, setCursor] = useState(() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); });
   const [selected, setSelected] = useState(() => toISO(new Date()));
+  const [clientFilter, setClientFilter] = useState(""); // "" = all clients
   const [showAdd, setShowAdd] = useState(false);
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState("");
@@ -60,20 +61,29 @@ export function CalendarBoard({ entries, clients }) {
     return "";
   })();
 
+  // client filter applied once, everything below reads from `filtered`
+  const filtered = useMemo(() => {
+    if (!clientFilter) return entries;
+    const name = clients.find((c) => String(c.id) === String(clientFilter))?.business_name;
+    return entries.filter((e) =>
+      e.client_id != null ? String(e.client_id) === String(clientFilter) : e.business_name === name,
+    );
+  }, [entries, clients, clientFilter]);
+
   const byDate = useMemo(() => {
     const m = new Map();
-    for (const e of entries) {
+    for (const e of filtered) {
       const key = String(e.scheduled_date).slice(0, 10);
       if (!m.has(key)) m.set(key, []);
       m.get(key).push(e);
     }
     return m;
-  }, [entries]);
+  }, [filtered]);
 
   const monthEntries = useMemo(() => {
     const mk = monthKey(cursor);
-    return entries.filter((e) => String(e.scheduled_date).slice(0, 7) === mk);
-  }, [entries, cursor]);
+    return filtered.filter((e) => String(e.scheduled_date).slice(0, 7) === mk);
+  }, [filtered, cursor]);
 
   const grid = useMemo(() => {
     const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
@@ -103,6 +113,15 @@ export function CalendarBoard({ entries, clients }) {
       return `${DONUT_HEX[i % DONUT_HEX.length]} ${from}deg ${acc * 360}deg`;
     });
     return `conic-gradient(${stops.join(",")})`;
+  }
+
+  function openAdd() {
+    setForm((f) => ({
+      ...f,
+      scheduled_date: selected,
+      client_id: clientFilter || f.client_id,
+    }));
+    setShowAdd(true);
   }
 
   async function addEntry(e) {
@@ -139,6 +158,7 @@ export function CalendarBoard({ entries, clients }) {
 
   const selectedEntries = byDate.get(selected) || [];
   const todayISO = toISO(new Date());
+  const activeClient = clients.find((c) => String(c.id) === String(clientFilter));
 
   return (
     <div className="space-y-4">
@@ -158,9 +178,28 @@ export function CalendarBoard({ entries, clients }) {
             Today
           </button>
         </div>
-        <Button onClick={() => { setForm((f) => ({ ...f, scheduled_date: selected })); setShowAdd(true); }}>
-          <Plus className="h-3.5 w-3.5" /> Add Post
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select
+            value={clientFilter}
+            onChange={(e) => setClientFilter(e.target.value)}
+            className="!w-auto min-w-[180px]"
+            aria-label="Filter by client"
+          >
+            <option value="">All clients</option>
+            {clients.map((c) => <option key={c.id} value={c.id}>{c.business_name}</option>)}
+          </Select>
+          {clientFilter ? (
+            <button
+              onClick={() => setClientFilter("")}
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <X className="h-3 w-3" /> Clear
+            </button>
+          ) : null}
+          <Button onClick={openAdd}>
+            <Plus className="h-3.5 w-3.5" /> Add Post
+          </Button>
+        </div>
       </div>
 
       {msg ? <p className="rounded-md bg-zinc-50 dark:bg-zinc-900 px-3 py-2 text-xs text-zinc-600 dark:text-zinc-300">{msg}</p> : null}
@@ -212,8 +251,10 @@ export function CalendarBoard({ entries, clients }) {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40 text-[#F53236]">
                 <Calendar className="h-5 w-5" />
               </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Total posts this month</p>
+              <div className="min-w-0">
+                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  Total posts this month{activeClient ? ` · ${activeClient.business_name}` : ""}
+                </p>
                 <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{totalMonth}</p>
               </div>
             </CardBody>
@@ -248,7 +289,7 @@ export function CalendarBoard({ entries, clients }) {
                 {busy === selected ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 Run AI job ({selected})
               </Button>
-              <Button variant="secondary" className="w-full justify-center" onClick={() => { setForm((f) => ({ ...f, scheduled_date: selected })); setShowAdd(true); }}>
+              <Button variant="secondary" className="w-full justify-center" onClick={openAdd}>
                 <Plus className="h-3.5 w-3.5" /> Add post to this day
               </Button>
             </CardBody>
@@ -264,7 +305,7 @@ export function CalendarBoard({ entries, clients }) {
       <Card>
         <CardHeader
           title={new Date(selected + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          subtitle={`${selectedEntries.length} scheduled`}
+          subtitle={`${selectedEntries.length} scheduled${activeClient ? ` · ${activeClient.business_name}` : ""}`}
         />
         <CardBody className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {selectedEntries.map((e) => {
