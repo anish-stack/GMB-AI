@@ -36,9 +36,15 @@ export async function POST(request) {
     const provider = new GoogleGMBProvider();
 
     if (body.action === "select") {
+      // Only allowed while no listing is linked yet. Changing the listing is the
+      // client's decision: send a new connect link and they pick again.
+      const cur = await one("SELECT google_location_name FROM clients WHERE id=?", [clientId]);
+      if (cur?.google_location_name && cur.google_location_name !== body.locationName) {
+        return NextResponse.json({ error: "This client is already linked to its own listing. To change it, send a new connect link - the client picks the listing again." }, { status: 409 });
+      }
       const { locations } = await provider.syncClient(clientId, { locationName: body.locationName });
       const match = locations.find((l) => l.location.name === body.locationName);
-      if (!match) return NextResponse.json({ error: "That location is not available on the connected account" }, { status: 400 });
+      if (!match) return NextResponse.json({ error: "Location not found on this Google account" }, { status: 404 });
       const linked = await linkGoogleLocation(clientId, match.account, match.location);
       const imported = await importFromGoogle(clientId).catch((e) => ({ error: e.message }));
       return NextResponse.json({ ok: true, linked: linked.title, location_id: linked.locationId, imported });
@@ -46,11 +52,16 @@ export async function POST(request) {
 
     // default: refresh the location list and cache performance
     const { accounts, locations, chosen } = await provider.syncClient(clientId);
-    // keep the current location if it still exists, else take the first one;
-    // always re-link so gmb_profiles/provider/location id are repaired on every sync
+    // ONLY the listing this client chose. Other listings on the same Google login
+    // are never shown or linked here. Nothing chosen yet: auto-link if there is
+    // exactly one, otherwise the staff picks once.
     const row = await one("SELECT google_location_name FROM clients WHERE id=?", [clientId]);
     const current = row?.google_location_name ? locations.find((l) => l.location.name === row.google_location_name) : null;
-    const target = current || chosen;
+    if (row?.google_location_name && !current) {
+      return NextResponse.json({ error: "The linked listing is no longer available on this Google account (access removed or listing deleted). Send a new connect link." }, { status: 409 });
+    }
+    const target = current || (locations.length === 1 ? chosen : null);
+    const visible = current ? [current] : locations;
     let linked = null;
     if (target) linked = await linkGoogleLocation(clientId, target.account, target.location);
     const imported = linked ? await importFromGoogle(clientId).catch((e) => ({ error: e.message })) : null;
@@ -65,7 +76,7 @@ export async function POST(request) {
     return NextResponse.json({
       ok: true,
       accounts: accounts.length,
-      locations: locations.map((l) => ({
+      locations: visible.map((l) => ({
         account: l.account,
         name: l.location.name,
         title: l.location.title,
@@ -74,7 +85,9 @@ export async function POST(request) {
       performance_days_cached: cached,
       linked: linked ? { title: linked.title, location_id: linked.locationId } : null,
       imported,
-      warning: locations.length ? null : "No locations on this Google account - sign in with the account that manages the business profile.",
+      warning: !locations.length
+        ? "No locations on this Google account - sign in with the account that manages the business profile."
+        : !target ? "Pick the listing for this client (only once)." : null,
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

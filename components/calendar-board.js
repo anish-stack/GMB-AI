@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { CalendarImport } from "./calendar-import";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, Sparkles, Calendar, ChevronLeft, ChevronRight, X, Loader2 } from "lucide-react";
@@ -40,6 +41,11 @@ export function CalendarBoard({ entries, clients }) {
     scheduled_date: toISO(new Date()),
     post_type: "Service",
     topic: "",
+    scheduled_time: "10:00",
+    primary_keyword: "",
+    secondary_keywords: "",
+    tertiary_keywords: "",
+    cta: "",
   });
   const { data: usage } = usePlanUsage(showAdd ? form.client_id : null);
   const planBlock = (() => {
@@ -138,7 +144,7 @@ export function CalendarBoard({ entries, clients }) {
     setBusy("");
     if (!res.ok) return setMsg(data.error);
     setShowAdd(false);
-    setForm({ ...form, topic: "" });
+    setForm({ ...form, topic: "", primary_keyword: "", secondary_keywords: "", tertiary_keywords: "" });
     router.refresh();
   }
 
@@ -196,6 +202,7 @@ export function CalendarBoard({ entries, clients }) {
               <X className="h-3 w-3" /> Clear
             </button>
           ) : null}
+          <CalendarImport clients={clients} />
           <Button onClick={openAdd}>
             <Plus className="h-3.5 w-3.5" /> Add Post
           </Button>
@@ -367,6 +374,28 @@ export function CalendarBoard({ entries, clients }) {
               <Field label="Topic" hint="Leave empty to let the Topic Agent choose">
                 <Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} placeholder="AI picks if empty" />
               </Field>
+              <Field label="Primary keyword" hint="Empty = Keyword Agent picks">
+                <Input value={form.primary_keyword} onChange={(e) => setForm({ ...form, primary_keyword: e.target.value })} placeholder="e.g. corporate taxi gurugram" />
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Secondary" hint="comma separated">
+                  <Input value={form.secondary_keywords} onChange={(e) => setForm({ ...form, secondary_keywords: e.target.value })} />
+                </Field>
+                <Field label="Tertiary" hint="local / long-tail">
+                  <Input value={form.tertiary_keywords} onChange={(e) => setForm({ ...form, tertiary_keywords: e.target.value })} />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Post time" hint="used by auto-publish">
+                  <Input type="time" value={form.scheduled_time} onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })} />
+                </Field>
+                <Field label="Button">
+                  <Select value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })}>
+                    <option value="">AI picks</option>
+                    {["None", "Book", "Order online", "Buy", "Learn more", "Sign up", "Call now"].map((o) => <option key={o}>{o}</option>)}
+                  </Select>
+                </Field>
+              </div>
               <Button type="submit" disabled={busy === "add" || Boolean(planBlock)} className="w-full justify-center">
                 {busy === "add" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 Add

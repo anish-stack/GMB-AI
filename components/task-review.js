@@ -179,6 +179,7 @@ export function TaskReview({
     title: initial.title || "",
     description: initial.description || "",
     cta: initial.cta || "",
+    cta_url: initial.cta_url || "",
     primary_keyword: initial.primary_keyword || "",
     secondary_keywords: (initial.secondary_keywords || []).join(", "),
     tertiary_keywords: (initial.tertiary_keywords || []).join(", "),
@@ -201,6 +202,7 @@ export function TaskReview({
     form.title !== (task.title || "") ||
     form.description !== (task.description || "") ||
     form.cta !== (task.cta || "") ||
+    form.cta_url !== (task.cta_url || "") ||
     form.primary_keyword !== (task.primary_keyword || "") ||
     form.secondary_keywords !== (task.secondary_keywords || []).join(", ") ||
     form.tertiary_keywords !== (task.tertiary_keywords || []).join(", ") ||
@@ -214,6 +216,7 @@ export function TaskReview({
     title: form.title,
     description: form.description,
     cta: form.cta,
+    cta_url: form.cta_url,
     primary_keyword: form.primary_keyword,
     secondary_keywords: form.secondary_keywords
       .split(",")
@@ -249,6 +252,7 @@ export function TaskReview({
           title: data.task.title || "",
           description: data.task.description || "",
           cta: data.task.cta || "",
+          cta_url: data.task.cta_url || "",
           primary_keyword: data.task.primary_keyword || "",
           hashtags: (data.task.hashtags || []).join(" "),
           post_type: data.task.post_type || "Service",
@@ -502,7 +506,7 @@ export function TaskReview({
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field
                   label="Button on Google"
-                  hint="Book / Order online / Buy / Learn more / Sign up use the client's website. Call now uses the listing phone."
+                  hint="Call now uses the listing phone. None = no button."
                 >
                   <Select
                     value={
@@ -517,6 +521,11 @@ export function TaskReview({
                     ))}
                   </Select>
                 </Field>
+                {!["None", "Call now"].includes(form.cta) ? (
+                  <Field label="Button link" hint="Empty = client's website. e.g. booking / order page">
+                    <Input value={form.cta_url} placeholder="https://" onChange={(e) => setForm({ ...form, cta_url: e.target.value })} />
+                  </Field>
+                ) : null}
               </div>
 
               <button

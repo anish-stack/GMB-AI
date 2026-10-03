@@ -19,6 +19,8 @@ const KeywordsPanel = dynamic(() => import("./keywords-panel").then((m) => m.Key
 const ServicesPanel = dynamic(() => import("./services-panel").then((m) => m.ServicesPanel), { loading: Loading });
 const ProductsPanel = dynamic(() => import("./products-panel").then((m) => m.ProductsPanel), { loading: Loading });
 const LinksPanel = dynamic(() => import("./links-panel").then((m) => m.LinksPanel), { loading: Loading });
+const WebsitePanel = dynamic(() => import("./website-panel").then((m) => m.WebsitePanel), { loading: Loading });
+const AutoPublishCard = dynamic(() => import("./auto-publish-card").then((m) => m.AutoPublishCard), { loading: () => null });
 const AutoReplyCard = dynamic(() => import("./links-panel").then((m) => m.AutoReplyCard), { loading: () => null });
 const BusinessToolsPanel = dynamic(() => import("./business-tools-panel").then((m) => m.BusinessToolsPanel), { loading: Loading });
 
@@ -29,6 +31,7 @@ const TABS = [
   ["services", "Services"],
   ["products", "Products"],
   ["links", "Links & QR"],
+  ["website", "Website"],
   ["media", "Photos"],
   ["keywords", "Keywords"],
   ["tools", "Business tools"],
@@ -50,7 +53,12 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
 
   const panels = {
     overview: overview,
-    posts: posts,
+    posts: (
+      <div className="space-y-5">
+        <AutoPublishCard clientId={clientId} />
+        {posts}
+      </div>
+    ),
     reviews: (
       <div className="space-y-5">
         <AutoReplyCard clientId={clientId} />
@@ -60,6 +68,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
     services: <ServicesPanel clientId={clientId} />,
     products: <ProductsPanel clientId={clientId} />,
     links: <LinksPanel clientId={clientId} />,
+    website: <WebsitePanel clientId={clientId} />,
     media: <MediaPanel clientId={clientId} />,
     keywords: <KeywordsPanel clientId={clientId} />,
     tools: <BusinessToolsPanel clientId={clientId} canConnect={canConnect} />,

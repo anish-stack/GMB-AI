@@ -28,6 +28,7 @@ const EXPR = {
   mail: process.env.MAIL_CRON || "*/10 * * * * *",
   health: process.env.HEALTH_CRON || "5 * * * *",
   reviews: process.env.REVIEW_SYNC_CRON || "*/30 * * * *",
+  autopublish: process.env.AUTO_PUBLISH_CRON || "*/5 * * * *",
   listings: process.env.LISTING_HEALTH_CRON || "0 3 * * *",
 };
 const log = (...a) => console.log(`[scheduler ${new Date().toISOString()}]`, ...a);
@@ -106,6 +107,23 @@ async function runMailWorker() {
   }
 }
 
+let autoBusy = false;
+async function runAutoPublishJob() {
+  if (autoBusy) return;
+  autoBusy = true;
+  try {
+    const { runAutoPublish } = await import("../lib/posting/autoPublish.js");
+    const r = await runAutoPublish();
+    await beat("auto_publish", true, JSON.stringify(r));
+    if (r.published || r.failed) log("auto-publish", JSON.stringify(r));
+  } catch (err) {
+    await beat("auto_publish", false, err.message);
+    log("auto-publish failed:", err.message);
+  } finally {
+    autoBusy = false;
+  }
+}
+
 let reviewBusy = false;
 async function runReviewSync() {
   if (reviewBusy) return;
@@ -152,6 +170,7 @@ cron.schedule(EXPR.images, runImageCleanup);
 cron.schedule(EXPR.housekeeping, runHousekeeping);
 cron.schedule(EXPR.health, runHealth);
 cron.schedule(EXPR.reviews, runReviewSync);
+cron.schedule(EXPR.autopublish, runAutoPublishJob);
 cron.schedule(EXPR.listings, runListingHealth);
 if (!process.argv.includes("--no-mail")) cron.schedule(EXPR.mail, runMailWorker);
 cron.schedule("* * * * *", () => beat("scheduler").catch(() => {}));
@@ -165,4 +184,5 @@ if (process.argv.includes("--cleanup-images")) runImageCleanup();
 if (process.argv.includes("--housekeeping")) runHousekeeping();
 if (process.argv.includes("--mail")) runMailWorker();
 if (process.argv.includes("--reviews")) runReviewSync();
+if (process.argv.includes("--autopublish")) runAutoPublishJob();
 if (process.argv.includes("--listings")) runListingHealth();

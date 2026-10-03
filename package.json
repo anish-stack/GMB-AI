@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "firebase": "^12.19.0",
     "lucide-react": "^1.35.0",
     "mysql2": "^3.24.2",
@@ -27,10 +28,10 @@
     "node-cron": "^4.6.0",
     "nodemailer": "^6.10.1",
     "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "server-only": "^0.0.1",
-    "qrcode": "^1.5.4"
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

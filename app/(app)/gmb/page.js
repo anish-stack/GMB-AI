@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { gmbProviderInfo } from "@/lib/gmb/provider.js";
@@ -20,12 +21,17 @@ export default async function GmbListPage() {
 
   return (
     <div className="space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">GMB profiles</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {live} of {rows.length} profile(s) live on Google.
           {rows.length - live ? ` Others use ${provider.isMock ? "demo (mock) data" : "Google once connected"} - connect them from the client page.` : ""}
         </p>
+      </div>
+      <Link href="/gmb/import" className="inline-flex items-center gap-1.5 rounded-xl bg-[#F53236] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#e81d22]">
+        Import all listings from Google
+      </Link>
       </div>
 
       <GmbProfilesTable rows={JSON.parse(JSON.stringify(rows))} />

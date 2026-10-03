@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { calendarExtras } from "@/lib/posting/calendarImport.js";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { insert, query, one } from "@/lib/db";
 import { assertLimit } from "@/lib/saas/entitlements.js";
@@ -59,6 +60,7 @@ export async function POST(request) {
             scheduled_date: String(d).slice(0, 10),
             post_type: postType,
             topic: body.topic ? String(body.topic).slice(0, 200) : null,
+            ...calendarExtras(body),
             status: "SCHEDULED",
             assigned_employee_id: body.assigned_employee_id || ctx.employeeId || null,
           }),

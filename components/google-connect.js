@@ -56,7 +56,11 @@ export function GoogleConnect({ client }) {
     const data = await call("sync");
     if (data) {
       setLocations(data.locations || []);
-      setMsg(`${data.accounts} account(s), ${data.locations.length} location(s) found.`);
+      setMsg(
+        data.linked
+          ? `Synced: ${data.linked.title}${data.imported && !data.imported.error && !data.imported.skipped ? ` - ${data.imported.services} services, ${data.imported.keywords} new keywords` : ""}.`
+          : data.warning || `${data.locations.length} listing(s) on this Google account - pick this client's listing.`,
+      );
       router.refresh();
     }
   }
@@ -128,7 +132,11 @@ export function GoogleConnect({ client }) {
           </div>
         ) : null}
 
-        {locations.length ? (
+        {client.google_location_name && locations.length === 1 ? (
+          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+            Linked listing: <b>{locations[0].title}</b>{locations[0].address ? ` - ${locations[0].address}` : ""}. Only this listing is used for this client. To change it, send a new connect link.
+          </p>
+        ) : !client.google_location_name && locations.length ? (
           <Select
             defaultValue={client.google_location_name || ""}
             onChange={(e) => select(e.target.value)}
