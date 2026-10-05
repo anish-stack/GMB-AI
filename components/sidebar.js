@@ -43,11 +43,11 @@ function NavList({ pathname, onNavigate, perms = [] }) {
             className={cn(
               "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-brand-50 text-[#e81d22] ring-1 ring-inset ring-[#e81d22] dark:bg-brand-500/10 dark:text-brand-400 dark:ring-brand-500/20"
+                ? "bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-600 dark:bg-brand-500/10 dark:text-brand-400 dark:ring-brand-500/20"
                 : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
             )}
           >
-            <Icon className={cn("h-4 w-4", active ? "text-[#F53236] dark:text-brand-400" : "text-zinc-400")} />
+            <Icon className={cn("h-4 w-4", active ? "text-brand-500 dark:text-brand-400" : "text-zinc-400")} />
             {label}
           </Link>
         );

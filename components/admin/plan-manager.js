@@ -279,7 +279,7 @@ export function PlanManager({ plans }) {
                       type="checkbox"
                       checked={Boolean(Number(form[k]))}
                       onChange={(e) => set(k, e.target.checked ? 1 : 0)}
-                      className="h-4 w-4 accent-[#F53236]"
+                      className="h-4 w-4 accent-brand-500"
                     />
                     <span className="text-zinc-700 dark:text-zinc-200">{FEATURE_LABEL[k]}</span>
                   </label>
@@ -295,11 +295,11 @@ export function PlanManager({ plans }) {
                 <Field label="Description"><Textarea value={form.description || ""} onChange={(e) => set("description", e.target.value)} /></Field>
                 <div className="flex gap-3">
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={Boolean(Number(form.is_public))} onChange={(e) => set("is_public", e.target.checked ? 1 : 0)} className="h-4 w-4 accent-[#F53236]" />
+                    <input type="checkbox" checked={Boolean(Number(form.is_public))} onChange={(e) => set("is_public", e.target.checked ? 1 : 0)} className="h-4 w-4 accent-brand-500" />
                     Show on pricing page
                   </label>
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={Boolean(Number(form.is_active))} onChange={(e) => set("is_active", e.target.checked ? 1 : 0)} className="h-4 w-4 accent-[#F53236]" />
+                    <input type="checkbox" checked={Boolean(Number(form.is_active))} onChange={(e) => set("is_active", e.target.checked ? 1 : 0)} className="h-4 w-4 accent-brand-500" />
                     Active
                   </label>
                 </div>

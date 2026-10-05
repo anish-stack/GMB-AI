@@ -6,6 +6,7 @@ import { Card, CardBody, CardHeader, Badge } from "@/components/ui";
 import { QA_PASS_SCORE, DUPLICATE_THRESHOLD } from "@/lib/constants";
 import { FEATURE_KEYS, FEATURE_LABEL, LIMIT_KEYS, LIMIT_LABEL, isUnlimited } from "@/lib/saas/constants.js";
 import { AccountForm } from "@/components/account-form";
+import { AppearanceCard } from "@/components/appearance-card";
 import { listTenantUsers } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +32,8 @@ export default async function SettingsPage() {
         tenant={JSON.parse(JSON.stringify(ctx.tenant))}
         canEditWorkspace={ctx.can("settings.edit")}
       />
+
+      <AppearanceCard canEdit={ctx.can("settings.edit")} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

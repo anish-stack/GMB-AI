@@ -15,7 +15,7 @@ export function QuotaNotice({ used, limit, label, planName }) {
             : `${used} of ${limit} ${label} used on the ${planName} plan${full ? " - limit reached." : `, ${left} left.`}`}
         </span>
         {full ? (
-          <Link href="/billing" className="rounded-xl bg-[#F53236] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#e81d22]">
+          <Link href="/billing" className="rounded-xl bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600">
             Upgrade plan
           </Link>
         ) : null}

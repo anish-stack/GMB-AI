@@ -121,7 +121,7 @@ export function ApiKeysManager() {
             <div className="space-y-1.5">
               {Object.entries(scopes).map(([s, d]) => (
                 <label key={s} className="flex items-start gap-2 text-sm">
-                  <input type="checkbox" className="mt-1 accent-[#F53236]" checked={form.scopes.includes(s)} onChange={() => setForm((f) => ({ ...f, scopes: f.scopes.includes(s) ? f.scopes.filter((x) => x !== s) : [...f.scopes, s] }))} />
+                  <input type="checkbox" className="mt-1 accent-brand-500" checked={form.scopes.includes(s)} onChange={() => setForm((f) => ({ ...f, scopes: f.scopes.includes(s) ? f.scopes.filter((x) => x !== s) : [...f.scopes, s] }))} />
                   <span><code className="text-xs font-semibold">{s}</code> <span className="text-xs text-zinc-500">- {d}</span></span>
                 </label>
               ))}

@@ -99,7 +99,7 @@ const FEATURES = [
 const FEATURE_ICON = {
   blue: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
   violet: "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
-  rose: "bg-rose-50 text-[#F53236] dark:bg-rose-500/10 dark:text-rose-400",
+  rose: "bg-rose-50 text-brand-500 dark:bg-rose-500/10 dark:text-rose-400",
 };
 
 // NOTE: placeholder numbers — replace with real figures before going live.
@@ -122,7 +122,7 @@ const REVIEWS = [
 function Logo({ name }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F53236] shadow-[0_4px_12px_rgba(245,50,54,0.35)]">
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 shadow-[0_4px_12px_rgba(245,50,54,0.35)]">
         <BarChart3 className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
       </span>
       <span className="text-sm font-semibold">{name}</span>
@@ -132,14 +132,14 @@ function Logo({ name }) {
 
 function Pill({ children }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-medium text-[#e81d22] ring-1 ring-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-900/40">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-medium text-brand-600 ring-1 ring-rose-100 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-900/40">
       {children}
     </span>
   );
 }
 
 function PrimaryCta({ allowSignup, email, className = "" }) {
-  const cls = `inline-flex items-center gap-2 rounded-lg bg-[#F53236] px-5 py-2.5 text-sm font-medium text-white shadow-[0_6px_16px_rgba(245,50,54,0.3)] hover:bg-[#e81d22] ${className}`;
+  const cls = `inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white shadow-[0_6px_16px_rgba(245,50,54,0.3)] hover:bg-brand-600 ${className}`;
   return allowSignup ? (
     <Link href="/signup" className={cls}>
       Start free <ArrowRight className="h-4 w-4" />
@@ -209,11 +209,11 @@ export default async function Home() {
               Sign in
             </Link>
             {allowSignup ? (
-              <Link href="/signup" className="rounded-lg bg-[#F53236] px-7 py-2 text-sm font-medium text-white hover:bg-[#e81d22]">
+              <Link href="/signup" className="rounded-lg bg-brand-500 px-7 py-2 text-sm font-medium text-white hover:bg-brand-600">
                 Start free
               </Link>
             ) : (
-              <a href={`mailto:${email}`} className="rounded-lg bg-[#F53236] px-7 py-2 text-sm font-medium text-white hover:bg-[#e81d22]">
+              <a href={`mailto:${email}`} className="rounded-lg bg-brand-500 px-7 py-2 text-sm font-medium text-white hover:bg-brand-600">
                 Contact sales
               </a>
             )}
@@ -238,7 +238,7 @@ export default async function Home() {
               Turn 30 minutes
               <br className="hidden sm:block" /> of GMB post work
               <br className="hidden sm:block" /> into a{" "}
-              <span className="text-[#F53236]">two-minute review</span>
+              <span className="text-brand-500">two-minute review</span>
             </h1>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               {name} researches, writes, designs and QA-checks Google Business
@@ -268,7 +268,7 @@ export default async function Home() {
 
           <div className="relative mx-auto w-full max-w-2xl lg:max-w-none">
             <div className={`${hand.className} pointer-events-none absolute -top-6 right-2 z-10 hidden rotate-[4deg] text-right text-lg leading-tight text-zinc-700 lg:block dark:text-zinc-300`}>
-              <svg viewBox="0 0 50 30" className="absolute -left-12 top-3 h-6 w-10 text-[#F53236]" fill="none">
+              <svg viewBox="0 0 50 30" className="absolute -left-12 top-3 h-6 w-10 text-brand-500" fill="none">
                 <path d="M48 6 C 30 0, 10 4, 4 22" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
                 <path d="M1 17 L4 23 L9 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
@@ -276,7 +276,7 @@ export default async function Home() {
               <br />
               to published
               <br />
-              in minutes! <span className="text-[#F53236]">🚀</span>
+              in minutes! <span className="text-brand-500">🚀</span>
             </div>
             <Image
               src="/illustrations/hero.png"
@@ -297,7 +297,7 @@ export default async function Home() {
             <Sparkles className="h-3 w-3" /> A complete, end-to-end workflow
           </Pill>
           <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-[32px]">
-            From Idea to Published — <span className="text-[#F53236]">Every Post, Fully Managed</span>
+            From Idea to Published — <span className="text-brand-500">Every Post, Fully Managed</span>
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-zinc-500 dark:text-zinc-400">
             One smart workflow handles the research, content, visuals, quality
@@ -353,7 +353,7 @@ export default async function Home() {
 
         <p className={`${hand.className} mx-auto mt-8 -rotate-2 text-center text-xl text-zinc-700 dark:text-zinc-300`}>
           Same process.{" "}
-          <span className="underline decoration-[#F53236] decoration-2 underline-offset-4">Happier clients.</span>{" "}
+          <span className="underline decoration-brand-500 decoration-2 underline-offset-4">Happier clients.</span>{" "}
           Bigger results.
         </p>
       </section>
@@ -372,7 +372,7 @@ export default async function Home() {
               <Pill>Why choose {name}</Pill>
               <h2 className="mt-4 text-2xl font-bold leading-tight tracking-tight sm:text-[30px]">
                 Built for agencies
-                <br /> running this <span className="text-[#F53236]">at scale</span>
+                <br /> running this <span className="text-brand-500">at scale</span>
               </h2>
               <p className="mt-3 max-w-[270px] text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
                 Everything you need to manage Google Business Profile content
@@ -381,7 +381,7 @@ export default async function Home() {
               <ul className="mt-6 space-y-3 text-[13px]">
                 {["Save hours every week", "Deliver consistent quality", "Keep clients happy", "Scale without extra headcount"].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
-                    <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#F53236] text-white">
+                    <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-brand-500 text-white">
                       <Check className="h-3 w-3" strokeWidth={3} />
                     </span>
                     {t}
@@ -445,7 +445,7 @@ export default async function Home() {
           <div className="mx-auto max-w-xl text-center">
             <Pill>Flexible plans for every team</Pill>
             <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-[30px]">
-              Simple, <span className="text-[#F53236]">credit-based</span> pricing
+              Simple, <span className="text-brand-500">credit-based</span> pricing
             </h2>
             <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
               Every plan includes the full AI pipeline. You pick the volume.
@@ -457,7 +457,7 @@ export default async function Home() {
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/pricing" className="inline-flex items-center gap-1 text-xs font-medium text-[#F53236] hover:underline">
+            <Link href="/pricing" className="inline-flex items-center gap-1 text-xs font-medium text-brand-500 hover:underline">
               Compare every plan &amp; feature <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -475,7 +475,7 @@ export default async function Home() {
             </p>
             <a
               href="#reviews"
-              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-[#F53236] hover:underline lg:absolute lg:right-0 lg:bottom-0 lg:mt-0"
+              className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-brand-500 hover:underline lg:absolute lg:right-0 lg:bottom-0 lg:mt-0"
             >
               See more reviews <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -487,7 +487,7 @@ export default async function Home() {
                 key={r.name}
                 className="flex gap-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-rose-200 text-sm font-semibold text-[#F53236] dark:from-rose-500/20 dark:to-rose-500/10">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-rose-200 text-sm font-semibold text-brand-500 dark:from-rose-500/20 dark:to-rose-500/10">
                   {r.initials}
                 </span>
                 <div>
@@ -516,7 +516,7 @@ export default async function Home() {
           }}
         >
           <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr_auto_auto]">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F53236] shadow-[0_0_30px_rgba(245,50,54,0.6)]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 shadow-[0_0_30px_rgba(245,50,54,0.6)]">
               <BarChart3 className="h-6 w-6 text-white" strokeWidth={2.5} />
             </span>
 
@@ -592,7 +592,7 @@ export default async function Home() {
             <p className="text-xs font-semibold">Follow us</p>
             <div className="mt-3 flex items-center gap-4 text-zinc-700 dark:text-zinc-300">
               {SOCIALS.map((s) => (
-                <a key={s.label} href="#" aria-label={s.label} className="hover:text-[#F53236]">
+                <a key={s.label} href="#" aria-label={s.label} className="hover:text-brand-500">
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
                     <path d={s.d} />
                   </svg>
@@ -607,12 +607,12 @@ export default async function Home() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-xs outline-none placeholder:text-zinc-400 focus:border-[#F53236] dark:border-zinc-800 dark:bg-zinc-900"
+                className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-xs outline-none placeholder:text-zinc-400 focus:border-brand-500 dark:border-zinc-800 dark:bg-zinc-900"
               />
               <button
                 type="submit"
                 aria-label="Subscribe"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F53236] text-white hover:bg-[#e81d22]"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-white hover:bg-brand-600"
               >
                 <ArrowRight className="h-4 w-4" />
               </button>

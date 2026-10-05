@@ -96,7 +96,7 @@ export function GmbPostList({ rows }) {
 
       <Table
         head={[
-          <input key="all" type="checkbox" className="h-4 w-4 accent-[#F53236]" checked={allChecked} onChange={() => setSel(allChecked ? [] : allIds)} aria-label="Select all" />,
+          <input key="all" type="checkbox" className="h-4 w-4 accent-brand-500" checked={allChecked} onChange={() => setSel(allChecked ? [] : allIds)} aria-label="Select all" />,
           "", "Post", "Client / Tenant", "Type", "Status", "QA", "Scheduled", "Published", "Assignee", "Credits", "",
         ]}
         empty={!rows.length ? <EmptyRow colSpan={12}>No GMB posts match these filters.</EmptyRow> : null}
@@ -107,7 +107,7 @@ export function GmbPostList({ rows }) {
             <Fragment key={r.id}>
               <tr className={`hover:bg-zinc-50 dark:hover:bg-zinc-800/60 ${sel.includes(r.id) ? "bg-rose-50/40 dark:bg-rose-950/20" : ""}`}>
                 <td className="px-4 py-2">
-                  <input type="checkbox" className="h-4 w-4 accent-[#F53236]" checked={sel.includes(r.id)} onChange={() => toggle(r.id)} aria-label={`Select #${r.id}`} />
+                  <input type="checkbox" className="h-4 w-4 accent-brand-500" checked={sel.includes(r.id)} onChange={() => toggle(r.id)} aria-label={`Select #${r.id}`} />
                 </td>
                 <td className="cursor-pointer px-1 py-2 text-zinc-400" onClick={() => setOpen(isOpen ? null : r.id)}>
                   {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}

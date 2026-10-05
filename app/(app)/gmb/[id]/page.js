@@ -151,7 +151,7 @@ function SectionTitle({ icon: Icon, title, href }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
       <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-white">
-        <Icon className="h-4 w-4 text-[#F53236]" /> {title}
+        <Icon className="h-4 w-4 text-brand-500" /> {title}
       </h2>
       {href ? (
         <Link
@@ -297,7 +297,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
             />
             <button
               type="submit"
-              className="rounded-lg bg-[#F53236] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#e81d22]"
+              className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-600"
             >
               Apply
             </button>
@@ -431,7 +431,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
             ) : (
               <p className="text-sm text-zinc-400">
                 No description.{" "}
-                <Link href={editHref} className="font-semibold text-[#F53236]">
+                <Link href={editHref} className="font-semibold text-brand-500">
                   Add one
                 </Link>{" "}
                 - it helps ranking and conversions.
@@ -510,14 +510,14 @@ export default async function GmbProfilePage({ params, searchParams }) {
     <Card className="overflow-hidden">
       <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
         <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-white">
-          <FileText className="h-4 w-4 text-[#F53236]" /> Posts on Google
+          <FileText className="h-4 w-4 text-brand-500" /> Posts on Google
           <span className="font-normal text-zinc-400">
             · {posts.length} via {provider.name}
           </span>
         </h2>
         <Link
           href="/gmb/tasks"
-          className="text-xs font-semibold text-[#F53236] hover:underline"
+          className="text-xs font-semibold text-brand-500 hover:underline"
         >
           Review queue →
         </Link>
@@ -579,7 +579,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
       <Card className="px-4 py-4 sm:px-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F53236] text-white shadow-lg shadow-[#F53236]/25">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg shadow-brand-500/25">
               <Building2 className="h-5 w-5" />
             </span>
             <div className="min-w-0">
@@ -607,7 +607,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
 
             <Link
               href={editHref}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-[#F53236] transition hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-brand-500 transition hover:bg-red-50 dark:hover:bg-red-950/30"
             >
               <Pencil className="h-3.5 w-3.5" />
               Edit profile
@@ -642,6 +642,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
         reviewUrl={profile.review_url || ""}
         business={profile.business_name}
         canConnect={canConnect}
+        social={Number(ctx.tenant?.social_enabled) === 1}
       />
 
       

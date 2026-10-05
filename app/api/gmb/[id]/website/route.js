@@ -62,8 +62,9 @@ export const POST = route({ permission: "gmb.edit" }, async ({ ctx, params, requ
     }
     case "create_from_gmb": {
       if (!b.theme_id || !b.slug) throw Object.assign(new Error("Pick a theme and a web address."), { status: 400 });
-      const prefill = await buildPrefill(id);
-      const useAi = b.images === "ai";
+      // blank website: only the business name, no Google content
+      const prefill = b.fill === false ? { basicInfo: { siteName: (await one("SELECT business_name FROM clients WHERE id=?", [id]))?.business_name } } : await buildPrefill(id);
+      const useAi = b.images === "ai" && b.fill !== false;
       // check plan / provider / credits BEFORE creating anything
       if (useAi) await assertAiImagesAllowed(ctx.tenantId, plannedImages(prefill));
       const site = await createFromGmb(id, ctx.tenantId, { themeId: String(b.theme_id), slug: String(b.slug), prefill });

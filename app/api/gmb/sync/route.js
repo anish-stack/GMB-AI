@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { guard } from "@/lib/saas/guard.js";
 import { assertClientInTenant } from "@/lib/repo/clients.js";
 import { assertFeature } from "@/lib/saas/entitlements.js";
-import { one } from "@/lib/db";
+import { one, query } from "@/lib/db";
 import { linkGoogleLocation, unlinkGoogle } from "@/lib/repo/gmb.js";
 import { importFromGoogle } from "@/lib/gmb/importFromGoogle.js";
+import { importSiblingListings } from "@/lib/gmb/bulkConnect.js";
 import { GoogleGMBProvider } from "@/lib/gmb/googleProvider.js";
 import { connectLink, disconnectClient } from "@/lib/gmb/googleAuth.js";
 
@@ -34,6 +35,30 @@ export async function POST(request) {
     }
 
     const provider = new GoogleGMBProvider();
+
+    // Same Google login manages more listings -> turn them into their OWN clients
+    // (no more switching this client's location to post for another listing).
+    if (body.action === "siblings") {
+      const cur = await one("SELECT google_location_name, tenant_id FROM clients WHERE id=?", [clientId]);
+      const { locations } = await provider.syncClient(clientId);
+      const taken = new Set((await query("SELECT google_location_name n FROM clients WHERE tenant_id=? AND google_location_name IS NOT NULL", [cur.tenant_id])).map((r) => r.n));
+      return NextResponse.json({
+        ok: true,
+        items: locations
+          .filter((l) => l.location.name !== cur.google_location_name)
+          .map((l) => ({ name: l.location.name, title: l.location.title, address: [...(l.location.storefrontAddress?.addressLines || []), l.location.storefrontAddress?.locality].filter(Boolean).join(", "), imported: taken.has(l.location.name) })),
+      });
+    }
+    if (body.action === "siblings_import") {
+      const wanted = new Set(Array.isArray(body.names) ? body.names : []);
+      if (!wanted.size) return NextResponse.json({ error: "Select at least one listing" }, { status: 400 });
+      const { locations } = await provider.syncClient(clientId);
+      const res = await importSiblingListings(clientId, locations.filter((l) => wanted.has(l.location.name)));
+      after(async () => {
+        for (const c of res.created) await importFromGoogle(c.client_id).catch((e) => console.error("[import]", c.client_id, e.message));
+      });
+      return NextResponse.json({ ok: true, ...res });
+    }
 
     if (body.action === "select") {
       // Only allowed while no listing is linked yet. Changing the listing is the

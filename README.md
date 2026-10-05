@@ -405,3 +405,49 @@ credits = image cost x count, checked before the site is created). AI images are
 Existing websites: **AI images** button on the Website tab. Needs plan feature *AI image generation* and an
 image provider (Gemini / OpenAI / HF). Use S3/R2/Cloudinary storage in production so the builder's public site
 can load the images (local storage serves them from APP_URL).
+
+## v9 - panel tour, native website editor, listings as clients
+
+**Tour** - first visit to the dashboard starts a guided tour (sidebar + top bar); the **? Tour** button in the
+top bar replays it. Steps live in `components/tour/steps.js` (selectors: `aside a[href=...]` and `data-tour="..."`).
+
+**Website editor (no iframe)** - `/gmb/:id/website/:websiteId`: Overview (Fill from Google, AI images, Reset to
+Google, theme switch, delete), Brand & logo, Hero slides, About, Services, Reviews, Contact (+ map preview),
+Footer & social, SEO (with Google preview), Show/hide sections, Pages & sections for multi-page themes (edit,
+reorder, hide, add blocks) and Form leads. The GMB server calls the builder's employee API with the tenant's
+token (`/api/gmb/:id/website/api/...`, whitelisted paths, website/page ownership checked) - the builder UI is no
+longer embedded. `/gmb/:id/website/new` creates a site (with or without Google data). Old `/gmb/:id/website?site=`
+links redirect to the editor.
+
+**Other listings -> clients** - client page, Google card: **Other listings → clients** lists the other listings
+on the same Google login and turns the selected ones into their own connected clients, so you never switch a
+client's location to post for another listing.
+
+## v9.1 - workspace colour, Facebook page & Instagram (test mode)
+
+Run `mysql -u root -p gmb_ai < db/upgrade-v9-theme-social.sql`.
+
+**Colour** - Settings -> Appearance: presets or any hex, live preview, saved per workspace (`tenants.theme_color`).
+The whole panel's `brand-50 … brand-900` palette is generated from that one colour.
+
+**Facebook & Instagram (test mode)** - hidden for everyone until the super admin enables a workspace
+(Admin -> Tenants -> tenant -> "Facebook & Instagram (test mode)" -> Enable). Then a GMB profile shows a
+**Facebook & Instagram** tab:
+- Connect the client's Facebook page (Facebook login -> pick page). The Instagram Business/Creator account linked
+  to that page is connected with it.
+- Create a post (new text or re-use a GMB post with its image) on Facebook and/or Instagram; see recent posts with
+  likes/comments; publishing history.
+- "Auto-publish every GMB post here" per account - when a GMB post goes live it is copied to the page / Instagram.
+- Instagram auto-reply to DMs: keyword rules -> AI answer from the business facts -> fallback text, max 3 auto
+  replies per person per 10 min, DM log.
+
+Meta app setup (developers.facebook.com):
+1. Create an app (type Business), add **Facebook Login for Business**, **Instagram Graph API / Instagram** and
+   **Webhooks** products.
+2. Facebook Login -> Valid OAuth Redirect URI: `{APP_URL}/api/social/callback`.
+3. Webhooks -> Instagram -> callback `{APP_URL}/api/meta/webhook`, verify token = the one saved in Admin ->
+   Integrations -> Meta; subscribe to **messages**.
+4. Admin -> Integrations -> Meta: App ID, App secret, verify token (Graph version default v21.0) -> Test.
+5. While the app is in **Development** mode only people with a role on the app (admin / developer / tester) can
+   connect - that is the test mode. Going live for everyone needs Meta App Review for pages_manage_posts,
+   instagram_content_publish and instagram_manage_messages.

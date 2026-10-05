@@ -53,14 +53,14 @@ export function NotificationsAdmin() {
           <Field label="Title" className="sm:col-span-2"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={220} /></Field>
           <Field label="Message" className="sm:col-span-2"><Textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} rows={3} maxLength={1000} /></Field>
           <Field label="Link (optional, in-app path)"><Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/billing" /></Field>
-          <label className="flex items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" checked={form.push} onChange={(e) => setForm({ ...form, push: e.target.checked })} className="accent-[#F53236]" /> Also send push notification</label>
+          <label className="flex items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" checked={form.push} onChange={(e) => setForm({ ...form, push: e.target.checked })} className="accent-brand-500" /> Also send push notification</label>
           {form.audience_type !== "ALL" ? (
             <div className="sm:col-span-2">
               <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter…" />
               <div className="mt-2 max-h-56 overflow-y-auto rounded-xl border border-zinc-200 p-2 dark:border-zinc-800">
                 {options.map((o) => (
                   <label key={o.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                    <input type="checkbox" className="accent-[#F53236]" checked={ids.includes(o.id)} onChange={() => setIds((l) => (l.includes(o.id) ? l.filter((x) => x !== o.id) : [...l, o.id]))} /> {o.label}
+                    <input type="checkbox" className="accent-brand-500" checked={ids.includes(o.id)} onChange={() => setIds((l) => (l.includes(o.id) ? l.filter((x) => x !== o.id) : [...l, o.id]))} /> {o.label}
                   </label>
                 ))}
               </div>

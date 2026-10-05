@@ -23,7 +23,7 @@ function Stepper({ steps, current }) {
         const on = i === current;
         return (
           <li key={s} className="flex flex-1 items-center gap-2">
-            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition ${done ? "bg-emerald-500 text-white" : on ? "bg-[#F53236] text-white" : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"}`}>
+            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition ${done ? "bg-emerald-500 text-white" : on ? "bg-brand-500 text-white" : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800"}`}>
               {done ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : i + 1}
             </span>
             <span className={`hidden text-xs font-semibold sm:inline ${on ? "text-zinc-900 dark:text-white" : "text-zinc-400"}`}>{s}</span>
@@ -38,10 +38,10 @@ function Stepper({ steps, current }) {
 function SidePanel({ plan, cycle, quote, platformName }) {
   return (
     <aside className="relative hidden overflow-hidden rounded-3xl bg-zinc-950 p-8 text-white lg:flex lg:flex-col">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#F53236]/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-500/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-violet-600/30 blur-3xl" />
       <div className="relative flex items-center gap-2 text-sm font-semibold">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F53236]"><Sparkles className="h-4 w-4" /></span>
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-500"><Sparkles className="h-4 w-4" /></span>
         {platformName}
       </div>
       <h1 className="relative mt-10 text-3xl font-bold leading-tight">
@@ -192,7 +192,7 @@ export function SignupWizard({ plans, selected, initialCycle, taxPercent, online
 
         {step !== "done" ? (
           <p className="mt-6 text-center text-xs text-zinc-500">
-            Already have an account? <Link href="/login" className="font-semibold text-[#F53236]">Sign in</Link>
+            Already have an account? <Link href="/login" className="font-semibold text-brand-500">Sign in</Link>
           </p>
         ) : null}
       </section>

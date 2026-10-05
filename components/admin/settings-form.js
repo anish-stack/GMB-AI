@@ -86,7 +86,7 @@ export function SettingsForm({ settings, plans }) {
       <Card>
         <CardHeader title="Payment gateway" subtitle="Razorpay keys, webhook secret and on/off switch now live in Integrations (encrypted)." />
         <CardBody>
-          <a href="/admin/integrations" className="text-sm font-semibold text-[#F53236] hover:underline">Open Integrations → Razorpay</a>
+          <a href="/admin/integrations" className="text-sm font-semibold text-brand-500 hover:underline">Open Integrations → Razorpay</a>
         </CardBody>
       </Card>
 

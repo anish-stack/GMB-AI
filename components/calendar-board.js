@@ -229,12 +229,12 @@ export function CalendarBoard({ entries, clients }) {
                   onClick={() => setSelected(iso)}
                   className={`min-h-[92px] border-b border-r border-zinc-100 dark:border-zinc-800/70 p-1.5 text-left align-top transition-colors
                     ${inMonth ? "bg-white dark:bg-zinc-950" : "bg-zinc-50/60 dark:bg-zinc-900/30"}
-                    ${isSelected ? "ring-2 ring-inset ring-[#F53236]" : ""}
+                    ${isSelected ? "ring-2 ring-inset ring-brand-500" : ""}
                     hover:bg-zinc-50 dark:hover:bg-zinc-900`}
                 >
                   <div className="flex items-center justify-between">
                     <span className={`flex h-5 w-5 items-center justify-center rounded-full text-xs
-                      ${isToday ? "bg-[#F53236] text-white font-semibold" : inMonth ? "text-zinc-700 dark:text-zinc-300" : "text-zinc-300 dark:text-zinc-700"}`}>
+                      ${isToday ? "bg-brand-500 text-white font-semibold" : inMonth ? "text-zinc-700 dark:text-zinc-300" : "text-zinc-300 dark:text-zinc-700"}`}>
                       {d.getDate()}
                     </span>
                     {dayEntries.length > 0 ? <span className="text-[10px] font-medium text-zinc-400">{dayEntries.length}</span> : null}
@@ -255,7 +255,7 @@ export function CalendarBoard({ entries, clients }) {
         <div className="space-y-4">
           <Card>
             <CardBody className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40 text-[#F53236]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40 text-brand-500">
                 <Calendar className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -303,7 +303,7 @@ export function CalendarBoard({ entries, clients }) {
           </Card>
 
           <div className="rounded-lg border border-rose-100 dark:border-rose-950 bg-rose-50/60 dark:bg-rose-950/20 p-3">
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-[#F53236]"><Sparkles className="h-3.5 w-3.5" /> Tip</p>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-500"><Sparkles className="h-3.5 w-3.5" /> Tip</p>
             <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">Keep your posts consistent for better engagement and visibility.</p>
           </div>
         </div>
@@ -329,7 +329,7 @@ export function CalendarBoard({ entries, clients }) {
                 <div className="mt-2 flex items-center justify-between">
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${c.bg} ${c.text}`}>{e.post_type}</span>
                   <div className="flex items-center gap-2">
-                    {e.task_id ? <Link href={`/gmb/tasks/${e.task_id}`} className="text-xs font-medium text-[#F53236] hover:text-[#e81d22]">View task</Link> : null}
+                    {e.task_id ? <Link href={`/gmb/tasks/${e.task_id}`} className="text-xs font-medium text-brand-500 hover:text-brand-600">View task</Link> : null}
                     {e.status === "SCHEDULED" ? (
                       <button onClick={() => removeEntry(e.id)} className="text-zinc-400 hover:text-red-600" aria-label="Remove entry">
                         <Trash2 className="h-3.5 w-3.5" />
@@ -345,61 +345,93 @@ export function CalendarBoard({ entries, clients }) {
       </Card>
 
       {showAdd ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowAdd(false)}>
-          <div className="w-full max-w-md rounded-xl bg-white dark:bg-zinc-950 p-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Schedule a post</h3>
-              <button onClick={() => setShowAdd(false)} className="text-zinc-400 hover:text-zinc-600"><X className="h-4 w-4" /></button>
+        <div className="fixed inset-0 z-99 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowAdd(false)}>
+          <div
+            className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-zinc-950"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3 dark:border-zinc-800">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Schedule a post</h3>
+                <p className="text-xs text-zinc-500">Leave AI fields empty and the agents will fill them.</p>
+              </div>
+              <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800">
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <form onSubmit={addEntry} className="space-y-3">
-              <Field label="Client">
-                <Select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}>
-                  {clients.map((c) => <option key={c.id} value={c.id}>{c.business_name}</option>)}
-                </Select>
-              </Field>
-              <Field label="Date">
-                <Input type="date" value={form.scheduled_date} onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
-              </Field>
-              <Field label="Repeat weekly" hint="1 = just this date. Every week is checked against the plan.">
-                <Input type="number" min={1} max={52} value={form.repeat_weeks || 1} onChange={(e) => setForm({ ...form, repeat_weeks: e.target.value })} />
-              </Field>
-              <PlanUsageInline usage={usage} />
-              {planBlock ? <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">{planBlock}</p> : null}
-              {msg ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">{msg}</p> : null}
-              <Field label="Post type">
-                <Select value={form.post_type} onChange={(e) => setForm({ ...form, post_type: e.target.value })}>
-                  {POST_TYPES.map((t) => <option key={t}>{t}</option>)}
-                </Select>
-              </Field>
-              <Field label="Topic" hint="Leave empty to let the Topic Agent choose">
-                <Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} placeholder="AI picks if empty" />
-              </Field>
-              <Field label="Primary keyword" hint="Empty = Keyword Agent picks">
-                <Input value={form.primary_keyword} onChange={(e) => setForm({ ...form, primary_keyword: e.target.value })} placeholder="e.g. corporate taxi gurugram" />
-              </Field>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Secondary" hint="comma separated">
-                  <Input value={form.secondary_keywords} onChange={(e) => setForm({ ...form, secondary_keywords: e.target.value })} />
-                </Field>
-                <Field label="Tertiary" hint="local / long-tail">
-                  <Input value={form.tertiary_keywords} onChange={(e) => setForm({ ...form, tertiary_keywords: e.target.value })} />
-                </Field>
+
+            <form onSubmit={addEntry} className="flex min-h-0 flex-1 flex-col">
+              <div className="space-y-5 overflow-y-auto px-5 py-4">
+                {/* WHEN */}
+                <section className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Who &amp; when</p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                    <Field label="Client" className="sm:col-span-6">
+                      <Select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}>
+                        {clients.map((c) => <option key={c.id} value={c.id}>{c.business_name}</option>)}
+                      </Select>
+                    </Field>
+                    <Field label="Date" className="sm:col-span-3">
+                      <Input type="date" value={form.scheduled_date} onChange={(e) => setForm({ ...form, scheduled_date: e.target.value })} />
+                    </Field>
+                    <Field label="Post time" className="sm:col-span-3">
+                      <Input type="time" value={form.scheduled_time} onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })} />
+                    </Field>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                    <Field label="Repeat weekly" hint="1 = once" className="sm:col-span-3">
+                      <Input type="number" min={1} max={52} value={form.repeat_weeks || 1} onChange={(e) => setForm({ ...form, repeat_weeks: e.target.value })} />
+                    </Field>
+                    <Field label="Post type" className="sm:col-span-5">
+                      <Select value={form.post_type} onChange={(e) => setForm({ ...form, post_type: e.target.value })}>
+                        {POST_TYPES.map((t) => <option key={t}>{t}</option>)}
+                      </Select>
+                    </Field>
+                    <Field label="Button" className="sm:col-span-4">
+                      <Select value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })}>
+                        <option value="">AI picks</option>
+                        {["None", "Book", "Order online", "Buy", "Learn more", "Sign up", "Call now"].map((o) => <option key={o}>{o}</option>)}
+                      </Select>
+                    </Field>
+                  </div>
+                </section>
+
+                {/* CONTENT */}
+                <section className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Content</p>
+                  <Field label="Topic" hint="Empty = Topic Agent chooses">
+                    <Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} placeholder="AI picks if empty" />
+                  </Field>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <Field label="Primary keyword" hint="Empty = AI picks">
+                      <Input value={form.primary_keyword} onChange={(e) => setForm({ ...form, primary_keyword: e.target.value })} placeholder="corporate taxi gurugram" />
+                    </Field>
+                    <Field label="Secondary" hint="comma separated">
+                      <Input value={form.secondary_keywords} onChange={(e) => setForm({ ...form, secondary_keywords: e.target.value })} />
+                    </Field>
+                    <Field label="Tertiary" hint="local / long-tail">
+                      <Input value={form.tertiary_keywords} onChange={(e) => setForm({ ...form, tertiary_keywords: e.target.value })} />
+                    </Field>
+                  </div>
+                </section>
+
+                {/* PLAN + ALERTS */}
+                <PlanUsageInline usage={usage} />
+                {planBlock ? <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">{planBlock}</p> : null}
+                {msg ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">{msg}</p> : null}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Post time" hint="used by auto-publish">
-                  <Input type="time" value={form.scheduled_time} onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })} />
-                </Field>
-                <Field label="Button">
-                  <Select value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })}>
-                    <option value="">AI picks</option>
-                    {["None", "Book", "Order online", "Buy", "Learn more", "Sign up", "Call now"].map((o) => <option key={o}>{o}</option>)}
-                  </Select>
-                </Field>
+
+              {/* Sticky footer */}
+              <div className="flex items-center justify-end gap-2 border-t border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-950">
+                <Button type="button" variant="secondary" onClick={() => setShowAdd(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={busy === "add" || Boolean(planBlock)} className="min-w-28 justify-center">
+                  {busy === "add" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                  Add
+                </Button>
               </div>
-              <Button type="submit" disabled={busy === "add" || Boolean(planBlock)} className="w-full justify-center">
-                {busy === "add" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                Add
-              </Button>
             </form>
           </div>
         </div>

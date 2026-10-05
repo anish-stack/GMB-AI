@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { query } from "@/lib/db";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { getTenant, updateTenant, setTenantStatus, deleteTenant } from "@/lib/saas/tenants.js";
 import { changePlan, cancelSubscription, renewSubscription, setOverrides, extendPeriod } from "@/lib/saas/billing.js";
@@ -55,6 +56,10 @@ export async function PATCH(request, { params }) {
         break;
       case "cancel":
         await cancelSubscription({ tenantId, immediate: Boolean(body.immediate), actor, reason: body.reason });
+        break;
+      case "social":
+        // test-mode access to Facebook / Instagram tools, granted per tenant
+        await query("UPDATE tenants SET social_enabled=? WHERE id=?", [body.enabled ? 1 : 0, tenantId]);
         break;
       case "overrides":
         await setOverrides({ tenantId, overrides: body.overrides || {}, actor });

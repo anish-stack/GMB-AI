@@ -114,7 +114,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex h-full flex-col">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F53236] shadow-lg shadow-rose-500/30">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-500 shadow-lg shadow-rose-500/30">
               <Sparkles className="h-5 w-5 text-white" />
             </span>
             <span className="text-lg font-semibold text-white">
@@ -204,7 +204,7 @@ export default function LoginPage() {
                   <p className="text-xs font-semibold text-white">
                     Create Post
                   </p>
-                  <span className="rounded-full bg-[#F53236] px-2 py-0.5 text-[9px] font-medium text-white">
+                  <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[9px] font-medium text-white">
                     Publish
                   </span>
                 </div>
@@ -223,14 +223,14 @@ export default function LoginPage() {
                   <span className="flex-1 rounded-lg border border-emerald-400/30 bg-emerald-400/10 py-1.5 text-center text-[10px] font-medium text-emerald-300">
                     ✓ Approved
                   </span>
-                  <span className="flex-1 rounded-lg bg-[#F53236] py-1.5 text-center text-[10px] font-medium text-white">
+                  <span className="flex-1 rounded-lg bg-brand-500 py-1.5 text-center text-[10px] font-medium text-white">
                     ✓ Published
                   </span>
                 </div>
               </div>
 
               <div className="absolute -bottom-6 -right-4 flex items-center gap-2.5 rounded-2xl border border-white/10 bg-zinc-900/90 px-4 py-3 shadow-xl backdrop-blur">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F53236]/15 text-[#F53236]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/15 text-brand-500">
                   <BarChart3 className="h-4 w-4" />
                 </span>
                 <div>
@@ -280,7 +280,7 @@ export default function LoginPage() {
         >
           {/* mobile-only logo */}
           <Link href="/" className="mb-6 flex items-center gap-2.5 lg:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F53236]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
               <Sparkles className="h-4 w-4 text-white" />
             </span>
             <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -331,7 +331,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]"
+                className="mt-5 flex w-full items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600"
                 disabled={busy || code.length !== 6}
               >
                 {busy ? (
@@ -363,7 +363,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={resendOtp}
                   disabled={resendBusy}
-                  className="font-medium text-[#F53236] hover:underline disabled:opacity-50"
+                  className="font-medium text-brand-500 hover:underline disabled:opacity-50"
                 >
                   {resendBusy ? "Sending..." : "Resend code"}
                 </button>
@@ -425,13 +425,13 @@ export default function LoginPage() {
                   <label className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
                     <input
                       type="checkbox"
-                      className="h-3.5 w-3.5 rounded border-zinc-300 text-[#F53236] focus:ring-[#F53236] dark:border-zinc-700"
+                      className="h-3.5 w-3.5 rounded border-zinc-300 text-brand-500 focus:ring-brand-500 dark:border-zinc-700"
                     />
                     Remember me
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="font-medium text-[#F53236] hover:underline"
+                    className="font-medium text-brand-500 hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -446,7 +446,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]"
+                className="mt-5 flex w-full items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600"
                 disabled={busy}
               >
                 {busy ? (
@@ -474,7 +474,7 @@ export default function LoginPage() {
                 No account yet?{" "}
                 <Link
                   href="/signup"
-                  className="font-medium text-[#F53236] hover:underline"
+                  className="font-medium text-brand-500 hover:underline"
                 >
                   Create a workspace
                 </Link>

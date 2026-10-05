@@ -67,7 +67,7 @@ export function ReportHistory({ clients }) {
                         {s.method === "DOWNLOAD" ? "-" : <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {s.view_count}</span>}
                         {s.last_viewed_at ? <div className="text-[11px]">last {formatDate(s.last_viewed_at, true)}</div> : null}
                       </td>
-                      <td className="py-3 text-right"><a href={`/api/reports/shares/${s.id}/file`} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#F53236] hover:underline">Open PDF</a></td>
+                      <td className="py-3 text-right"><a href={`/api/reports/shares/${s.id}/file`} target="_blank" rel="noreferrer" className="text-xs font-semibold text-brand-500 hover:underline">Open PDF</a></td>
                     </tr>
                   );
                 })}

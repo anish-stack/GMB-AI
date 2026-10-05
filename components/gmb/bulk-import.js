@@ -92,7 +92,7 @@ export function GmbBulkImport({ initialConnection = null }) {
               {visible.map((l) => (
                 <li key={l.name} className="flex items-center gap-3 px-5 py-3">
                   {l.client_id ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" /> : (
-                    <input type="checkbox" className="h-4 w-4 shrink-0 accent-[#F53236]" checked={picked.has(l.name)} onChange={() => toggle(l.name)} />
+                    <input type="checkbox" className="h-4 w-4 shrink-0 accent-brand-500" checked={picked.has(l.name)} onChange={() => toggle(l.name)} />
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">{l.title}</p>

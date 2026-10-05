@@ -175,6 +175,7 @@ export function TaskReview({
 }) {
   const router = useRouter();
   const [task, setTask] = useState(initial);
+  console.log("task", task);
   const [form, setForm] = useState({
     title: initial.title || "",
     description: initial.description || "",
@@ -202,7 +203,7 @@ export function TaskReview({
     form.title !== (task.title || "") ||
     form.description !== (task.description || "") ||
     form.cta !== (task.cta || "") ||
-    form.cta_url !== (task.cta_url || "") ||
+    form.cta_url !== (task?.cta_url || "") ||
     form.primary_keyword !== (task.primary_keyword || "") ||
     form.secondary_keywords !== (task.secondary_keywords || []).join(", ") ||
     form.tertiary_keywords !== (task.tertiary_keywords || []).join(", ") ||
@@ -212,28 +213,25 @@ export function TaskReview({
     form.image_url !== (task.image_url || "") ||
     form.scheduled_date !== (task.scheduled_date || "");
 
-  const fields = () => ({
-    title: form.title,
-    description: form.description,
-    cta: form.cta,
-    cta_url: form.cta_url,
-    primary_keyword: form.primary_keyword,
-    secondary_keywords: form.secondary_keywords
-      .split(",")
-      .map((k) => k.trim().toLowerCase())
-      .filter(Boolean)
-      .slice(0, 3),
-    tertiary_keywords: form.tertiary_keywords
-      .split(",")
-      .map((k) => k.trim().toLowerCase())
-      .filter(Boolean)
-      .slice(0, 3),
-    post_type: form.post_type,
-    topic: form.topic,
-    image_concept: form.image_concept,
-    image_url: form.image_url,
-    scheduled_date: form.scheduled_date || null,
-  });
+const toList = (v, max = 3) =>
+  (Array.isArray(v) ? v : String(v ?? "").split(","))
+    .map((k) => String(k).trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, max);
+const fields = () => ({
+  title: form.title || "",
+  description: form.description || "",
+  cta: form.cta || "",
+  cta_url: form.cta_url || "",
+  primary_keyword: form.primary_keyword || "",
+  secondary_keywords: toList(form.secondary_keywords),
+  tertiary_keywords: toList(form.tertiary_keywords),
+  post_type: form.post_type || "Service",
+  topic: form.topic || "",
+  image_concept: form.image_concept || "",
+  image_url: form.image_url || "",
+  scheduled_date: form.scheduled_date || null,
+});
 
   async function act(action, extra = {}, busyKey = action) {
     setBusy(busyKey);
@@ -254,6 +252,10 @@ export function TaskReview({
           cta: data.task.cta || "",
           cta_url: data.task.cta_url || "",
           primary_keyword: data.task.primary_keyword || "",
+
+          secondary_keywords: (data.task.secondary_keywords || []).join(", "),
+          tertiary_keywords: (data.task.tertiary_keywords || []).join(", "),
+
           hashtags: (data.task.hashtags || []).join(" "),
           post_type: data.task.post_type || "Service",
           topic: data.task.topic || "",
@@ -522,8 +524,17 @@ export function TaskReview({
                   </Select>
                 </Field>
                 {!["None", "Call now"].includes(form.cta) ? (
-                  <Field label="Button link" hint="Empty = client's website. e.g. booking / order page">
-                    <Input value={form.cta_url} placeholder="https://" onChange={(e) => setForm({ ...form, cta_url: e.target.value })} />
+                  <Field
+                    label="Button link"
+                    hint="Empty = client's website. e.g. booking / order page"
+                  >
+                    <Input
+                      value={form?.cta_url}
+                      placeholder="https://"
+                      onChange={(e) =>
+                        setForm({ ...form, cta_url: e.target.value })
+                      }
+                    />
                   </Field>
                 ) : null}
               </div>
@@ -531,7 +542,7 @@ export function TaskReview({
               <button
                 type="button"
                 onClick={() => setShowAdvanced((v) => !v)}
-                className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300"
+                className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300"
               >
                 {showAdvanced
                   ? "Hide advanced fields"
@@ -607,7 +618,7 @@ export function TaskReview({
                     <Button
                       variant="secondary"
                       onClick={() => act("update_post", { fields: fields() })}
-                      disabled={!dirty || busy || livePostRemoved}
+                      // disabled={!dirty || busy || livePostRemoved}
                     >
                       <Save className="h-3.5 w-3.5" />{" "}
                       {busy === "update_post"

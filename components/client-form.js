@@ -2,10 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, CardHeader, Field, Input, Select, Textarea } from "@/components/ui";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Field,
+  Input,
+  Select,
+  Textarea,
+} from "@/components/ui";
 import { PostingPlanFields, emptyPlan } from "@/components/posting/plan-fields";
 import { POST_TYPES, TONES, FREQUENCIES } from "@/lib/constants";
 
+/** DB plan row -> form value (start_date as YYYY-MM-DD in the browser's local day). */
+function planFromClient(p) {
+  if (!p) return emptyPlan();
+  const d = p.start_date ? new Date(p.start_date) : new Date();
+  return {
+    start_date: Number.isNaN(d.getTime())
+      ? String(p.start_date).slice(0, 10)
+      : d.toLocaleDateString("en-CA"),
+    duration_months: Number(p.duration_months) || 1,
+    posts_per_week: Number(p.posts_per_week) || 3,
+    total_posts: p.total_posts ? String(p.total_posts) : "",
+    posting_days: Array.isArray(p.posting_days) ? p.posting_days : [],
+  };
+}
 export function ClientForm({ client, employees = [] }) {
   const router = useRouter();
   const editing = Boolean(client);
@@ -28,11 +51,29 @@ export function ClientForm({ client, employees = [] }) {
     assigned_employee_id: client?.assigned_employee_id || "",
     services: (client?.services || []).map((s) => s.name).join("\n"),
     target_locations: (client?.locations || []).map((l) => l.name).join("\n"),
-    target_keywords: (client?.keywords || []).filter((k) => k.source === "CLIENT").map((k) => k.keyword).join("\n"),
+    target_keywords: (client?.keywords || [])
+      .filter((k) => k.source === "CLIENT")
+      .map((k) => k.keyword)
+      .join("\n"),
     prohibited_claims: (client?.prohibited_claims || []).join("\n"),
   });
+  const [initialPlan] = useState(() =>
+    editing ? planFromClient(client.plan) : emptyPlan(),
+  );
+    const [plan, setPlan] = useState(initialPlan || emptyPlan);
 
-  const [plan, setPlan] = useState(emptyPlan);
+  const norm = (p) =>
+    JSON.stringify({
+      start_date: p.start_date,
+      duration_months: Number(p.duration_months) || 0,
+      posts_per_week: Number(p.posts_per_week) || 0,
+      total_posts:
+        p.total_posts === "" || p.total_posts == null
+          ? ""
+          : String(p.total_posts),
+      posting_days: [...(p.posting_days || [])].map(Number).sort(),
+    });
+  const planChanged = norm(plan) !== norm(initialPlan);
   // New clients: Google fills category, contact details, services, locations & keywords after connect.
   const [fromGoogle, setFromGoogle] = useState(!editing);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -45,25 +86,67 @@ export function ClientForm({ client, employees = [] }) {
     const res = await fetch(url, {
       method: editing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editing ? form : { ...form, business_category: fromGoogle ? form.business_category || "" : form.business_category, import_from_google: fromGoogle, posting_plan: plan }),
+      body: JSON.stringify(
+        editing
+          ? form
+          : {
+              ...form,
+              business_category: fromGoogle
+                ? form.business_category || ""
+                : form.business_category,
+              import_from_google: fromGoogle,
+              posting_plan: plan,
+            },
+      ),
     });
     const data = await res.json();
+    if (!res.ok) {
+      setBusy(false);
+      return setError(data.error || "Save failed");
+    }
+
+    // editing + plan changed -> save the new plan (old one is kept as history)
+    if (editing && planChanged) {
+      const pr = await fetch(`/api/clients/${client.id}/posting-plan`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan),
+      });
+      const pd = await pr.json().catch(() => ({}));
+      if (!pr.ok) {
+        setBusy(false);
+        return setError(
+          `Client saved, but the posting plan was not: ${pd.error || "plan save failed"}`,
+        );
+      }
+    }
+
     setBusy(false);
-    if (!res.ok) return setError(data.error || "Save failed");
     router.push(editing ? `/clients/${client.id}` : `/clients/${data.id}`);
     router.refresh();
   }
-
   return (
     <form onSubmit={submit} className="space-y-4">
       {!editing ? (
         <Card>
           <CardBody>
             <label className="flex items-start gap-3">
-              <input type="checkbox" className="mt-1 h-4 w-4 accent-[#F53236]" checked={fromGoogle} onChange={(e) => setFromGoogle(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-brand-500"
+                checked={fromGoogle}
+                onChange={(e) => setFromGoogle(e.target.checked)}
+              />
               <span>
-                <span className="block text-sm font-semibold text-zinc-900 dark:text-white">Import details from Google Business Profile (recommended)</span>
-                <span className="block text-xs text-zinc-500">Only the business name is needed now. After you connect Google on the next screen, category, phone, website, address, description, services, locations, keywords, logo and links are pulled in automatically.</span>
+                <span className="block text-sm font-semibold text-zinc-900 dark:text-white">
+                  Import details from Google Business Profile (recommended)
+                </span>
+                <span className="block text-xs text-zinc-500">
+                  Only the business name is needed now. After you connect Google
+                  on the next screen, category, phone, website, address,
+                  description, services, locations, keywords, logo and links are
+                  pulled in automatically.
+                </span>
               </span>
             </label>
           </CardBody>
@@ -71,28 +154,68 @@ export function ClientForm({ client, employees = [] }) {
       ) : null}
 
       <Card>
-        <CardHeader title="Business information" subtitle={fromGoogle ? "Everything else comes from Google after connecting" : "Only these verified details are given to the AI agents"} />
+        <CardHeader
+          title="Business information"
+          subtitle={
+            fromGoogle
+              ? "Everything else comes from Google after connecting"
+              : "Only these verified details are given to the AI agents"
+          }
+        />
         <CardBody className="grid gap-3 sm:grid-cols-2">
-          <Field label="Business name"><Input value={form.business_name} onChange={set("business_name")} required /></Field>
+          <Field label="Business name">
+            <Input
+              value={form.business_name}
+              onChange={set("business_name")}
+              required
+            />
+          </Field>
           {!fromGoogle ? (
             <>
-              <Field label="Category"><Input value={form.business_category} onChange={set("business_category")} placeholder="Dental Clinic" required /></Field>
-              <Field label="Phone"><Input value={form.phone} onChange={set("phone")} /></Field>
-              <Field label="Website"><Input value={form.website} onChange={set("website")} /></Field>
-              <Field label="Address"><Input value={form.address} onChange={set("address")} /></Field>
-              <Field label="City"><Input value={form.city} onChange={set("city")} /></Field>
-              <Field label="State"><Input value={form.state} onChange={set("state")} /></Field>
+              <Field label="Category">
+                <Input
+                  value={form.business_category}
+                  onChange={set("business_category")}
+                  placeholder="Dental Clinic"
+                  required
+                />
+              </Field>
+              <Field label="Phone">
+                <Input value={form.phone} onChange={set("phone")} />
+              </Field>
+              <Field label="Website">
+                <Input value={form.website} onChange={set("website")} />
+              </Field>
+              <Field label="Address">
+                <Input value={form.address} onChange={set("address")} />
+              </Field>
+              <Field label="City">
+                <Input value={form.city} onChange={set("city")} />
+              </Field>
+              <Field label="State">
+                <Input value={form.state} onChange={set("state")} />
+              </Field>
             </>
           ) : null}
           <Field label="Assigned employee">
-            <Select value={form.assigned_employee_id} onChange={set("assigned_employee_id")}>
+            <Select
+              value={form.assigned_employee_id}
+              onChange={set("assigned_employee_id")}
+            >
               <option value="">Unassigned</option>
-              {employees.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+              {employees.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
             </Select>
           </Field>
           {!fromGoogle ? (
             <Field label="Description" className="sm:col-span-2">
-              <Textarea value={form.description} onChange={set("description")} />
+              <Textarea
+                value={form.description}
+                onChange={set("description")}
+              />
             </Field>
           ) : null}
         </CardBody>
@@ -100,51 +223,130 @@ export function ClientForm({ client, employees = [] }) {
 
       {!fromGoogle ? (
         <Card>
-          <CardHeader title="Services, locations and keywords" subtitle="One per line (skip if you'll connect Google - they're imported)" />
+          <CardHeader
+            title="Services, locations and keywords"
+            subtitle="One per line (skip if you'll connect Google - they're imported)"
+          />
           <CardBody className="grid gap-3 sm:grid-cols-3">
-            <Field label="Services"><Textarea className="min-h-32" value={form.services} onChange={set("services")} /></Field>
-            <Field label="Target locations"><Textarea className="min-h-32" value={form.target_locations} onChange={set("target_locations")} /></Field>
-            <Field label="Target keywords"><Textarea className="min-h-32" value={form.target_keywords} onChange={set("target_keywords")} /></Field>
+            <Field label="Services">
+              <Textarea
+                className="min-h-32"
+                value={form.services}
+                onChange={set("services")}
+              />
+            </Field>
+            <Field label="Target locations">
+              <Textarea
+                className="min-h-32"
+                value={form.target_locations}
+                onChange={set("target_locations")}
+              />
+            </Field>
+            <Field label="Target keywords">
+              <Textarea
+                className="min-h-32"
+                value={form.target_keywords}
+                onChange={set("target_keywords")}
+              />
+            </Field>
           </CardBody>
         </Card>
       ) : null}
 
       <Card>
-        <CardHeader title="Content rules" subtitle="Tone, language and phrases the AI must never use" />
+        <CardHeader
+          title="Content rules"
+          subtitle="Tone, language and phrases the AI must never use"
+        />
         <CardBody className="grid gap-3 sm:grid-cols-2">
           <Field label="Tone">
             <Select value={form.content_tone} onChange={set("content_tone")}>
-              {TONES.map((t) => <option key={t}>{t}</option>)}
+              {TONES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
             </Select>
           </Field>
-          <Field label="Language"><Input value={form.preferred_language} onChange={set("preferred_language")} /></Field>
+          <Field label="Language">
+            <Input
+              value={form.preferred_language}
+              onChange={set("preferred_language")}
+            />
+          </Field>
           <Field label="Posting frequency">
-            <Select value={form.posting_frequency} onChange={set("posting_frequency")}>
-              {FREQUENCIES.map((f) => <option key={f}>{f}</option>)}
+            <Select
+              value={form.posting_frequency}
+              onChange={set("posting_frequency")}
+            >
+              {FREQUENCIES.map((f) => (
+                <option key={f}>{f}</option>
+              ))}
             </Select>
           </Field>
           <Field label="Prohibited claims" hint="One per line">
-            <Textarea value={form.prohibited_claims} onChange={set("prohibited_claims")} />
+            <Textarea
+              value={form.prohibited_claims}
+              onChange={set("prohibited_claims")}
+            />
           </Field>
         </CardBody>
       </Card>
 
-      {!editing ? (
-        <Card>
-          <CardHeader title="Posting plan" subtitle="What the client purchased - scheduling and AI generation are capped to this." />
-          <CardBody>
-            <PostingPlanFields value={plan} onChange={setPlan} />
-          </CardBody>
-        </Card>
+      <Card>
+        <CardHeader
+          title="Posting plan"
+          subtitle={
+            editing
+              ? client.plan
+                ? `Current: ${client.plan.posts_per_week}/week · ${client.plan.total_posts} posts · ends ${new Date(client.plan.end_date).toLocaleDateString("en-IN")} (${client.plan.status})`
+                : "No plan yet - set one so posts can be scheduled."
+              : "What the client purchased - scheduling and AI generation are capped to this."
+          }
+        />
+        <CardBody className="space-y-3">
+          <PostingPlanFields value={plan} onChange={setPlan} />
+          {editing && planChanged ? (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+              Saving replaces the current plan (the old one is kept in history).
+              Posts already scheduled or published inside the new plan&apos;s
+              dates count towards its limits.
+            </p>
+          ) : null}
+          {editing && client.plan_history?.length ? (
+            <details className="text-xs text-zinc-500">
+              <summary className="cursor-pointer">
+                Previous plans ({client.plan_history.length})
+              </summary>
+              <ul className="mt-2 space-y-1">
+                {client.plan_history.map((h) => (
+                  <li key={h.id}>
+                    {new Date(h.start_date).toLocaleDateString("en-IN")} →{" "}
+                    {new Date(h.end_date).toLocaleDateString("en-IN")} ·{" "}
+                    {h.posts_per_week}/week · {h.total_posts} posts
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+        </CardBody>
+      </Card>
+
+      {error ? (
+        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
       ) : null}
 
-      {error ? <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-
       <div className="flex gap-2">
-        <Button type="submit" disabled={busy}>{busy ? "Saving..." : editing ? "Save changes" : "Create client"}</Button>
-        <Button type="button" variant="secondary" onClick={() => router.back()}>Cancel</Button>
+        <Button type="submit" disabled={busy}>
+          {busy ? "Saving..." : editing ? "Save changes" : "Create client"}
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => router.back()}>
+          Cancel
+        </Button>
       </div>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">Post types available in the calendar: {POST_TYPES.join(", ")}.</p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        Post types available in the calendar: {POST_TYPES.join(", ")}.
+      </p>
     </form>
   );
 }

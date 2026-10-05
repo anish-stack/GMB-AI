@@ -128,7 +128,7 @@ export function KeywordsTable({ rows, clientFiltered }) {
             <td className="px-4 py-2">
               <Link
                 href={`/clients/${k.client_id}`}
-                className="text-zinc-600 dark:text-zinc-400 hover:text-[#F53236] dark:text-brand-400"
+                className="text-zinc-600 dark:text-zinc-400 hover:text-brand-500 dark:text-brand-400"
               >
                 {k.business_name}
               </Link>
@@ -199,7 +199,7 @@ export function KeywordsTable({ rows, clientFiltered }) {
                   type="button"
                   onClick={() => setPage(p)}
                   aria-current={p === current ? "page" : undefined}
-                  className={`${navBtn} ${p === current ? "!border-[#F53236] !bg-[#F53236] !text-white hover:!bg-[#e81d22]" : ""}`}
+                  className={`${navBtn} ${p === current ? "!border-brand-500 !bg-brand-500 !text-white hover:!bg-brand-600" : ""}`}
                 >
                   {p}
                 </button>

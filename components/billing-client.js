@@ -177,7 +177,7 @@ export function BillingClient({ data, canManage }) {
             return (
               <div
                 key={p.id}
-                className={`flex flex-col rounded-2xl border p-4 ${current ? "border-[#F53236] ring-1 ring-[#F53236]" : "border-zinc-200 dark:border-zinc-800"}`}
+                className={`flex flex-col rounded-2xl border p-4 ${current ? "border-brand-500 ring-1 ring-brand-500" : "border-zinc-200 dark:border-zinc-800"}`}
               >
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-zinc-900 dark:text-zinc-100">{p.name}</p>

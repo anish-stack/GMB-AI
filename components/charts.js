@@ -20,7 +20,7 @@ export function BarTrend({ data, height = 160, colorClass = "fill-brand-500" }) 
             <g key={i} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
               <rect
                 x={x} y={y} width={barW} height={Math.max(barH, 1.5)} rx={2}
-                className={hover === i ? "fill-[#F53236] transition-all" : `${colorClass} transition-all opacity-80`}
+                className={hover === i ? "fill-brand-500 transition-all" : `${colorClass} transition-all opacity-80`}
               />
               <rect x={x} y={0} width={barW} height={height} fill="transparent" />
             </g>

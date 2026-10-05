@@ -17,7 +17,7 @@ export default async function PublicLayout({ children }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={settings.logo_url} alt="" className="h-9 w-9 rounded-2xl object-contain" />
             ) : (
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F53236]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-500">
                 <Sparkles className="h-4.5 w-4.5 text-white" />
               </span>
             )}
@@ -27,7 +27,7 @@ export default async function PublicLayout({ children }) {
             <Link href="/pricing" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-300">Pricing</Link>
             <Link href="/login" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-300">Sign in</Link>
             {Number(settings.allow_signup) === 1 ? (
-              <Link href="/signup" className="rounded-xl bg-[#F53236] px-3.5 py-2 font-medium text-white hover:bg-[#e81d22]">
+              <Link href="/signup" className="rounded-xl bg-brand-500 px-3.5 py-2 font-medium text-white hover:bg-brand-600">
                 Start free
               </Link>
             ) : null}

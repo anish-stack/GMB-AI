@@ -19,6 +19,7 @@ const KeywordsPanel = dynamic(() => import("./keywords-panel").then((m) => m.Key
 const ServicesPanel = dynamic(() => import("./services-panel").then((m) => m.ServicesPanel), { loading: Loading });
 const ProductsPanel = dynamic(() => import("./products-panel").then((m) => m.ProductsPanel), { loading: Loading });
 const LinksPanel = dynamic(() => import("./links-panel").then((m) => m.LinksPanel), { loading: Loading });
+const SocialPanel = dynamic(() => import("./social-panel").then((m) => m.SocialPanel), { loading: Loading });
 const WebsitePanel = dynamic(() => import("./website-panel").then((m) => m.WebsitePanel), { loading: Loading });
 const AutoPublishCard = dynamic(() => import("./auto-publish-card").then((m) => m.AutoPublishCard), { loading: () => null });
 const AutoReplyCard = dynamic(() => import("./links-panel").then((m) => m.AutoReplyCard), { loading: () => null });
@@ -37,8 +38,9 @@ const TABS = [
   ["tools", "Business tools"],
 ];
 
-export function GmbDetailTabs({ clientId, initialTab = "overview", overview, posts, reviewUrl, business, canConnect }) {
-  const valid = TABS.some(([k]) => k === initialTab) ? initialTab : "overview";
+export function GmbDetailTabs({ clientId, initialTab = "overview", overview, posts, reviewUrl, business, canConnect, social = false }) {
+  const tabs = social ? [...TABS.slice(0, TABS.findIndex(([k]) => k === "website") + 1), ["social", "Facebook & Instagram"], ...TABS.slice(TABS.findIndex(([k]) => k === "website") + 1)] : TABS;
+  const valid = tabs.some(([k]) => k === initialTab) ? initialTab : "overview";
   const [tab, setTab] = useState(valid);
   const [visited, setVisited] = useState(() => new Set([valid]));
 
@@ -69,6 +71,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
     products: <ProductsPanel clientId={clientId} />,
     links: <LinksPanel clientId={clientId} />,
     website: <WebsitePanel clientId={clientId} />,
+    social: social ? <SocialPanel clientId={clientId} /> : null,
     media: <MediaPanel clientId={clientId} />,
     keywords: <KeywordsPanel clientId={clientId} />,
     tools: <BusinessToolsPanel clientId={clientId} canConnect={canConnect} />,
@@ -78,7 +81,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
     <div className="space-y-5">
       <div className="sticky top-0 z-[5] -mx-4 border-b border-zinc-200/70 bg-[#f6f7fb]/90 px-4 backdrop-blur md:-mx-6 md:px-6 dark:border-zinc-800 dark:bg-[#0b0c0f]/90">
         <nav role="tablist" aria-label="GMB sections" className="no-scrollbar flex gap-1 overflow-x-auto">
-          {TABS.map(([key, label]) => (
+          {tabs.map(([key, label]) => (
             <button
               key={key}
               role="tab"
@@ -87,7 +90,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
               onClick={() => open(key)}
               className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
                 tab === key
-                  ? "border-[#F53236] text-zinc-900 dark:text-white"
+                  ? "border-brand-500 text-zinc-900 dark:text-white"
                   : "border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
               }`}
             >
@@ -96,7 +99,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
           ))}
         </nav>
       </div>
-      {TABS.map(([key]) =>
+      {tabs.map(([key]) =>
         visited.has(key) ? (
           <div key={key} role="tabpanel" hidden={tab !== key}>
             {panels[key]}

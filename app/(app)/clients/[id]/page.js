@@ -20,6 +20,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const sp = await searchParams;
   const client = await getClient(Number(id), ctx.tenantId);
   if (!client) notFound();
+  console.log("client",client)
 
   if (sp?.edit) {
     const employees = await listEmployeesForAssignment(ctx.tenantId);
@@ -44,8 +45,8 @@ export default async function ClientDetailPage({ params, searchParams }) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link href={`/clients/${client.id}?edit=1`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Edit details</Link>
-          <Link href={`/gmb/${client.id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">GMB profile</Link>
+          <Link href={`/clients/${client.id}?edit=1`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Edit details</Link>
+          <Link href={`/gmb/${client.id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">GMB profile</Link>
           <GenerateNow clientId={client.id} />
           <DangerActions
             patchUrl={`/api/clients/${client.id}`}
@@ -125,7 +126,7 @@ export default async function ClientDetailPage({ params, searchParams }) {
             {client.tasks.map((t) => (
               <tr key={t.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
                 <td className="px-4 py-2">
-                  <Link href={`/gmb/tasks/${t.id}`} className="text-zinc-700 dark:text-zinc-300 hover:text-[#F53236] dark:text-brand-400">{truncate(t.topic, 34) || "-"}</Link>
+                  <Link href={`/gmb/tasks/${t.id}`} className="text-zinc-700 dark:text-zinc-300 hover:text-brand-500 dark:text-brand-400">{truncate(t.topic, 34) || "-"}</Link>
                 </td>
                 <td className="px-4 py-2"><StatusBadge status={t.status} /></td>
                 <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{t.qa_score ?? "-"}</td>

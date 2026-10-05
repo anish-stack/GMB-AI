@@ -133,7 +133,7 @@ export function GenerateNow({ clientId }) {
             bg-gradient-to-r
             from-violet-600
             via-fuchsia-600
-            to-[#F53236]
+            to-brand-500
             px-3
             text-xs
             font-semibold

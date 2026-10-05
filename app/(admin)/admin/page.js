@@ -65,7 +65,7 @@ export default async function AdminOverviewPage() {
           title="Tenants"
           subtitle={`${tenants.length} accounts`}
           action={
-            <Link href="/admin/tenants" className="inline-flex items-center gap-1 text-xs font-medium text-[#F53236]">
+            <Link href="/admin/tenants" className="inline-flex items-center gap-1 text-xs font-medium text-brand-500">
               Manage <ArrowRight className="h-3 w-3" />
             </Link>
           }
@@ -86,7 +86,7 @@ export default async function AdminOverviewPage() {
               </td>
               <td className="px-4 py-2 text-xs text-zinc-500">{t.current_period_end ? formatDate(t.current_period_end) : "-"}</td>
               <td className="px-4 py-2 text-right">
-                <Link href={`/admin/tenants/${t.id}`} className="text-xs font-medium text-[#F53236]">Open</Link>
+                <Link href={`/admin/tenants/${t.id}`} className="text-xs font-medium text-brand-500">Open</Link>
               </td>
             </tr>
           ))}

@@ -6,14 +6,14 @@ import { money, lim, priceOf, passwordScore } from "./shared";
 import { GoogleButton, GoogleIcon } from "@/components/google-button";
 
 const input =
-  "w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[#F53236] focus:ring-4 focus:ring-[#F53236]/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
+  "w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
 
 export function PrimaryButton({ busy, children, ...props }) {
   return (
     <button
       {...props}
       disabled={busy || props.disabled}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#F53236] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#F53236]/25 transition hover:bg-[#e81d22] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:bg-brand-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
       {children}
@@ -66,8 +66,8 @@ export function PlanStep({ plans, planSlug, setPlanSlug, cycle, setCycle, onNext
           const price = priceOf(p, cycle);
           return (
             <button key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setPlanSlug(p.slug)}
-              className={`group relative flex items-start gap-3 rounded-2xl border p-4 text-left transition ${on ? "border-[#F53236] bg-red-50/50 ring-4 ring-[#F53236]/10 dark:bg-red-950/10" : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"}`}>
-              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-[#F53236] bg-[#F53236]" : "border-zinc-300 dark:border-zinc-600"}`}>
+              className={`group relative flex items-start gap-3 rounded-2xl border p-4 text-left transition ${on ? "border-brand-500 bg-red-50/50 ring-4 ring-brand-500/10 dark:bg-red-950/10" : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"}`}>
+              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-brand-500 bg-brand-500" : "border-zinc-300 dark:border-zinc-600"}`}>
                 {on ? <Check className="h-3 w-3 text-white" strokeWidth={3} /> : null}
               </span>
               <div className="min-w-0 flex-1">
@@ -154,7 +154,7 @@ export function DetailsStep({ form, setForm, busy, error, onBack, onSubmit, goog
       </label>
       ) : null}
       <label className="flex items-start gap-2 text-xs text-zinc-600 dark:text-zinc-400">
-        <input type="checkbox" checked={form.terms} onChange={set("terms")} required className="mt-0.5 h-4 w-4 accent-[#F53236]" />
+        <input type="checkbox" checked={form.terms} onChange={set("terms")} required className="mt-0.5 h-4 w-4 accent-brand-500" />
         <span>I agree to the Terms of Service and Privacy Policy.</span>
       </label>
       <ErrorBox>{error}</ErrorBox>
@@ -203,7 +203,7 @@ export function VerifyStep({ maskedEmail, busy, error, onVerify, onResend, onEdi
     <div className="space-y-5">
       <BackLink onClick={onEditEmail}>Wrong email? Edit</BackLink>
       <div>
-        <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-[#F53236] dark:bg-red-950/30"><Mail className="h-6 w-6" /></span>
+        <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-brand-500 dark:bg-red-950/30"><Mail className="h-6 w-6" /></span>
         <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Check your inbox</h2>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Enter the 6-digit code sent to <span className="font-semibold text-zinc-800 dark:text-zinc-200">{maskedEmail}</span>. Check spam if you don&apos;t see it.
@@ -213,7 +213,7 @@ export function VerifyStep({ maskedEmail, busy, error, onVerify, onResend, onEdi
         {digits.map((d, i) => (
           <input key={i} ref={(el) => { refs.current[i] = el; }} value={d} onChange={(e) => onChange(i, e.target.value)} onKeyDown={(e) => onKeyDown(i, e)}
             inputMode="numeric" autoComplete={i === 0 ? "one-time-code" : "off"} maxLength={6} aria-label={`Digit ${i + 1}`} autoFocus={i === 0}
-            className="h-14 w-full min-w-0 rounded-xl border border-zinc-300 bg-white text-center text-xl font-bold text-zinc-900 outline-none focus:border-[#F53236] focus:ring-4 focus:ring-[#F53236]/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white" />
+            className="h-14 w-full min-w-0 rounded-xl border border-zinc-300 bg-white text-center text-xl font-bold text-zinc-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white" />
         ))}
       </div>
       <ErrorBox>{error}</ErrorBox>
@@ -225,7 +225,7 @@ export function VerifyStep({ maskedEmail, busy, error, onVerify, onResend, onEdi
         {cooldown > 0 ? (
           <span>Resend in {cooldown}s</span>
         ) : (
-          <button type="button" className="font-semibold text-[#F53236] hover:underline" onClick={async () => { setDigits(["", "", "", "", "", ""]); setCooldown(45); await onResend(); refs.current[0]?.focus(); }}>
+          <button type="button" className="font-semibold text-brand-500 hover:underline" onClick={async () => { setDigits(["", "", "", "", "", ""]); setCooldown(45); await onResend(); refs.current[0]?.focus(); }}>
             Resend code
           </button>
         )}

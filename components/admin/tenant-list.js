@@ -126,7 +126,7 @@ export function TenantList({ tenants, plans }) {
           {filtered.map((t) => (
             <tr key={t.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
               <td className="px-4 py-2">
-                <Link href={`/admin/tenants/${t.id}`} className="font-medium text-zinc-800 hover:text-[#F53236] dark:text-zinc-100">{t.name}</Link>
+                <Link href={`/admin/tenants/${t.id}`} className="font-medium text-zinc-800 hover:text-brand-500 dark:text-zinc-100">{t.name}</Link>
                 <p className="text-xs text-zinc-400">{t.slug}</p>
               </td>
               <td className="px-4 py-2 text-xs text-zinc-500">{t.owner_name}<br />{t.owner_email}</td>
@@ -147,7 +147,7 @@ export function TenantList({ tenants, plans }) {
               <td className="px-4 py-2 text-right">
                 <div className="flex justify-end gap-1.5">
                   <Button variant="ghost" className="!py-1 text-xs" onClick={() => impersonate(t.id)}>View as</Button>
-                  <Link href={`/admin/tenants/${t.id}`} className="rounded-xl px-2 py-1 text-xs font-medium text-[#F53236] hover:bg-zinc-100 dark:hover:bg-zinc-800">Manage</Link>
+                  <Link href={`/admin/tenants/${t.id}`} className="rounded-xl px-2 py-1 text-xs font-medium text-brand-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">Manage</Link>
                 </div>
               </td>
             </tr>

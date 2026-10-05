@@ -6,7 +6,7 @@ import { Card, Button, Alert, Skeleton } from "@/components/ui";
 import { useApi, apiFetch } from "@/lib/hooks/use-api";
 import { PostingPlanFields, emptyPlan } from "./plan-fields";
 
-function Bar({ value, max, tone = "bg-[#F53236]" }) {
+function Bar({ value, max, tone = "bg-brand-500" }) {
   const pct = max ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
     <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
@@ -73,7 +73,7 @@ export function PostingPlanCard({ clientId, canEdit = true }) {
     <Card className="overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
         <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-900 dark:text-white">
-          <CalendarClock className="h-4 w-4 text-[#F53236]" /> Posting plan
+          <CalendarClock className="h-4 w-4 text-brand-500" /> Posting plan
           <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}>{label}</span>
         </h2>
         <div className="flex gap-2">

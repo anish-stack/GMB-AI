@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-white p-7 shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
       >
         <Link href="/" className="mb-6 flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F53236]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
             <Sparkles className="h-4 w-4 text-white" />
           </span>
           <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">GMB AI Cloud</span>
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
             <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
               You can now sign in with your new password.
             </p>
-            <Button type="button" onClick={() => router.push("/login")} className="mt-6 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]">
+            <Button type="button" onClick={() => router.push("/login")} className="mt-6 flex w-full items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600">
               Go to sign in <ArrowRight className="h-4 w-4" />
             </Button>
           </>
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
 
             {error ? <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p> : null}
 
-            <Button type="submit" disabled={busy} className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]">
+            <Button type="submit" disabled={busy} className="mt-5 flex w-full items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600">
               {busy ? "Updating..." : "Update password"}
             </Button>
             <button type="button" onClick={() => setStep("email")} className="mt-4 flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
@@ -137,11 +137,11 @@ export default function ForgotPasswordPage() {
 
             {error ? <p className="mt-4 rounded-xl bg-rose-50 px-3 py-2.5 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</p> : null}
 
-            <Button type="submit" disabled={busy} className="mt-5 flex w-full items-center justify-center gap-2 bg-[#F53236] hover:bg-[#e81d22]">
+            <Button type="submit" disabled={busy} className="mt-5 flex w-full items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600">
               {busy ? "Sending..." : "Send reset code"}
             </Button>
             <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-              <Link href="/login" className="font-medium text-[#F53236] hover:underline">Back to sign in</Link>
+              <Link href="/login" className="font-medium text-brand-500 hover:underline">Back to sign in</Link>
             </p>
           </>
         )}

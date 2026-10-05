@@ -164,7 +164,7 @@ export function CreditManager({ wallets, packs, tenants, costs }) {
             onClick={() => setTab(t.id)}
             className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               tab === t.id
-                ? "border-[#F53236] text-zinc-900 dark:text-zinc-100"
+                ? "border-brand-500 text-zinc-900 dark:text-zinc-100"
                 : "border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
             }`}
           >

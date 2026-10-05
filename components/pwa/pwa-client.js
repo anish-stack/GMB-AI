@@ -69,7 +69,7 @@ export function PwaClient() {
       <div className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4" role="status">
         <div className="flex items-center gap-3 rounded-2xl bg-zinc-900 px-4 py-3 text-sm text-white shadow-2xl dark:bg-zinc-100 dark:text-zinc-900">
           <RefreshCw className="h-4 w-4" /> A new version is available.
-          <button type="button" className="rounded-lg bg-[#F53236] px-3 py-1.5 text-xs font-semibold text-white" onClick={() => waiting.postMessage("SKIP_WAITING")}>
+          <button type="button" className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white" onClick={() => waiting.postMessage("SKIP_WAITING")}>
             Update
           </button>
         </div>
@@ -90,7 +90,7 @@ export function PwaClient() {
           </p>
         </div>
         {installEvt ? (
-          <button type="button" className="inline-flex items-center gap-1 rounded-lg bg-[#F53236] px-3 py-1.5 text-xs font-semibold text-white"
+          <button type="button" className="inline-flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white"
             onClick={async () => { installEvt.prompt(); await installEvt.userChoice.catch(() => null); setInstallEvt(null); }}>
             <Download className="h-3.5 w-3.5" /> Install
           </button>

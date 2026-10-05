@@ -44,7 +44,7 @@ export function GmbProfilesTable({ rows }) {
             <td className="px-4 py-2"><Badge tone="amber">{p.connection_status}</Badge></td>
             <td className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">{formatDate(p.last_synced_at, true)}</td>
             <td className="px-4 py-2 text-right">
-              <Link href={`/gmb/${p.client_id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Open</Link>
+              <Link href={`/gmb/${p.client_id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Open</Link>
             </td>
           </tr>
         ))}

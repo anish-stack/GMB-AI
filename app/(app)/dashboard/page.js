@@ -93,7 +93,7 @@ export default async function DashboardPage() {
             title="Review queue"
             subtitle="Open a task to review, edit and approve"
             action={
-              <Link href="/gmb/tasks" className="inline-flex items-center gap-1 text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">
+              <Link href="/gmb/tasks" className="inline-flex items-center gap-1 text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">
                 Open queue <ArrowRight className="h-3 w-3" />
               </Link>
             }
@@ -113,7 +113,7 @@ export default async function DashboardPage() {
                 </td>
                 <td className="px-4 py-2"><StatusBadge status={t.status} /></td>
                 <td className="px-4 py-2 text-right">
-                  <Link href={`/gmb/tasks/${t.id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Review</Link>
+                  <Link href={`/gmb/tasks/${t.id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Review</Link>
                 </td>
               </tr>
             ))}
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
             <CardBody className="space-y-2">
               {clients.map((c) => (
                 <div key={c.id} className="flex items-center justify-between text-sm">
-                  <Link href={`/clients/${c.id}`} className="truncate text-zinc-700 dark:text-zinc-300 hover:text-[#F53236] dark:text-brand-400">
+                  <Link href={`/clients/${c.id}`} className="truncate text-zinc-700 dark:text-zinc-300 hover:text-brand-500 dark:text-brand-400">
                     {c.business_name}
                   </Link>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">{c.published || 0} published</span>

@@ -11,7 +11,7 @@ export function Section({ icon: Icon, title, description, action, locked, childr
     <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex flex-col gap-2 border-b border-zinc-100 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5 dark:border-zinc-800">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#F53236] dark:bg-red-950/30">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-brand-500 dark:bg-red-950/30">
             <Icon className="h-4 w-4" />
           </span>
           <div>
@@ -57,7 +57,7 @@ export function HoursEditor({ hours, setHours }) {
   }
   return (
     <div className="space-y-2">
-      <button type="button" onClick={copyMonday} className="mb-1 inline-flex items-center gap-1 text-xs font-semibold text-[#F53236] hover:underline">
+      <button type="button" onClick={copyMonday} className="mb-1 inline-flex items-center gap-1 text-xs font-semibold text-brand-500 hover:underline">
         <Copy className="h-3.5 w-3.5" /> Copy Monday to Tue–Sat
       </button>
       {DAYS.map(([key, label]) => {
@@ -65,13 +65,13 @@ export function HoursEditor({ hours, setHours }) {
         return (
           <div key={key} className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-800">
             <label className="flex w-24 items-center gap-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              <input type="checkbox" checked={d.enabled} onChange={() => set(key, { enabled: !d.enabled })} className="h-4 w-4 accent-[#F53236]" />
+              <input type="checkbox" checked={d.enabled} onChange={() => set(key, { enabled: !d.enabled })} className="h-4 w-4 accent-brand-500" />
               {label}
             </label>
             {d.enabled ? (
               <>
                 <label className="flex items-center gap-1.5 text-xs text-zinc-500">
-                  <input type="checkbox" checked={d.allDay} className="accent-[#F53236]"
+                  <input type="checkbox" checked={d.allDay} className="accent-brand-500"
                     onChange={() => set(key, d.allDay ? { allDay: false, open: "09:00", close: "18:00" } : { allDay: true, open: "00:00", close: "24:00" })} />
                   24h
                 </label>
@@ -106,7 +106,7 @@ export function SpecialHoursEditor({ rows, setRows }) {
           <input type="date" min={today} value={r.date} onChange={(e) => update(i, { date: e.target.value })} aria-label="Date"
             className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100" />
           <label className="flex items-center gap-1.5 text-xs text-zinc-500">
-            <input type="checkbox" checked={r.closed} onChange={() => update(i, { closed: !r.closed })} className="accent-[#F53236]" /> Closed
+            <input type="checkbox" checked={r.closed} onChange={() => update(i, { closed: !r.closed })} className="accent-brand-500" /> Closed
           </label>
           {!r.closed ? (
             <>
@@ -122,7 +122,7 @@ export function SpecialHoursEditor({ rows, setRows }) {
         </div>
       ))}
       <button type="button" onClick={() => setRows((r) => [...r, { date: "", closed: true, open: "10:00", close: "14:00" }])}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 hover:border-[#F53236] hover:text-[#F53236] dark:border-zinc-700 dark:text-zinc-300">
+        className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 hover:border-brand-500 hover:text-brand-500 dark:border-zinc-700 dark:text-zinc-300">
         <CalendarPlus className="h-3.5 w-3.5" /> Add holiday / special day
       </button>
     </div>

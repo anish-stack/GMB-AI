@@ -1,5 +1,7 @@
 "use client";
 
+import { SiblingListings } from "./gmb/sibling-listings";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Link2, RefreshCw, Unlink, Check } from "lucide-react";
@@ -113,8 +115,9 @@ export function GoogleConnect({ client }) {
           {connected ? (
             <>
               <Button variant="secondary" onClick={sync} disabled={busy === "sync"}>
-                <RefreshCw className={busy === "sync" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} /> Sync locations
+                <RefreshCw className={busy === "sync" ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} /> Sync listing
               </Button>
+              <SiblingListings clientId={client.id} />
               <Button variant="danger" onClick={disconnect} disabled={busy === "disconnect"}>
                 <Unlink className="h-3.5 w-3.5" /> Disconnect
               </Button>

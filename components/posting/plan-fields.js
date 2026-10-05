@@ -16,7 +16,8 @@ export const emptyPlan = () => ({
 });
 
 export function PostingPlanFields({ value, onChange }) {
-  const set = (k, v) => onChange({ ...value, [k]: v });
+  const NUM = ["duration_months", "posts_per_week"];
+  const set = (k, v) => onChange({ ...value, [k]: NUM.includes(k) ? (v === "" ? "" : Number(v)) : v });
   const computed = approxTotal(value.duration_months, value.posts_per_week);
   const days = value.posting_days || [];
   return (
@@ -42,7 +43,7 @@ export function PostingPlanFields({ value, onChange }) {
             const on = days.includes(i);
             return (
               <button key={d} type="button" onClick={() => set("posting_days", on ? days.filter((x) => x !== i) : [...days, i].sort())}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${on ? "bg-[#F53236] text-white ring-[#F53236]" : "text-zinc-600 ring-zinc-200 dark:text-zinc-300 dark:ring-zinc-700"}`}>
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${on ? "bg-brand-500 text-white ring-brand-500" : "text-zinc-600 ring-zinc-200 dark:text-zinc-300 dark:ring-zinc-700"}`}>
                 {d}
               </button>
             );

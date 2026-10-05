@@ -35,10 +35,8 @@ export function WebsitePanel({ clientId }) {
 
   return (
     <Card className="overflow-hidden">
-      <PanelHeader icon={Globe} tone="blue" title="Website" subtitle="Build, edit and publish this business's website right here - no separate login"
+      <PanelHeader icon={Globe} tone="blue" title="Website" subtitle="Create a website from the Google profile, then edit every section right here"
         actions={data?.configured ? <>
-          <Link href={`/gmb/${clientId}/website`}><Button variant="secondary"><LayoutDashboard className="h-4 w-4" /> Open builder</Button></Link>
-          <Link href={`/gmb/${clientId}/website?new=1`}><Button variant="secondary"><Plus className="h-4 w-4" /> Blank website</Button></Link>
           <Link href={`/gmb/${clientId}/website/new`}><Button><Sparkles className="h-4 w-4" /> Create from Google</Button></Link>
         </> : null} />
       <div className="space-y-3 p-4 sm:p-5">
@@ -56,7 +54,7 @@ export function WebsitePanel({ clientId }) {
               <p className="text-[11px] text-zinc-400">Theme {s.themeKey || "-"}{s.updatedAt ? ` · updated ${new Date(s.updatedAt).toLocaleDateString("en-IN")}` : ""}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href={`/gmb/${clientId}/website?site=${s.id}`}><Button variant="secondary"><Pencil className="h-4 w-4" /> Edit</Button></Link>
+              <Link href={`/gmb/${clientId}/website/${s.id}`}><Button variant="secondary"><Pencil className="h-4 w-4" /> Edit</Button></Link>
               <Button variant="secondary" title="Fill empty fields with the latest Google data (keeps your edits)" onClick={() => act("refill", s.id, null, { mode: "fill" })} disabled={Boolean(busy)}>
                 {spin(`refill:${s.id}`) ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Fill from Google
               </Button>

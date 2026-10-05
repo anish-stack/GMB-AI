@@ -193,7 +193,7 @@ export function GmbProfileForm({ clientId, profile }) {
             Cancel
           </button>
           <button type="submit" disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#F53236] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#e81d22] disabled:opacity-60">
+            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600 disabled:opacity-60">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {busy ? "Saving…" : "Save changes"}
           </button>

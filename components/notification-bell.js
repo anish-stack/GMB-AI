@@ -96,7 +96,7 @@ export function NotificationBell() {
       >
         <Bell className="h-4 w-4" />
         {unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F53236] px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-zinc-900">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-zinc-900">
             {unread > 99 ? "99+" : unread}
           </span>
         ) : null}
@@ -107,7 +107,7 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
             <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Notifications</p>
             {unread ? (
-              <button type="button" onClick={markAll} className="inline-flex items-center gap-1 text-xs font-semibold text-[#F53236]">
+              <button type="button" onClick={markAll} className="inline-flex items-center gap-1 text-xs font-semibold text-brand-500">
                 <CheckCheck className="h-3.5 w-3.5" /> Mark all read
               </button>
             ) : null}
@@ -129,7 +129,7 @@ export function NotificationBell() {
                       {it.body ? <p className="line-clamp-2 text-xs text-zinc-400">{it.body}</p> : null}
                       <p className="mt-0.5 text-[10px] text-zinc-400">{formatDate(it.created_at, true)}</p>
                     </div>
-                    {!it.is_read ? <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#F53236]" /> : null}
+                    {!it.is_read ? <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-500" /> : null}
                   </button>
                 );
               })

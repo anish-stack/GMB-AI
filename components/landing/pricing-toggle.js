@@ -17,7 +17,7 @@ export default function PricingToggle({ plans, allowSignup }) {
             type="button"
             onClick={() => setYearly(false)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              !yearly ? "bg-[#F53236] text-white" : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400"
+              !yearly ? "bg-brand-500 text-white" : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400"
             }`}
           >
             Monthly
@@ -26,7 +26,7 @@ export default function PricingToggle({ plans, allowSignup }) {
             type="button"
             onClick={() => setYearly(true)}
             className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              yearly ? "bg-[#F53236] text-white" : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400"
+              yearly ? "bg-brand-500 text-white" : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400"
             }`}
           >
             Yearly
@@ -51,12 +51,12 @@ export default function PricingToggle({ plans, allowSignup }) {
               key={p.id}
               className={`relative flex flex-col rounded-2xl border bg-white p-6 dark:bg-zinc-900 ${
                 popular
-                  ? "border-[#F53236] shadow-[0_0_0_1px_#F53236]"
+                  ? "border-brand-500 shadow-[0_0_0_1px_#F53236]"
                   : "border-zinc-200 dark:border-zinc-800"
               }`}
             >
               {popular ? (
-                <span className="absolute -top-3 right-6 rounded-full bg-[#F53236] px-3 py-1 text-[11px] font-semibold text-white">
+                <span className="absolute -top-3 right-6 rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white">
                   Most popular
                 </span>
               ) : null}
@@ -86,7 +86,7 @@ export default function PricingToggle({ plans, allowSignup }) {
                 href={allowSignup ? `/signup?plan=${p.slug}` : "/pricing"}
                 className={`mt-6 rounded-xl px-4 py-2.5 text-center text-sm font-medium transition-colors ${
                   popular
-                    ? "bg-[#F53236] text-white hover:bg-[#e81d22]"
+                    ? "bg-brand-500 text-white hover:bg-brand-600"
                     : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
                 }`}
               >

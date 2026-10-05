@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 import { GlobalSearch } from "@/components/global-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TourButton } from "@/components/tour/tour";
 
 export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsLeft = null }) {
   const router = useRouter();
@@ -61,7 +62,7 @@ export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsL
         <span className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800 dark:text-zinc-400">AI: {aiProvider.name} / {aiProvider.textModel}</span>
         <span className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800 dark:text-zinc-400">GMB: {gmbProvider.name}{gmbProvider.isMock ? " (mock)" : ""}</span>
         {creditsLeft !== null ? (
-          <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+          <span data-tour="credits" className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
             {creditsLeft} credits
           </span>
         ) : null}
@@ -69,15 +70,16 @@ export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsL
 
       <div className="flex items-center gap-1.5 md:gap-2">
         {msg ? <span className="hidden max-w-md truncate text-xs text-zinc-600 md:inline dark:text-zinc-400">{msg}</span> : null}
-        <Button onClick={runNightly} disabled={running} className="hidden sm:inline-flex">
+        <Button data-tour="run-ai" onClick={runNightly} disabled={running} className="hidden sm:inline-flex">
           <Play className="h-3.5 w-3.5" />
           {running ? "Running..." : "Run AI job"}
         </Button>
         <Button onClick={runNightly} disabled={running} className="sm:hidden !px-2.5" aria-label="Run AI job now">
           <Play className="h-3.5 w-3.5" />
         </Button>
+        <TourButton />
         <ThemeToggle />
-        <NotificationBell />
+        <span data-tour="bell" className="inline-flex"><NotificationBell /></span>
         <div className="hidden items-center gap-2 rounded-xl bg-zinc-50 px-3 py-1.5 ring-1 ring-zinc-100 sm:flex dark:bg-zinc-800/60 dark:ring-zinc-800">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-violet-500 text-xs font-semibold text-white">
             {(session.name || "?").charAt(0).toUpperCase()}

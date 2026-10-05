@@ -28,7 +28,7 @@ export function GbpNotificationsCard() {
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-white"><BellRing className="h-4 w-4 text-[#F53236]" /> Real-time review notifications (Pub/Sub)</p>
+          <p className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-white"><BellRing className="h-4 w-4 text-brand-500" /> Real-time review notifications (Pub/Sub)</p>
           <p className="mt-1 max-w-2xl text-xs text-zinc-500">
             New/updated reviews, Google edits, duplicate and lost-ownership events arrive instantly. Setup: create a Pub/Sub topic, give
             <code className="mx-1">mybusiness-api-pubsub@system.gserviceaccount.com</code> the Publisher role, add a push subscription to

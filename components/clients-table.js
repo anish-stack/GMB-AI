@@ -56,7 +56,7 @@ export function ClientsTable({ clients, limit }) {
             <td className="px-4 py-2"><Badge tone="amber">{c.gmb_connection_status}</Badge></td>
             <td className="px-4 py-2">{c.active ? <Badge tone="emerald">Active</Badge> : <Badge tone="red">Inactive</Badge>}</td>
             <td className="px-4 py-2 text-right">
-              <Link href={`/clients/${c.id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Open</Link>
+              <Link href={`/clients/${c.id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Open</Link>
             </td>
           </tr>
         ))}

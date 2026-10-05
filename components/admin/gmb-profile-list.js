@@ -30,7 +30,7 @@ export function GmbProfileList({ rows }) {
             <p className="flex items-center gap-1 font-medium text-zinc-800 dark:text-zinc-100">
               <span className="truncate">{r.location_name}</span>
               {r.map_url ? (
-                <a href={r.map_url} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-[#F53236]"><ExternalLink className="h-3.5 w-3.5" /></a>
+                <a href={r.map_url} target="_blank" rel="noreferrer" className="text-zinc-400 hover:text-brand-500"><ExternalLink className="h-3.5 w-3.5" /></a>
               ) : null}
             </p>
             <p className="truncate text-xs text-zinc-400">{[r.phone, r.address].filter(Boolean).join(" · ") || "-"}</p>

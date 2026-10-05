@@ -86,7 +86,7 @@ export function CmsAdmin() {
               <Field label="Status"><Select value={edit.status} onChange={set("status")}><option value="DRAFT">Draft (unpublished)</option><option value="PUBLISHED">Published</option></Select></Field>
               <Field label="Sort order"><Input type="number" value={edit.sort_order} onChange={set("sort_order")} /></Field>
             </div>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(Number(edit.show_in_footer))} onChange={set("show_in_footer")} className="accent-[#F53236]" /> Show link in the public footer</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(Number(edit.show_in_footer))} onChange={set("show_in_footer")} className="accent-brand-500" /> Show link in the public footer</label>
             {msg ? <Alert>{msg}</Alert> : null}
           </div>
         ) : null}

@@ -58,7 +58,7 @@ function IntegrationCard({ item, onChange }) {
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="h-4 w-4 accent-[#F53236]" /> Enabled
+          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="h-4 w-4 accent-brand-500" /> Enabled
         </label>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">

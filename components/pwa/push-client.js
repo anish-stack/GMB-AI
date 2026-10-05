@@ -76,12 +76,12 @@ export function PushClient() {
   return (
     <div className="fixed right-4 top-20 z-[55] w-[min(92vw,360px)] rounded-2xl border border-zinc-200 bg-white p-4 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-[#F53236] dark:bg-red-950/30"><BellRing className="h-4 w-4" /></span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-brand-500 dark:bg-red-950/30"><BellRing className="h-4 w-4" /></span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Get notified when AI finishes</p>
           <p className="mt-0.5 text-xs text-zinc-500">We&apos;ll ping this device when posts are ready - even if you switch tabs or close the app.</p>
           <div className="mt-3 flex gap-2">
-            <button type="button" className="rounded-lg bg-[#F53236] px-3 py-1.5 text-xs font-semibold text-white"
+            <button type="button" className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white"
               onClick={async () => {
                 setAsk(false);
                 const p = await Notification.requestPermission();

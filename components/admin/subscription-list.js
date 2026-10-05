@@ -74,7 +74,7 @@ export function SubscriptionList({ subscriptions }) {
               </td>
               <td className="px-4 py-2 text-xs text-zinc-500">{s.cancel_at_period_end ? "At period end" : "-"}</td>
               <td className="px-4 py-2 text-right">
-                <Link href={`/admin/tenants/${s.tenant_id}`} className="text-xs font-medium text-[#F53236]">Manage</Link>
+                <Link href={`/admin/tenants/${s.tenant_id}`} className="text-xs font-medium text-brand-500">Manage</Link>
               </td>
             </tr>
           ))}

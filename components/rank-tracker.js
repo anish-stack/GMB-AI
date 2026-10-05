@@ -87,7 +87,7 @@ export function RankTracker({ clients }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 px-5 py-3 text-xs text-zinc-500 dark:border-zinc-800">
           <span>{points} search points · covers {((form.grid_size - 1) * form.spacing_km).toFixed(1)} km across {client?.place_id ? "" : " · listing not linked yet"}</span>
-          <button type="button" className="inline-flex items-center gap-1 font-semibold text-[#F53236]" onClick={() => setLocate(true)}><MapPin className="h-3.5 w-3.5" /> {client?.place_id ? "Change linked listing" : "Link Google listing"}</button>
+          <button type="button" className="inline-flex items-center gap-1 font-semibold text-brand-500" onClick={() => setLocate(true)}><MapPin className="h-3.5 w-3.5" /> {client?.place_id ? "Change linked listing" : "Link Google listing"}</button>
         </div>
         {msg ? <div className="px-5 pb-4"><Alert>{msg}</Alert></div> : null}
       </Card>
@@ -158,7 +158,7 @@ export function RankScanView({ id }) {
   if (running) {
     return (
       <Card className="flex flex-col items-center gap-3 p-10 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F53236]" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
         <p className="font-semibold">Scanning &ldquo;{s.keyword}&rdquo; for {s.business_name}…</p>
         <p className="text-sm text-zinc-500">{s.points_done}/{s.grid_size * s.grid_size} points. You&apos;ll get a notification when it&apos;s done.</p>
       </Card>

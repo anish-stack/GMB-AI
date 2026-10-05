@@ -59,7 +59,7 @@ export default async function ApiDocs() {
           <p className="mt-3 max-w-2xl">Read clients, posting-plan usage, reviews and performance, and create AI-generated Google Business Profile posts from your own website or app. JSON over HTTPS.</p>
           <div className="mt-4 flex flex-wrap gap-2 text-sm">
             <span className="rounded-lg bg-zinc-100 px-3 py-1.5 font-mono text-xs dark:bg-zinc-800">Base URL: {base}</span>
-            <a href="/postman/gmb-ai-cloud.postman_collection.json" download className="rounded-lg bg-[#F53236] px-3 py-1.5 text-xs font-semibold text-white">Download Postman collection</a>
+            <a href="/postman/gmb-ai-cloud.postman_collection.json" download className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white">Download Postman collection</a>
             <a href="/postman/gmb-ai-cloud.postman_environment.json" download className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold dark:border-zinc-700">Postman environment</a>
           </div>
         </section>
@@ -131,7 +131,7 @@ if (plan.data.this_week.remaining > 0) {
   if (error) console.error(error.code, error.message);
   else console.log("post", data.id, data.status);
 }`}</Code>
-          <p className="text-sm">Questions? <Link href="/support" className="font-semibold text-[#F53236]">Open a support ticket</Link>.</p>
+          <p className="text-sm">Questions? <Link href="/support" className="font-semibold text-brand-500">Open a support ticket</Link>.</p>
         </section>
       </article>
     </div>

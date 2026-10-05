@@ -9,7 +9,7 @@ export function MaintenanceScreen({ title, message, eta, platformName, supportEm
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-white">{title}</h1>
         <p className="mt-3 whitespace-pre-line text-sm leading-6 text-zinc-600 dark:text-zinc-300">{message}</p>
         {eta ? <p className="mt-4 inline-block rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{eta}</p> : null}
-        {supportEmail ? <p className="mt-6 text-xs text-zinc-400">Need help? <a href={`mailto:${supportEmail}`} className="font-semibold text-[#F53236]">{supportEmail}</a></p> : null}
+        {supportEmail ? <p className="mt-6 text-xs text-zinc-400">Need help? <a href={`mailto:${supportEmail}`} className="font-semibold text-brand-500">{supportEmail}</a></p> : null}
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export function AiRunsTable({ runs }) {
             <td className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">{formatDate(r.created_at, true)}</td>
             <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">
               {r.task_id ? (
-                <Link href={`/gmb/tasks/${r.task_id}`} className="hover:text-[#F53236] dark:text-brand-400">{r.business_name || "-"}</Link>
+                <Link href={`/gmb/tasks/${r.task_id}`} className="hover:text-brand-500 dark:text-brand-400">{r.business_name || "-"}</Link>
               ) : (r.business_name || "-")}
             </td>
             <td className="px-4 py-2 font-medium text-zinc-700 dark:text-zinc-300">{r.agent}</td>

@@ -55,7 +55,7 @@ export function CardBody({ className, children }) {
 }
 
 const BUTTONS = {
-  primary: "bg-[#F53236] text-white shadow-sm shadow-[#F53236]/25 hover:bg-[#e81d22] disabled:bg-brand-300",
+  primary: "bg-brand-500 text-white shadow-sm shadow-brand-500/25 hover:bg-brand-600 disabled:bg-brand-300",
   secondary: "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 ring-1 ring-inset ring-zinc-300 dark:ring-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:ring-zinc-400",
   success: "bg-emerald-600 text-white shadow-sm shadow-emerald-600/25 hover:bg-emerald-500 disabled:bg-emerald-300",
   danger: "bg-rose-600 text-white shadow-sm shadow-rose-600/25 hover:bg-rose-500 disabled:bg-rose-300",
@@ -228,7 +228,7 @@ export function EmptyState({ icon: Icon, title, text, action }) {
 
 export function PanelHeader({ icon: Icon, tone = "red", title, subtitle, count, actions }) {
   const tones = {
-    red: "bg-red-50 text-[#F53236] dark:bg-red-950/30",
+    red: "bg-red-50 text-brand-500 dark:bg-red-950/30",
     amber: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400",
     violet: "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400",
     blue: "bg-sky-50 text-sky-600 dark:bg-sky-950/30 dark:text-sky-400",

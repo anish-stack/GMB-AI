@@ -146,6 +146,15 @@ export function TenantDetail({ tenant, ent, plans }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
+          <CardHeader title="Facebook & Instagram (test mode)" subtitle="Only tenants enabled here see the Social tab: Facebook page posting and Instagram auto-DM" />
+          <CardBody className="flex items-center justify-between gap-3">
+            <p className="text-sm">{tenant.social_enabled ? "Enabled for this tenant" : "Disabled"}</p>
+            <Button variant={tenant.social_enabled ? "dangerGhost" : "primary"} disabled={busy === "social"} onClick={() => call({ action: "social", enabled: !tenant.social_enabled }, "social")}>
+              {tenant.social_enabled ? "Disable" : "Enable"}
+            </Button>
+          </CardBody>
+        </Card>
+        <Card>
           <CardHeader title="Grant AI credits" subtitle="Purchased credits never expire. Plan credits reset each cycle." />
           <CardBody className="flex flex-wrap items-end gap-3">
             <Field label="Credits" className="w-32"><Input type="number" value={credits} onChange={(e) => setCredits(e.target.value)} /></Field>

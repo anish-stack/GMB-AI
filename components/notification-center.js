@@ -68,7 +68,7 @@ export function NotificationCenter() {
                       {n.body ? <p className="mt-0.5 whitespace-pre-line text-sm text-zinc-500 dark:text-zinc-400">{n.body}</p> : null}
                       <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
                         <span>{formatDate(n.created_at, true)}</span>
-                        {n.link ? <Link href={n.link} onClick={() => !n.is_read && read([n.id])} className="font-semibold text-[#F53236] hover:underline">Open</Link> : null}
+                        {n.link ? <Link href={n.link} onClick={() => !n.is_read && read([n.id])} className="font-semibold text-brand-500 hover:underline">Open</Link> : null}
                         {!n.is_read ? <button type="button" onClick={() => read([n.id])} className="font-medium hover:text-zinc-700">Mark read</button> : <span>Read {n.read_at ? formatDate(n.read_at, true) : ""}</span>}
                       </div>
                     </div>

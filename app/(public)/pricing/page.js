@@ -54,7 +54,7 @@ export default async function PricingPage() {
             {Number(settings.allow_signup) === 1 ? (
               <Link
                 href={`/signup?plan=${p.slug}`}
-                className="mt-6 rounded-xl bg-[#F53236] px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-[#e81d22]"
+                className="mt-6 rounded-xl bg-brand-500 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-brand-600"
               >
                 {Number(p.price_monthly) === 0 ? "Start free" : "Choose plan"}
               </Link>

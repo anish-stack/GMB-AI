@@ -83,7 +83,7 @@ export function TaskQueueTable({ tasks, bulkEnabled = true, canPublish = true })
             <td className="px-4 py-1.5" colSpan={9}>
               {selectableIds.length > 0 ? (
                 <label className="inline-flex items-center gap-2 text-xs text-zinc-400">
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-3.5 w-3.5 rounded border-zinc-300 text-[#F53236] focus:ring-brand-500/30" />
+                  <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-3.5 w-3.5 rounded border-zinc-300 text-brand-500 focus:ring-brand-500/30" />
                   Select all reviewable
                 </label>
               ) : null}
@@ -100,7 +100,7 @@ export function TaskQueueTable({ tasks, bulkEnabled = true, canPublish = true })
                     type="checkbox"
                     checked={selected.has(t.id)}
                     onChange={() => toggleOne(t.id)}
-                    className="h-3.5 w-3.5 rounded border-zinc-300 text-[#F53236] focus:ring-brand-500/30"
+                    className="h-3.5 w-3.5 rounded border-zinc-300 text-brand-500 focus:ring-brand-500/30"
                   />
                 ) : null}
               </td>
@@ -118,7 +118,7 @@ export function TaskQueueTable({ tasks, bulkEnabled = true, canPublish = true })
               <td className="px-4 py-2"><StatusBadge status={t.status} /></td>
               <td className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">{formatDate(t.updated_at, true)}</td>
               <td className="px-4 py-2 text-right">
-                <Link href={`/gmb/tasks/${t.id}`} className="text-xs font-medium text-[#F53236] dark:text-brand-400 hover:text-[#e81d22] dark:hover:text-brand-300">Open</Link>
+                <Link href={`/gmb/tasks/${t.id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Open</Link>
               </td>
             </tr>
           );

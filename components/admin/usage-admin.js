@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/utils";
 
 function Bar({ v, max }) {
   const pct = max ? Math.min(100, Math.round((v / max) * 100)) : 0;
-  return <div className="h-1.5 w-24 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"><div className={`h-full ${pct >= 100 ? "bg-rose-500" : "bg-[#F53236]"}`} style={{ width: `${pct}%` }} /></div>;
+  return <div className="h-1.5 w-24 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"><div className={`h-full ${pct >= 100 ? "bg-rose-500" : "bg-brand-500"}`} style={{ width: `${pct}%` }} /></div>;
 }
 
 export function ClientUsageAdmin() {
@@ -91,7 +91,7 @@ export function ApiUsageAdmin() {
             <CardHeader title={`Requests - last 30 days (${total.toLocaleString("en-IN")})`} />
             <CardBody>
               <div className="flex h-28 items-end gap-1">
-                {data.byDay.map((d) => <div key={d.day} title={`${d.day}: ${d.requests} req, ${d.errors} err, ${d.throttled} throttled`} className="flex-1 rounded-t bg-[#F53236]/70" style={{ height: `${(Number(d.requests) / max) * 100}%` }} />)}
+                {data.byDay.map((d) => <div key={d.day} title={`${d.day}: ${d.requests} req, ${d.errors} err, ${d.throttled} throttled`} className="flex-1 rounded-t bg-brand-500/70" style={{ height: `${(Number(d.requests) / max) * 100}%` }} />)}
                 {!data.byDay.length ? <p className="text-xs text-zinc-400">No API traffic yet.</p> : null}
               </div>
             </CardBody>

@@ -34,7 +34,7 @@ export function ExpiryAlert({ ent }) {
         <AlertTriangle className="h-4 w-4 shrink-0" />
         {messages.join(" ")}
       </span>
-      <Link href="/billing" className="shrink-0 rounded-xl bg-[#F53236] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#e81d22]">
+      <Link href="/billing" className="shrink-0 rounded-xl bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600">
         Go to billing
       </Link>
     </div>

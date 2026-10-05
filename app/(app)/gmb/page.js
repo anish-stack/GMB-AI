@@ -29,7 +29,7 @@ export default async function GmbListPage() {
           {rows.length - live ? ` Others use ${provider.isMock ? "demo (mock) data" : "Google once connected"} - connect them from the client page.` : ""}
         </p>
       </div>
-      <Link href="/gmb/import" className="inline-flex items-center gap-1.5 rounded-xl bg-[#F53236] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#e81d22]">
+      <Link href="/gmb/import" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">
         Import all listings from Google
       </Link>
       </div>

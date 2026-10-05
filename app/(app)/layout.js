@@ -28,6 +28,7 @@ export default async function AppLayout({ children }) {
       aiProvider={providerInfo()}
       gmbProvider={gmbProviderInfo()}
       workspace={ctx.tenant?.name}
+      themeColor={ctx.tenant?.theme_color || null}
       plan={ctx.plan?.name}
       perms={perms}
       creditsLeft={ctx.ent.wallet.balance}

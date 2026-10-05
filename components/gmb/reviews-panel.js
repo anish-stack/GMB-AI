@@ -272,7 +272,7 @@ export function ReviewsPanel({ clientId, reviewUrl, business }) {
             </Select>
           </div>
           {filtersOn ? (
-            <button type="button" className="text-xs font-semibold text-[#F53236]" onClick={() => { setStatus("all"); setRating("all"); setQ(""); }}>
+            <button type="button" className="text-xs font-semibold text-brand-500" onClick={() => { setStatus("all"); setRating("all"); setQ(""); }}>
               Clear filters
             </button>
           ) : null}

@@ -132,7 +132,7 @@ function AddMediaModal({ clientId, open, onClose, onAdded }) {
           <label
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); pick(e.dataTransfer.files?.[0]); }}
-            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center hover:border-[#F53236] dark:border-zinc-700"
+            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center hover:border-brand-500 dark:border-zinc-700"
           >
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
