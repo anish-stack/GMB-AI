@@ -103,7 +103,7 @@ function ThemePreviewModal({ t, onClose, onPick, active }) {
           <iframe
             src={t.previewImage}
             title={t.name}
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts"
             className="h-full border-0 bg-white transition-all duration-300"
             style={{ width: widths[device], maxWidth: "100%" }}
           />
@@ -136,7 +136,7 @@ function ThemeCard({ t, active, onPick }) {
                   title={t.name}
                   loading="lazy"
                   tabIndex={-1}
-                  sandbox="allow-scripts allow-same-origin"
+                  sandbox="allow-scripts"
                   className="pointer-events-none absolute left-0 top-0 h-[1000px] w-[1600px] origin-top-left border-0 bg-white"
                   style={{ transform: "scale(var(--s, 0.2))" }}
                   ref={(el) => {
