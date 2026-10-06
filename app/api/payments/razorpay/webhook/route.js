@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyWebhook } from "@/lib/payments/razorpay.js";
 import { completeSignupFromWebhook } from "@/lib/saas/signup.js";
 import { settleInvoiceFromWebhook } from "@/lib/payments/invoicePayments.js";
+import { handleSubscriptionWebhook } from "@/lib/payments/autopay.js";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export async function POST(request) {
 
   try {
     const event = JSON.parse(raw);
+    // autopay (subscriptions) first
+    const sub = await handleSubscriptionWebhook(event);
+    if (sub) return NextResponse.json({ ok: true, ...sub });
     const payment = event?.payload?.payment?.entity;
     const orderId = payment?.order_id || event?.payload?.order?.entity?.id;
     if (!orderId || !payment || payment.status !== "captured") return NextResponse.json({ ok: true, ignored: true });

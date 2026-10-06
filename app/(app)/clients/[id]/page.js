@@ -20,7 +20,6 @@ export default async function ClientDetailPage({ params, searchParams }) {
   const sp = await searchParams;
   const client = await getClient(Number(id), ctx.tenantId);
   if (!client) notFound();
-  console.log("client",client)
 
   if (sp?.edit) {
     const employees = await listEmployeesForAssignment(ctx.tenantId);

@@ -175,7 +175,6 @@ export function TaskReview({
 }) {
   const router = useRouter();
   const [task, setTask] = useState(initial);
-  console.log("task", task);
   const [form, setForm] = useState({
     title: initial.title || "",
     description: initial.description || "",
@@ -615,6 +614,11 @@ const fields = () => ({
               <div className="flex flex-wrap gap-2 pt-1">
                 {isPublished ? (
                   <>
+                    {!livePostRemoved && (task.live_url || task.client_maps_url) ? (
+                      <a href={task.live_url || task.client_maps_url} target="_blank" rel="noreferrer">
+                        <Button type="button">View on Google ↗</Button>
+                      </a>
+                    ) : null}
                     <Button
                       variant="secondary"
                       onClick={() => act("update_post", { fields: fields() })}

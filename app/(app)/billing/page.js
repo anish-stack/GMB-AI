@@ -1,3 +1,4 @@
+import { AutopayCard } from "@/components/autopay-card";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { BillingClient } from "@/components/billing-client";
 import { listPlans, listCreditPacks, listInvoices, getSubscription } from "@/lib/saas/billing.js";
@@ -46,6 +47,7 @@ export default async function BillingPage() {
           Your subscription, usage against plan limits, AI credit wallet and invoices.
         </p>
       </div>
+      <AutopayCard canManage={ctx.can("billing.manage")} />
       <BillingClient data={JSON.parse(JSON.stringify(data))} canManage={ctx.can("billing.manage")} />
     </div>
   );

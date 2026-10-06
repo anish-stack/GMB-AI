@@ -16,9 +16,10 @@ import {
   Search,
   Star,
   Wrench,
+  ArrowRight,
 } from "lucide-react";
 import { providerFor } from "@/lib/gmb/provider.js";
-import { Badge, Card, Alert, EmptyState } from "@/components/ui";
+import { Badge, Card, Alert, EmptyState, Button } from "@/components/ui";
 import { MockBadge } from "@/components/status-badge";
 import { GenerateNow } from "@/components/generate-now";
 import { GmbReportActions } from "@/components/gmb-report-actions";
@@ -519,7 +520,7 @@ export default async function GmbProfilePage({ params, searchParams }) {
           href="/gmb/tasks"
           className="text-xs font-semibold text-brand-500 hover:underline"
         >
-          Review queue →
+          Review queue <ArrowRight className="inline h-3.5 w-3.5" />
         </Link>
       </div>
       {postsR.status === "rejected" ? (
@@ -557,6 +558,19 @@ export default async function GmbProfilePage({ params, searchParams }) {
                     {p.status}
                   </Badge>
                   <span>{formatDate(p.published_at, true)}</span>
+
+                 {p.status !== "DELETED" && (p.search_url || profile.maps_url) ? (
+  <Button
+    as="a"
+    href={p.search_url || profile.maps_url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="bg-blue-600 shadow-blue-600/25 hover:bg-blue-700"
+  >
+    View on Google
+    <ExternalLink className="h-4 w-4" strokeWidth={2.2} />
+  </Button>
+) : null}
                 </div>
               </div>
             </li>
@@ -613,7 +627,12 @@ export default async function GmbProfilePage({ params, searchParams }) {
               Edit profile
             </Link>
 
-  
+            <Link
+              href={`/gmb/${clientId}/audit`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              Profile audit
+            </Link>
             <GmbSyncButton clientId={clientId} />
 
             <GenerateNow clientId={clientId} />
@@ -629,10 +648,10 @@ export default async function GmbProfilePage({ params, searchParams }) {
           </div>
         </div>
       </Card>
-          <GmbReportActions
-              clientId={clientId}
-              ownerEmail={owned?.google_email || ""}
-            />
+      <GmbReportActions
+        clientId={clientId}
+        ownerEmail={owned?.google_email || ""}
+      />
 
       <GmbDetailTabs
         clientId={clientId}
@@ -644,8 +663,6 @@ export default async function GmbProfilePage({ params, searchParams }) {
         canConnect={canConnect}
         social={Number(ctx.tenant?.social_enabled) === 1}
       />
-
-      
     </div>
   );
 }

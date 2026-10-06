@@ -118,6 +118,9 @@ export function TaskQueueTable({ tasks, bulkEnabled = true, canPublish = true })
               <td className="px-4 py-2"><StatusBadge status={t.status} /></td>
               <td className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">{formatDate(t.updated_at, true)}</td>
               <td className="px-4 py-2 text-right">
+                {t.status === "PUBLISHED" && (t.live_url || t.client_maps_url) ? (
+                  <a href={t.live_url || t.client_maps_url} target="_blank" rel="noreferrer" className="mr-3 text-xs font-semibold text-emerald-600 hover:underline">View ↗</a>
+                ) : null}
                 <Link href={`/gmb/tasks/${t.id}`} className="text-xs font-medium text-brand-500 dark:text-brand-400 hover:text-brand-600 dark:hover:text-brand-300">Open</Link>
               </td>
             </tr>

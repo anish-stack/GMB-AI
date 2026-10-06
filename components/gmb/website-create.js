@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ImageIcon,
   LayoutTemplate,
   Loader2,
@@ -20,6 +22,78 @@ import {
 } from "lucide-react";
 import { Button, Input, Alert, Skeleton, Badge, Card } from "@/components/ui";
 import { apiFetch } from "@/lib/hooks/use-api";
+
+const DEFAULT_PAGE_SIZE = 6;
+const PAGE_SIZES = [6, 12, 24];
+const FRAME_W = 1600;
+const FRAME_H = 1000;
+
+/* ---------- helpers ---------- */
+
+/** Page list with ellipsis, e.g. [1, "...", 4, 5, 6, "...", 12] */
+function buildPages(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const set = new Set([1, total, current, current - 1, current + 1]);
+  const nums = [...set].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+  const out = [];
+  nums.forEach((n, i) => {
+    if (i && n - nums[i - 1] > 1) out.push("...");
+    out.push(n);
+  });
+  return out;
+}
+
+/** Scales a fixed-size desktop iframe down to fit its parent width. */
+function ScaledFrame({ src, title }) {
+  const frameRef = useRef(null);
+
+  useEffect(() => {
+    const el = frameRef.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+    const apply = () =>
+      el.style.setProperty("--s", String(parent.clientWidth / FRAME_W));
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <iframe
+      ref={frameRef}
+      src={src}
+      title={title}
+      loading="lazy"
+      tabIndex={-1}
+      sandbox="allow-scripts"
+      className="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-white"
+      style={{
+        width: FRAME_W,
+        height: FRAME_H,
+        transform: "scale(var(--s, 0.2))",
+      }}
+    />
+  );
+}
+
+function StepHeader({ n, title, hint }) {
+  return (
+    <div className="mb-4 flex items-start gap-3">
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-xs font-bold text-white dark:bg-white dark:text-zinc-900">
+        {n}
+      </span>
+      <div className="min-w-0">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">
+          {title}
+        </h2>
+        {hint ? <p className="mt-0.5 text-xs text-zinc-500">{hint}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- preview modal ---------- */
 
 function ThemePreviewModal({ t, onClose, onPick, active }) {
   const [device, setDevice] = useState("desktop");
@@ -38,22 +112,28 @@ function ThemePreviewModal({ t, onClose, onPick, active }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${t.name} preview`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="flex h-[90vh] w-full relative top-[-20%] max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900"
+        className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <div className="min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 px-3 py-3 sm:px-4 dark:border-zinc-800">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
               {t.name}
             </p>
-            <p className="truncate text-xs text-zinc-500">{t.description}</p>
+            {t.description ? (
+              <p className="truncate text-xs text-zinc-500">{t.description}</p>
+            ) : null}
           </div>
+
           <div className="flex items-center gap-2">
-            <div className="flex overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+            <div className="hidden overflow-hidden rounded-lg border border-zinc-200 sm:flex dark:border-zinc-700">
               {[
                 ["desktop", Monitor],
                 ["tablet", Tablet],
@@ -63,7 +143,12 @@ function ThemePreviewModal({ t, onClose, onPick, active }) {
                   key={k}
                   type="button"
                   onClick={() => setDevice(k)}
-                  className={`p-1.5 ${device === k ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900" : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
+                  aria-pressed={device === k}
+                  className={`p-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500 ${
+                    device === k
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                      : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
                   title={k}
                 >
                   <Icon className="h-4 w-4" />
@@ -99,7 +184,8 @@ function ThemePreviewModal({ t, onClose, onPick, active }) {
             </button>
           </div>
         </div>
-        <div className="flex flex-1 justify-center overflow-auto bg-zinc-100 p-0 dark:bg-zinc-950">
+
+        <div className="flex flex-1 justify-center overflow-auto bg-zinc-100 dark:bg-zinc-950">
           <iframe
             src={t.previewImage}
             title={t.name}
@@ -113,6 +199,8 @@ function ThemePreviewModal({ t, onClose, onPick, active }) {
   );
 }
 
+/* ---------- theme card ---------- */
+
 function ThemeCard({ t, active, onPick }) {
   const [broken, setBroken] = useState(false);
   const [open, setOpen] = useState(false);
@@ -123,31 +211,25 @@ function ThemeCard({ t, active, onPick }) {
       <div
         role="button"
         tabIndex={0}
+        aria-pressed={active}
         onClick={onPick}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onPick()}
-        className={`group cursor-pointer overflow-hidden rounded-2xl border-2 bg-white text-left transition dark:bg-zinc-900 ${active ? "border-brand-500 shadow-lg shadow-red-500/10" : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800"}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPick();
+          }
+        }}
+        className={`group flex cursor-pointer flex-col overflow-hidden rounded-2xl border-2 bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 dark:bg-zinc-900 ${
+          active
+            ? "border-brand-500 shadow-lg shadow-red-500/10"
+            : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+        }`}
       >
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
           {t.previewImage && !broken ? (
             isHtml ? (
               <>
-                <iframe
-                  src={t.previewImage}
-                  title={t.name}
-                  loading="lazy"
-                  tabIndex={-1}
-                  sandbox="allow-scripts"
-                  className="pointer-events-none absolute left-0 top-0 h-[1000px] w-[1600px] origin-top-left border-0 bg-white"
-                  style={{ transform: "scale(var(--s, 0.2))" }}
-                  ref={(el) => {
-                    if (!el) return;
-                    const p = el.parentElement;
-                    const apply = () =>
-                      el.style.setProperty("--s", String(p.clientWidth / 1600));
-                    apply();
-                    new ResizeObserver(apply).observe(p);
-                  }}
-                />
+                <ScaledFrame src={t.previewImage} title={t.name} />
                 <span className="absolute inset-0" />
               </>
             ) : (
@@ -174,35 +256,37 @@ function ThemeCard({ t, active, onPick }) {
                 e.stopPropagation();
                 setOpen(true);
               }}
-              className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 rounded-lg bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 backdrop-blur transition group-hover:opacity-100 focus:opacity-100"
+              className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 rounded-lg bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur transition focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
             >
               <Eye className="h-3.5 w-3.5" /> Preview
             </button>
           ) : null}
 
           {active ? (
-            <span className="absolute right-2 top-2 z-10 rounded-full bg-brand-500 p-1 text-white">
+            <span className="absolute right-2 top-2 z-10 rounded-full bg-brand-500 p-1 text-white shadow">
               <CheckCircle2 className="h-4 w-4" />
             </span>
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-2 p-3">
-          <p
-            className="truncate text-sm font-semibold text-zinc-900 dark:text-white"
-            title={t.name}
-          >
-            {t.name}
-          </p>
-          <Badge tone={t.pageType === "multi" ? "violet" : "blue"}>
-            {t.pageType === "multi" ? "Multi-page" : "One page"}
-          </Badge>
+        <div className="flex flex-1 flex-col gap-1.5 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p
+              className="truncate text-sm font-semibold text-zinc-900 dark:text-white"
+              title={t.name}
+            >
+              {t.name}
+            </p>
+            <Badge tone={t.pageType === "multi" ? "violet" : "blue"}>
+              {t.pageType === "multi" ? "Multi-page" : "One page"}
+            </Badge>
+          </div>
+          {t.description ? (
+            <p className="line-clamp-2 text-xs text-zinc-500">
+              {t.description}
+            </p>
+          ) : null}
         </div>
-        {t.description ? (
-          <p className="line-clamp-2 px-3 pb-3 text-xs text-zinc-500">
-            {t.description}
-          </p>
-        ) : null}
       </div>
 
       {open ? (
@@ -217,6 +301,130 @@ function ThemeCard({ t, active, onPick }) {
   );
 }
 
+/* ---------- pagination ---------- */
+
+function Pagination({
+  page,
+  totalPages,
+  total,
+  from,
+  to,
+  pageSize,
+  onPage,
+  onPageSize,
+}) {
+  const pages = buildPages(page, totalPages);
+  const btn =
+    "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500";
+
+  return (
+    <div className="mt-5 flex flex-col items-center justify-between gap-3 border-t border-zinc-100 pt-4 sm:flex-row dark:border-zinc-800">
+      <div className="flex items-center gap-3 text-xs text-zinc-500">
+        <span>
+          Showing {from}-{to} of {total}
+        </span>
+        <label className="flex items-center gap-1.5">
+          <span className="sr-only sm:not-sr-only">Per page</span>
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSize(Number(e.target.value))}
+            className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+          >
+            {PAGE_SIZES.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {totalPages > 1 ? (
+        <nav aria-label="Theme pages" className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onPage(page - 1)}
+            disabled={page === 1}
+            aria-label="Previous page"
+            className={`${btn} text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800`}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {pages.map((p, i) =>
+            p === "..." ? (
+              <span key={`gap-${i}`} className="px-1 text-xs text-zinc-400">
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPage(p)}
+                aria-current={p === page ? "page" : undefined}
+                className={`${btn} ${
+                  p === page
+                    ? "bg-brand-500 text-white"
+                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
+
+          <button
+            type="button"
+            onClick={() => onPage(page + 1)}
+            disabled={page === totalPages}
+            aria-label="Next page"
+            className={`${btn} text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800`}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </nav>
+      ) : null}
+    </div>
+  );
+}
+
+/* ---------- image option ---------- */
+
+function ImageOption({ selected, disabled, onSelect, icon: Icon, title, text }) {
+  return (
+    <label
+      className={`block rounded-2xl border-2 p-4 transition focus-within:outline focus-within:outline-2 focus-within:outline-brand-500 ${
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+      } ${
+        selected
+          ? "border-brand-500 bg-red-50/40 dark:bg-red-950/10"
+          : "border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+      }`}
+    >
+      <input
+        type="radio"
+        name="img"
+        className="sr-only"
+        disabled={disabled}
+        checked={selected}
+        onChange={onSelect}
+      />
+      <div className="flex items-start justify-between gap-2">
+        <p className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-white">
+          {Icon}
+          {title}
+        </p>
+        {selected ? (
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-500" />
+        ) : null}
+      </div>
+      <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">{text}</p>
+    </label>
+  );
+}
+
+/* ---------- page ---------- */
+
 /** Separate page: /gmb/:id/website/new */
 export function CreateWebsitePage({ clientId, business, subtitle }) {
   const router = useRouter();
@@ -225,12 +433,15 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
   const [ai, setAi] = useState(null);
   const [theme, setTheme] = useState("");
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [slug, setSlug] = useState("");
   const [slugState, setSlugState] = useState(null);
   const [images, setImages] = useState("manual");
   const [fill, setFill] = useState(true);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const gridTop = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -288,9 +499,29 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
     }
   }
 
-  const shown = (themes || []).filter(
-    (t) => filter === "all" || t.pageType === filter,
+  const filtered = useMemo(
+    () =>
+      (themes || []).filter((t) => filter === "all" || t.pageType === filter),
+    [themes, filter],
   );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const shown = filtered.slice(start, start + pageSize);
+
+  function goPage(p) {
+    setPage(Math.min(Math.max(1, p), totalPages));
+    gridTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function changeFilter(k) {
+    setFilter(k);
+    setPage(1);
+  }
+  function changePageSize(n) {
+    setPageSize(n);
+    setPage(1);
+  }
+
   const chosen = themes?.find((t) => t.id === theme);
   const filled = pre
     ? [
@@ -309,47 +540,71 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
         ["SEO title, description & keywords", pre.seo?.title],
       ]
     : [];
+  const filledCount = filled.filter(([, ok]) => ok).length;
   const ready = theme && slugState?.available && !busy;
+  const imageMode = fill ? images : "manual";
+
+  const createLabel = (
+    <>
+      {busy ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Sparkles className="h-4 w-4" />
+      )}{" "}
+      Create & fill website
+    </>
+  );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+    <div className="mx-auto max-w-7xl space-y-5 pb-28 xl:pb-0">
+      {/* header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
           <Link
             href={`/gmb/${clientId}?tab=website`}
             className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to {business}
           </Link>
-          <h1 className="mt-1 text-xl font-bold text-zinc-900 dark:text-white">
+          <h1 className="mt-1 text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">
             Create website from Google
           </h1>
-          <p className="text-sm text-zinc-500">
+          <p className="truncate text-sm text-zinc-500">
             {business}
             {subtitle ? ` · ${subtitle}` : ""}
           </p>
         </div>
-        <Button onClick={create} disabled={!ready}>
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}{" "}
-          Create & fill website
+        <Button
+          onClick={create}
+          disabled={!ready}
+          className="hidden sm:inline-flex"
+        >
+          {createLabel}
         </Button>
       </div>
 
       {err ? <Alert>{err}</Alert> : null}
 
-      <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-        <div className="space-y-5">
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-5">
           {/* 1. theme */}
-          <Card className="p-4 sm:p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                1. Choose a theme
-              </p>
-              <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 text-xs dark:bg-zinc-800">
+          <Card className="p-4 sm:p-6">
+            <div ref={gridTop} className="scroll-mt-4" />
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <StepHeader
+                n={1}
+                title="Choose a theme"
+                hint={
+                  themes
+                    ? `${filtered.length} theme${filtered.length === 1 ? "" : "s"} available`
+                    : "Loading themes..."
+                }
+              />
+              <div
+                role="tablist"
+                aria-label="Theme type"
+                className="flex w-full gap-1 rounded-xl bg-zinc-100 p-1 text-xs sm:w-auto dark:bg-zinc-800"
+              >
                 {[
                   ["all", "All"],
                   ["single", "One page"],
@@ -358,43 +613,64 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
                   <button
                     key={k}
                     type="button"
-                    onClick={() => setFilter(k)}
-                    className={`rounded-lg px-3 py-1.5 font-semibold ${filter === k ? "bg-white shadow-sm dark:bg-zinc-900" : "text-zinc-500"}`}
+                    role="tab"
+                    aria-selected={filter === k}
+                    onClick={() => changeFilter(k)}
+                    className={`flex-1 rounded-lg px-3 py-1.5 font-semibold transition sm:flex-none ${
+                      filter === k
+                        ? "bg-white shadow-sm dark:bg-zinc-900 dark:text-white"
+                        : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                    }`}
                   >
                     {l}
                   </button>
                 ))}
               </div>
             </div>
+
             {!themes ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="aspect-[16/12]" />
+                {Array.from({ length: DEFAULT_PAGE_SIZE }, (_, i) => (
+                  <Skeleton key={i} className="aspect-[16/13]" />
                 ))}
               </div>
             ) : shown.length ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {shown.map((t) => (
-                  <ThemeCard
-                    key={t.id}
-                    t={t}
-                    active={theme === t.id}
-                    onPick={() => setTheme(t.id)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {shown.map((t) => (
+                    <ThemeCard
+                      key={t.id}
+                      t={t}
+                      active={theme === t.id}
+                      onPick={() => setTheme(t.id)}
+                    />
+                  ))}
+                </div>
+                <Pagination
+                  page={safePage}
+                  totalPages={totalPages}
+                  total={filtered.length}
+                  from={start + 1}
+                  to={start + shown.length}
+                  pageSize={pageSize}
+                  onPage={goPage}
+                  onPageSize={changePageSize}
+                />
+              </>
             ) : (
-              <p className="text-sm text-zinc-500">
-                No themes available in the website builder.
+              <p className="rounded-xl border border-dashed border-zinc-200 p-6 text-center text-sm text-zinc-500 dark:border-zinc-800">
+                No themes match this filter. Try &ldquo;All&rdquo;.
               </p>
             )}
           </Card>
 
           {/* 2. address */}
-          <Card className="p-4 sm:p-5">
-            <p className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
-              2. Web address
-            </p>
+          <Card className="p-4 sm:p-6">
+            <StepHeader
+              n={2}
+              title="Web address"
+              hint="3-40 letters, numbers and dashes"
+            />
             <div className="flex max-w-xl items-center gap-2">
               <Input
                 value={slug}
@@ -404,6 +680,7 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
                   )
                 }
                 maxLength={40}
+                aria-label="Web address"
               />
               {slugState ? (
                 slugState.available ? (
@@ -413,101 +690,103 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
                 )
               ) : null}
             </div>
-            <p className="mt-1.5 text-xs text-zinc-500">
-              {slugState?.url ? (
-                slugState.available ? (
+            {slugState?.url ? (
+              <p className="mt-2 break-all text-xs text-zinc-500">
+                {slugState.available ? (
                   <>
                     Your site: <b>{slugState.url}</b>
                   </>
                 ) : (
                   `${slugState.url} is taken - try another`
-                )
-              ) : (
-                "3-40 letters, numbers and dashes"
-              )}
-            </p>
+                )}
+              </p>
+            ) : null}
           </Card>
 
-          {/* content source */}
-          <Card className="p-4 sm:p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 accent-brand-500"
-                checked={fill}
-                onChange={(e) => setFill(e.target.checked)}
-              />
-              <span>
-                <span className="block text-sm font-semibold text-zinc-900 dark:text-white">
+          {/* 3. content + images */}
+          <Card className="p-4 sm:p-6">
+            <StepHeader n={3} title="Content and images" />
+
+            <div className="flex items-start justify-between gap-4 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-zinc-900 dark:text-white">
                   Fill with Google Business Profile data
-                </span>
-                <span className="block text-xs text-zinc-500">
-                  Untick to start from the theme&apos;s blank template and write
-                  everything yourself.
-                </span>
-              </span>
-            </label>
-          </Card>
-
-          {/* 3. images */}
-          <Card className="p-4 sm:p-5">
-            <p className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
-              3. Images
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              <label
-                className={`cursor-pointer rounded-2xl border-2 p-4 ${images === "manual" ? "border-brand-500 bg-red-50/40 dark:bg-red-950/10" : "border-zinc-200 dark:border-zinc-800"}`}
+                </p>
+                <p className="mt-0.5 text-xs text-zinc-500">
+                  Turn off to start from the theme&apos;s blank template and
+                  write everything yourself.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={fill}
+                aria-label="Fill with Google Business Profile data"
+                onClick={() => setFill((v) => !v)}
+                className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
+                  fill ? "bg-brand-500" : "bg-zinc-300 dark:bg-zinc-600"
+                }`}
               >
-                <input
-                  type="radio"
-                  name="img"
-                  className="sr-only"
-                  checked={images === "manual"}
-                  onChange={() => setImages("manual")}
+                <span
+                  className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    fill ? "translate-x-5" : ""
+                  }`}
                 />
-                <p className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-white">
-                  <ImageIcon className="h-4 w-4" /> Google photos + manual
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Uses the listing&apos;s Google photos where available. Upload
-                  the rest yourself in the builder. No credits.
-                </p>
-              </label>
-              <label
-                className={`rounded-2xl border-2 p-4 ${!ai?.available ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${images === "ai" ? "border-brand-500 bg-red-50/40 dark:bg-red-950/10" : "border-zinc-200 dark:border-zinc-800"}`}
-              >
-                <input
-                  type="radio"
-                  name="img"
-                  className="sr-only"
-                  disabled={!ai?.available}
-                  checked={images === "ai"}
-                  onChange={() => setImages("ai")}
-                />
-                <p className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-white">
-                  <Sparkles className="h-4 w-4 text-brand-500" /> Generate with
-                  AI
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {ai?.available
-                    ? `${ai.images} images - hero, about and one per service${ai.credits ? ` · ${ai.credits} credits` : ""}. Made in the background (~1-2 min); you get a notification.`
-                    : "No AI image provider configured (Gemini / OpenAI / Hugging Face)."}
-                </p>
-              </label>
+              </button>
             </div>
+
+            <div
+              className={`mt-4 grid gap-3 md:grid-cols-2 ${fill ? "" : "pointer-events-none opacity-50"}`}
+              aria-disabled={!fill}
+            >
+              <ImageOption
+                selected={imageMode === "manual"}
+                disabled={!fill}
+                onSelect={() => setImages("manual")}
+                icon={<ImageIcon className="h-4 w-4" />}
+                title="Google photos + manual"
+                text="Uses the listing's Google photos where available. Upload the rest yourself in the builder. No credits."
+              />
+              <ImageOption
+                selected={imageMode === "ai"}
+                disabled={!fill || !ai?.available}
+                onSelect={() => setImages("ai")}
+                icon={<Sparkles className="h-4 w-4 text-brand-500" />}
+                title="Generate with AI"
+                text={
+                  ai?.available
+                    ? `${ai.images} images - hero, about and one per service${ai.credits ? ` · ${ai.credits} credits` : ""}. Made in the background (~1-2 min); you get a notification.`
+                    : "No AI image provider configured (Gemini / OpenAI / Hugging Face)."
+                }
+              />
+            </div>
+            {!fill ? (
+              <p className="mt-2 text-xs text-zinc-500">
+                Image options apply only when Google data is used.
+              </p>
+            ) : null}
           </Card>
         </div>
 
         {/* summary */}
-        <div className="space-y-4 xl:sticky xl:top-4 xl:self-start">
+        <aside className="min-w-0 space-y-4 xl:sticky xl:top-4">
           <Card className="p-4 sm:p-5">
-            <p className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
-              Filled automatically from Google
-            </p>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                Filled from Google
+              </p>
+              {pre ? (
+                <span className="text-xs font-semibold text-zinc-500">
+                  {filledCount}/{filled.length}
+                </span>
+              ) : null}
+            </div>
             {!pre ? (
               <Skeleton className="h-48" />
             ) : (
-              <ul className="space-y-2 text-sm">
+              <ul
+                className={`grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-1 ${fill ? "" : "opacity-40"}`}
+              >
                 {filled.map(([label, ok]) => (
                   <li
                     key={label}
@@ -517,47 +796,74 @@ export function CreateWebsitePage({ clientId, business, subtitle }) {
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                     ) : (
                       <XCircle className="h-4 w-4 shrink-0" />
-                    )}{" "}
-                    {label}
+                    )}
+                    <span className="min-w-0">{label}</span>
                   </li>
                 ))}
               </ul>
             )}
-            <p className="mt-3 text-[11px] text-zinc-400">
+            <p className="mt-3 text-[11px] leading-relaxed text-zinc-400">
               Missing items stay as theme placeholders - edit them in the
               builder. Use &ldquo;Sync with Google&rdquo; first for the latest
               data.
             </p>
           </Card>
-          <Card className="space-y-2 p-4 text-sm sm:p-5">
+
+          <Card className="hidden space-y-3 p-4 text-sm sm:p-5 xl:block">
             <p className="font-semibold text-zinc-900 dark:text-white">
               Summary
             </p>
-            <p className="text-zinc-600 dark:text-zinc-300">
-              Theme: <b>{chosen?.name || "-"}</b>
-            </p>
-            <p className="break-all text-zinc-600 dark:text-zinc-300">
-              Address: <b>{slugState?.url || "-"}</b>
-            </p>
-            <p className="text-zinc-600 dark:text-zinc-300">
-              Images:{" "}
-              <b>
-                {images === "ai" ? "AI generated" : "Google photos + manual"}
-              </b>
-            </p>
+            <dl className="space-y-2 text-zinc-600 dark:text-zinc-300">
+              <div className="flex justify-between gap-3">
+                <dt className="text-zinc-500">Theme</dt>
+                <dd className="truncate font-semibold">{chosen?.name || "-"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-zinc-500">Address</dt>
+                <dd className="break-all text-right font-semibold">
+                  {slugState?.url || "-"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-zinc-500">Content</dt>
+                <dd className="font-semibold">
+                  {fill ? "Google data" : "Blank template"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-zinc-500">Images</dt>
+                <dd className="font-semibold">
+                  {imageMode === "ai" ? "AI generated" : "Google + manual"}
+                </dd>
+              </div>
+            </dl>
             <Button
-              className="mt-2 w-full justify-center"
+              className="mt-1 w-full justify-center"
               onClick={create}
               disabled={!ready}
             >
-              {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}{" "}
-              Create & fill website
+              {createLabel}
             </Button>
           </Card>
+        </aside>
+      </div>
+
+      {/* mobile / tablet sticky action bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur xl:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
+        <div className="mx-auto flex max-w-7xl items-center gap-3">
+          <div className="min-w-0 flex-1 text-xs">
+            <p className="truncate font-semibold text-zinc-900 dark:text-white">
+              {chosen?.name || "No theme selected"}
+            </p>
+            <p className="truncate text-zinc-500">
+              {slugState?.available
+                ? slugState.url
+                : "Pick an available web address"}
+            </p>
+          </div>
+          <Button onClick={create} disabled={!ready}>
+            {createLabel}
+          </Button>
         </div>
       </div>
     </div>

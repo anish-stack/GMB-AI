@@ -451,3 +451,35 @@ Meta app setup (developers.facebook.com):
 5. While the app is in **Development** mode only people with a role on the app (admin / developer / tester) can
    connect - that is the test mode. Going live for everyone needs Meta App Review for pages_manage_posts,
    instagram_content_publish and instagram_manage_messages.
+
+## v10 - keywords, audit, smart review QR, rank heat map, post automation, Razorpay autopay
+
+Run `mysql -u root -p gmb_ai < db/upgrade-v10-keywords-reviews-autopay.sql` (and v9 if not yet), `npm install`
+(adds `leaflet`), then build + restart.
+
+- **Tracked keywords** - GMB profile -> Keywords: slots from the plan (`max_keywords_client`), comma-separated
+  custom keywords, AI smart recommendations (services x city / areas / address landmarks + real Google terms),
+  "Add top 3", "Rank-scan all".
+- **Rank tracker** - several keywords at once (comma separated, max 10; scans run one after another).
+  Scan page: **Map your local search customers** - live OpenStreetMap with the rank grid or a heat map.
+- **Profile audit** - `/gmb/:id/audit`: 24 checks, score /100, a "Fix" link for each issue.
+- **Review QR & poster studio** - `/gmb/:id/review-qr`: QR -> smart AI review flow (`/review/<slug>`, public) or
+  direct Google form; question builder; branded QR (logo in the middle) PNG/SVG; A4 poster (4 styles, accent,
+  copy). Low ratings are offered a private message first, the Google option always stays (no review gating).
+- **Services / Products** - add & edit on their own pages (`/gmb/:id/services/new`, `/gmb/:id/products/new` ...).
+- **Posts** - "View on Google" on published posts (profile, review queue, task page).
+- **Connect link listing picker** - search, 10 per page, footer button always visible.
+- **Modals** - rendered in a portal: always centred, max 86% of the screen, only the body scrolls, Esc closes.
+- **Post automation** - every night the calendar is filled from each client's posting plan (plan days or a spread:
+  3/week = Mon/Wed/Fri, 10:00), within the plan caps; the AI job writes them and auto-publish (if on) posts them.
+  Admin -> Web settings -> **Post automation**: "Auto - from posting plans" or "Manual - only calendar entries".
+  Per client: "Auto-schedule from plan" switch + an automation check (scheduler running? plan active? ...).
+- **Razorpay Autopay** - Billing -> Enable autopay (UPI AutoPay / card / e-mandate via Razorpay Subscriptions).
+  First charge on the next renewal when the current period is already paid. Webhook (same URL as before,
+  `/api/payments/razorpay/webhook`) - also enable these events in the Razorpay dashboard:
+  `subscription.authenticated, subscription.activated, subscription.charged, subscription.pending,
+  subscription.halted, subscription.cancelled, subscription.completed`. A charge extends the period, resets
+  credits and records a PAID invoice (idempotent). Cancel = at cycle end, access stays until then.
+  Razorpay account must have Subscriptions enabled (Dashboard -> Subscriptions).
+
+Tests: `node --conditions=react-server scripts/test-v10.mjs` (server on :3258) - 43/43.

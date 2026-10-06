@@ -1,5 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
+const RankHeatMap = dynamic(() => import("./rank-heat-map").then((m) => m.RankHeatMap), { ssr: false, loading: () => <div className="h-[560px] animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-900" /> });
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,10 +53,10 @@ function Locate({ clientId, onDone }) {
   );
 }
 
-export function RankTracker({ clients }) {
+export function RankTracker({ clients, initialClient = "", initialKeywords = "" }) {
   const router = useRouter();
   const { data, error, loading, reload } = useApi("/api/rank/scans");
-  const [form, setForm] = useState({ client_id: clients[0]?.id || "", keyword: "", grid_size: 5, spacing_km: 1 });
+  const [form, setForm] = useState({ client_id: (clients.find((c) => String(c.id) === String(initialClient)) || clients[0])?.id || "", keyword: initialKeywords, grid_size: 5, spacing_km: 1 });
   const [locate, setLocate] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
@@ -62,8 +65,13 @@ export function RankTracker({ clients }) {
     setBusy(true);
     setMsg("");
     try {
-      const r = await apiFetch("/api/rank/scans", { body: form });
-      router.push(`/rank-tracker/${r.id}`);
+      const r = await apiFetch("/api/rank/scans", { body: { ...form, keywords: form.keyword } });
+      if (r.ids.length === 1 && !r.failed.length) router.push(`/rank-tracker/${r.id}`);
+      else {
+        setMsg(`${r.ids.length} scan(s) started - they run one after another and appear below.${r.failed.length ? ` Not started: ${r.failed.map((f) => `${f.keyword} (${f.error})`).join("; ")}` : ""}`);
+        setForm((x) => ({ ...x, keyword: "" }));
+        reload();
+      }
     } catch (e) {
       setMsg(e.message);
       if (e.status === 409) setLocate(true);
@@ -72,6 +80,7 @@ export function RankTracker({ clients }) {
     }
   }
   const points = form.grid_size * form.grid_size;
+  const kwCount = new Set(form.keyword.split(/[,\n;]/).map((k) => k.trim()).filter((k) => k.length >= 2)).size;
   return (
     <div className="space-y-4">
       <Card className="overflow-hidden">
@@ -80,16 +89,18 @@ export function RankTracker({ clients }) {
           <Field label="Client">
             <Select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}>{clients.map((c) => <option key={c.id} value={c.id}>{c.business_name}</option>)}</Select>
           </Field>
-          <Field label="Keyword"><Input value={form.keyword} onChange={(e) => setForm({ ...form, keyword: e.target.value })} placeholder="e.g. dentist near me" maxLength={160} /></Field>
+          <Field label="Keyword(s)" hint={kwCount > 1 ? `${kwCount} keywords → ${kwCount} scans` : "Separate several with commas"}>
+            <Input value={form.keyword} onChange={(e) => setForm({ ...form, keyword: e.target.value })} placeholder="dentist near me, root canal rohini, dental clinic" maxLength={1200} />
+          </Field>
           <Field label="Grid"><Select value={form.grid_size} onChange={(e) => setForm({ ...form, grid_size: Number(e.target.value) })}>{[3, 5, 7].map((n) => <option key={n} value={n}>{n}×{n}</option>)}</Select></Field>
           <Field label="Spacing"><Select value={form.spacing_km} onChange={(e) => setForm({ ...form, spacing_km: Number(e.target.value) })}>{[0.5, 1, 2, 3, 5].map((n) => <option key={n} value={n}>{n} km</option>)}</Select></Field>
-          <Button onClick={start} disabled={busy || form.keyword.trim().length < 2}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />} Scan</Button>
+          <Button onClick={start} disabled={busy || form.keyword.trim().length < 2}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />} {kwCount > 1 ? `Scan ${Math.min(kwCount, 10)}` : "Scan"}</Button>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 px-5 py-3 text-xs text-zinc-500 dark:border-zinc-800">
-          <span>{points} search points · covers {((form.grid_size - 1) * form.spacing_km).toFixed(1)} km across {client?.place_id ? "" : " · listing not linked yet"}</span>
+          <span>{points} search points per keyword{kwCount > 1 ? ` × ${Math.min(kwCount, 10)} keywords` : ""} · covers {((form.grid_size - 1) * form.spacing_km).toFixed(1)} km across {client?.place_id ? "" : " · listing not linked yet"}</span>
           <button type="button" className="inline-flex items-center gap-1 font-semibold text-brand-500" onClick={() => setLocate(true)}><MapPin className="h-3.5 w-3.5" /> {client?.place_id ? "Change linked listing" : "Link Google listing"}</button>
         </div>
-        {msg ? <div className="px-5 pb-4"><Alert>{msg}</Alert></div> : null}
+        {msg ? <div className="px-5 pb-4"><Alert tone={/scan\(s\) started/.test(msg) ? "green" : undefined}>{msg}</Alert></div> : null}
       </Card>
       {error ? <Alert>{error}</Alert> : null}
       <Card className="overflow-x-auto">
@@ -188,7 +199,7 @@ export function RankScanView({ id }) {
       </div>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,640px)_1fr]">
         <Card className="p-3">
-          <Heatmap scan={s} />
+          <RankHeatMap scan={s} />
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-zinc-500">
             {[["1-3", 1], ["4-7", 5], ["8-10", 9], ["11-20", 15], ["20+", null]].map(([l, v]) => <span key={l} className="inline-flex items-center gap-1"><span className="h-3 w-3 rounded-full" style={{ background: rankColor(v) }} /> {l}</span>)}
             <span>· black ring = business location</span>
