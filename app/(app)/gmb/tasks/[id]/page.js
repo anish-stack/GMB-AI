@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { notFound } from "next/navigation";
 import { getTask } from "@/lib/repo/tasks.js";
 import { TaskReview } from "@/components/task-review";
@@ -6,6 +7,7 @@ import { requireTenantContext } from "@/lib/saas/context.js";
 export const dynamic = "force-dynamic";
 
 export default async function TaskDetailPage({ params }) {
+  await requirePagePermission("task.view");
   const ctx = await requireTenantContext();
   const { id } = await params;
   const task = await getTask(Number(id), ctx.tenantId);

@@ -112,7 +112,7 @@ const STATS = [
 
 // NOTE: illustrative reviews — swap in real client quotes.
 const REVIEWS = [
-  { initials: "RM", name: "Rohit Mehta", role: "Digital Marketing Agency", quote: "GMB AI Cloud saves our team hours every week. The quality of posts is amazing." },
+  { initials: "RM", name: "Rohit Mehta", role: "Digital Marketing Agency", quote: "HBS Suite saves our team hours every week. The quality of posts is amazing." },
   { initials: "PS", name: "Priya Sharma", role: "Multi-location Business", quote: "We manage 50+ locations and this tool makes it effortless. Highly recommended!" },
   { initials: "AV", name: "Aman Verma", role: "SEO Consultant", quote: "The automated content and visuals are on point. Our client engagement has improved a lot." },
 ];

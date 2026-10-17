@@ -15,13 +15,14 @@ export default async function TeamPage() {
       <div>
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Team</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Owners manage billing and everything else. Managers run clients and publishing. Members review and edit posts.
+          Owners have full access. For every team member you choose exactly what they can open - by default everything except billing and workspace settings.
         </p>
       </div>
       <TeamManager
         users={JSON.parse(JSON.stringify(users))}
         canInvite={ctx.can("team.invite")}
         canEdit={ctx.can("team.edit")}
+        isOwner={ctx.role === "OWNER"}
         limit={ctx.limits.max_team_members}
         used={ctx.ent.live.team_members}
       />

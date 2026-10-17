@@ -120,7 +120,8 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const g = await guard(request, { permission: "gmb.edit" });
+  // removing the Google connection is a "Connect / disconnect Google" permission
+  const g = await guard(request, { permission: "gmb.connect" });
   if (g.error) return g.error;
 
   const { id } = await params;

@@ -8,6 +8,7 @@ import { Plus, Trash2, Sparkles, Calendar, ChevronLeft, ChevronRight, X, Loader2
 import { Badge, Button, Card, CardBody, CardHeader, Field, Input, Select } from "@/components/ui";
 import { POST_TYPES } from "@/lib/constants";
 import { usePlanUsage, PlanUsageInline } from "@/components/posting/plan-usage";
+import { useEngineChoice } from "@/components/engine-choice";
 
 const TYPE_COLORS = [
   { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", ring: "ring-blue-200 dark:ring-blue-900" },
@@ -29,6 +30,7 @@ function monthKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).pad
 function fmtMonth(d) { return d.toLocaleDateString("en-US", { month: "long", year: "numeric" }); }
 
 export function CalendarBoard({ entries, clients }) {
+  const [engineDialog, askEngine] = useEngineChoice();
   const router = useRouter();
   const [cursor, setCursor] = useState(() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); });
   const [selected, setSelected] = useState(() => toISO(new Date()));
@@ -41,7 +43,7 @@ export function CalendarBoard({ entries, clients }) {
     scheduled_date: toISO(new Date()),
     post_type: "Service",
     topic: "",
-    scheduled_time: "10:00",
+    scheduled_time: "05:00",
     primary_keyword: "",
     secondary_keywords: "",
     tertiary_keywords: "",
@@ -154,8 +156,10 @@ export function CalendarBoard({ entries, clients }) {
   }
 
   async function runDay(date) {
+    const engine = await askEngine();
+    if (!engine) return;
     setBusy(date); setMsg("");
-    const res = await fetch("/api/ai/nightly", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ date }) });
+    const res = await fetch("/api/ai/nightly", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ date, engine }) });
     const data = await res.json();
     setBusy("");
     setMsg(data.error || `${date}: ${data.generated}/${data.scheduled} generated, ${data.ready} ready, ${data.needsReview} need review`);
@@ -168,6 +172,7 @@ export function CalendarBoard({ entries, clients }) {
 
   return (
     <div className="space-y-4">
+      {engineDialog}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="rounded-md border border-zinc-200 dark:border-zinc-800 p-1.5 hover:bg-zinc-50 dark:hover:bg-zinc-900">

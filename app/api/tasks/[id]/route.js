@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withEngine } from "@/lib/ai/engine.js";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { getTask, editTask, approveTask, rejectTask, publishTask, updatePublishedPost, deletePublishedPost, assertTaskInTenant } from "@/lib/repo/tasks.js";
 import { runTaskPipeline, regenerateTaskImage, generateTaskImageOptions, selectTaskImage } from "@/lib/ai/orchestrator.js";
@@ -60,18 +61,18 @@ export async function POST(request, { params }) {
         assertCan(ctx, "task.generate");
         const { query } = await import("@/lib/db");
         await query("UPDATE ai_tasks SET regenerate_count=regenerate_count+1 WHERE id=?", [taskId]);
-        const result = await runTaskPipeline(taskId, { regenerate: true });
+        const result = await withEngine(body.engine, () => runTaskPipeline(taskId, { regenerate: true }));
         if (!result.ok) return NextResponse.json({ error: result.error, code: result.code }, { status: result.code ? 402 : 500 });
         break;
       }
       case "regenerate_image": {
         assertCan(ctx, "task.generate");
-        await regenerateTaskImage(taskId, tenantId);
+        await regenerateTaskImage(taskId, tenantId, { styleId: body.style_id || null });
         break;
       }
       case "generate_image_options": {
         assertCan(ctx, "task.generate");
-        const result = await generateTaskImageOptions(taskId, tenantId, body.count);
+        const result = await generateTaskImageOptions(taskId, tenantId, body.count, { styleId: body.style_id || null });
         await audit(ctx, "TASK_IMAGE_OPTIONS_GENERATED", { entity: "task", entityId: taskId, meta: { count: result.candidates.length } });
         return NextResponse.json({ ok: true, candidates: result.candidates, task: await getTask(taskId, tenantId) });
       }

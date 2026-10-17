@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { formatDate, truncate } from "@/lib/utils";
 import { TASK_STATUS } from "@/lib/constants";
 import { adminPostAction } from "@/components/admin/admin-post-actions";
+import { useEngineChoice } from "@/components/engine-choice";
 
 function qaTone(score) {
   if (score == null) return "slate";
@@ -30,6 +31,7 @@ const canPublish = (r) => ["APPROVED", "READY_FOR_REVIEW"].includes(r.status);
 export function GmbPostList({ rows }) {
   const router = useRouter();
   const [open, setOpen] = useState(null);
+  const [engineDialog, askEngine] = useEngineChoice();
   const [sel, setSel] = useState([]);
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState(null);
@@ -41,6 +43,11 @@ export function GmbPostList({ rows }) {
 
   async function run(action, ids, extra = {}, label = action) {
     if (!ids.length) return;
+    if (action === "regenerate") {
+      const engine = await askEngine();
+      if (!engine) return;
+      extra = { ...extra, engine };
+    }
     if (action === "delete" && !window.confirm(`Permanently delete ${ids.length} post(s)? Live posts are removed from GMB and images deleted. Cannot be undone.`)) return;
     if (action === "delete_post" && !window.confirm(`Remove ${ids.length} live post(s) from GMB?`)) return;
     if (action === "reject") {
@@ -69,6 +76,7 @@ export function GmbPostList({ rows }) {
 
   return (
     <div>
+      {engineDialog}
       {sel.length || msg ? (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 bg-zinc-50/80 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-800/40">
           <div className="text-xs">

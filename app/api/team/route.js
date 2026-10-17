@@ -3,7 +3,7 @@ import { guard, apiError } from "@/lib/saas/guard.js";
 import { listTenantUsers, hashPassword } from "@/lib/auth";
 import { insert, one } from "@/lib/db";
 import { assertLimit } from "@/lib/saas/entitlements.js";
-import { TENANT_ROLES } from "@/lib/saas/constants.js";
+import { TENANT_ROLES, ROLES, ALL_TENANT_PERMISSIONS } from "@/lib/saas/constants.js";
 import { audit } from "@/lib/saas/audit.js";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,13 @@ export async function POST(request) {
     if (!TENANT_ROLES.includes(body.role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
+    // only an owner can create another owner or hand out a custom permission set
+    if (ctx.role !== ROLES.OWNER && (body.role === ROLES.OWNER || Array.isArray(body.permissions))) {
+      return NextResponse.json({ error: "Only the workspace owner can add owners or set permissions" }, { status: 403 });
+    }
+    const permissions = body.role !== ROLES.OWNER && Array.isArray(body.permissions)
+      ? JSON.stringify(body.permissions.filter((p) => ALL_TENANT_PERMISSIONS.includes(p)))
+      : null;
     if (await one("SELECT id FROM users WHERE email=?", [email])) {
       return NextResponse.json({ error: "Email already in use" }, { status: 400 });
     }
@@ -39,6 +46,7 @@ export async function POST(request) {
       phone: body.phone || null,
       password_hash: await hashPassword(body.password),
       role: body.role,
+      permissions,
       active: 1,
     });
     await insert("employees", {

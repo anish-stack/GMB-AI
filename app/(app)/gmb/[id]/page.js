@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -170,6 +171,7 @@ const settled = (r, fallback) =>
   r.status === "fulfilled" ? r.value : fallback;
 
 export default async function GmbProfilePage({ params, searchParams }) {
+  await requirePagePermission("gmb.view");
   const ctx = await requireTenantContext();
   const { id } = await params;
   const sp = await searchParams;
@@ -633,18 +635,18 @@ export default async function GmbProfilePage({ params, searchParams }) {
             >
               Profile audit
             </Link>
-            <GmbSyncButton clientId={clientId} />
+            {canConnect ? <GmbSyncButton clientId={clientId} /> : null}
 
             <GenerateNow clientId={clientId} />
 
-            <DangerActions
+            {canConnect ? <DangerActions
               patchUrl={`/api/gmb/${clientId}`}
               deleteUrl={`/api/gmb/${clientId}`}
               active={connected}
               redirectTo="/gmb"
               deleteLabel="Remove GMB connection"
               deleteConfirm="This removes the GMB connection for this client. The client record stays. Continue?"
-            />
+            /> : null}
           </div>
         </div>
       </Card>

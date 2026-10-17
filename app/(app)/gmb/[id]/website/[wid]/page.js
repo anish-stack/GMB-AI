@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { notFound } from "next/navigation";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { one } from "@/lib/db";
@@ -8,6 +9,7 @@ export const metadata = { title: "Website editor" };
 
 /** Native website editor (no iframe): /gmb/:id/website/:websiteId */
 export default async function Page({ params }) {
+  await requirePagePermission("gmb.edit");
   const ctx = await requireTenantContext();
   const { id, wid } = await params;
   if (!/^[a-f0-9]{24}$/.test(String(wid))) notFound();

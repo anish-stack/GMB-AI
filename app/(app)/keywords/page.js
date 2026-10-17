@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { Stat } from "@/components/ui";
@@ -6,6 +7,7 @@ import { KeywordsTable } from "@/components/keywords-table";
 export const dynamic = "force-dynamic";
 
 export default async function KeywordsPage({ searchParams }) {
+  await requirePagePermission("keyword.view");
   const ctx = await requireTenantContext();
   const sp = await searchParams;
   const clientId = sp?.client ? Number(sp.client) : null;

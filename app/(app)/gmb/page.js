@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
@@ -7,6 +8,7 @@ import { GmbProfilesTable } from "@/components/gmb-profiles-table";
 export const dynamic = "force-dynamic";
 
 export default async function GmbListPage() {
+  await requirePagePermission("gmb.view");
   const ctx = await requireTenantContext();
   const rows = await query(
     `SELECT p.*, c.business_name, c.city, c.gmb_location_id,
@@ -29,9 +31,11 @@ export default async function GmbListPage() {
           {rows.length - live ? ` Others use ${provider.isMock ? "demo (mock) data" : "Google once connected"} - connect them from the client page.` : ""}
         </p>
       </div>
-      <Link href="/gmb/import" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">
-        Import all listings from Google
-      </Link>
+      {ctx.can("gmb.connect") ? (
+        <Link href="/gmb/import" className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">
+          Import all listings from Google
+        </Link>
+      ) : null}
       </div>
 
       <GmbProfilesTable rows={JSON.parse(JSON.stringify(rows))} />

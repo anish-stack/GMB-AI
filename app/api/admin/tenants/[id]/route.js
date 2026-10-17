@@ -57,6 +57,11 @@ export async function PATCH(request, { params }) {
       case "cancel":
         await cancelSubscription({ tenantId, immediate: Boolean(body.immediate), actor, reason: body.reason });
         break;
+      case "account_type":
+        // "Own company": unlimited credits, limits and team; never billed
+        await query("UPDATE tenants SET account_type=? WHERE id=?", [body.internal ? "INTERNAL" : "CUSTOMER", tenantId]);
+        if (body.internal) await query("UPDATE tenants SET social_enabled=1 WHERE id=?", [tenantId]);
+        break;
       case "social":
         // test-mode access to Facebook / Instagram tools, granted per tenant
         await query("UPDATE tenants SET social_enabled=? WHERE id=?", [body.enabled ? 1 : 0, tenantId]);

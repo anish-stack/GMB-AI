@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { agentUsage, dashboardStats } from "@/lib/repo/stats.js";
@@ -7,6 +8,7 @@ import { AiRunsTable } from "@/components/ai-runs-table";
 export const dynamic = "force-dynamic";
 
 export default async function AiRunsPage() {
+  await requirePagePermission("task.view");
   const ctx = await requireTenantContext();
   const [runs, agents, stats] = await Promise.all([
     query(

@@ -1,6 +1,7 @@
 /**
  * Background scheduler - run in its own process:  npm run scheduler
  *
+ *   Calendar post   CALENDAR_POST_CRON (every 2 min) -> POST /api/cron/calendar-post (publish calendar posts at their time, default 05:00)
  *   AI job          NIGHTLY_CRON (00:00)   -> POST /api/ai/nightly (generates SCHEDULED calendar slots;
  *                                            posting-plan caps, expiry and maintenance are enforced there)
  *   Billing sweep   BILLING_CRON (01:30)   -> renewals, past-due, expiry
@@ -29,6 +30,7 @@ const EXPR = {
   health: process.env.HEALTH_CRON || "5 * * * *",
   reviews: process.env.REVIEW_SYNC_CRON || "*/30 * * * *",
   autopublish: process.env.AUTO_PUBLISH_CRON || "*/5 * * * *",
+  calendarpost: process.env.CALENDAR_POST_CRON || "*/2 * * * *",
   listings: process.env.LISTING_HEALTH_CRON || "0 3 * * *",
 };
 const log = (...a) => console.log(`[scheduler ${new Date().toISOString()}]`, ...a);
@@ -108,6 +110,26 @@ async function runMailWorker() {
 }
 
 let autoBusy = false;
+let calendarBusy = false;
+/** Calendar auto-post: publish calendar entries at their time (default 05:00), prepare the next 3 hours. */
+async function runCalendarPostJob() {
+  if (calendarBusy) return;
+  calendarBusy = true;
+  try {
+    // runs inside the app (image rendering needs Next), like the nightly AI job
+    const res = await fetch(`${APP_URL}/api/cron/calendar-post`, { method: "POST", headers: { "x-scheduler-key": KEY } });
+    const r = await res.json().catch(() => ({}));
+    if (!res.ok || r.ok === false) throw new Error(r.error || `HTTP ${res.status}`);
+    await beat("calendar_post", true, JSON.stringify(r));
+    if (r.published || r.failed || r.prepared) log("calendar-post", JSON.stringify(r));
+  } catch (err) {
+    await beat("calendar_post", false, err.message);
+    log("calendar-post failed:", err.message);
+  } finally {
+    calendarBusy = false;
+  }
+}
+
 async function runAutoPublishJob() {
   if (autoBusy) return;
   autoBusy = true;
@@ -171,6 +193,7 @@ cron.schedule(EXPR.housekeeping, runHousekeeping);
 cron.schedule(EXPR.health, runHealth);
 cron.schedule(EXPR.reviews, runReviewSync);
 cron.schedule(EXPR.autopublish, runAutoPublishJob);
+cron.schedule(EXPR.calendarpost, runCalendarPostJob);
 cron.schedule(EXPR.listings, runListingHealth);
 if (!process.argv.includes("--no-mail")) cron.schedule(EXPR.mail, runMailWorker);
 cron.schedule("* * * * *", () => beat("scheduler").catch(() => {}));
@@ -185,4 +208,5 @@ if (process.argv.includes("--housekeeping")) runHousekeeping();
 if (process.argv.includes("--mail")) runMailWorker();
 if (process.argv.includes("--reviews")) runReviewSync();
 if (process.argv.includes("--autopublish")) runAutoPublishJob();
+if (process.argv.includes("--calendar-post")) runCalendarPostJob();
 if (process.argv.includes("--listings")) runListingHealth();

@@ -4,13 +4,15 @@ import { useCallback, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { TourProvider } from "@/components/tour/tour";
+import { BrandProvider } from "@/components/brand";
 import { ThemeColorProvider, palette } from "@/components/theme-color";
 
-export function AppShell({ session, aiProvider, gmbProvider, workspace, plan, perms, creditsLeft, banner, themeColor = null, children }) {
+export function AppShell({ session, aiProvider, gmbProvider, workspace, plan, perms, creditsLeft, banner, themeColor = null, brand = null, children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMenu = useCallback(() => setMobileOpen(false), []);
 
   return (
+    <BrandProvider value={brand}>
     <ThemeColorProvider color={themeColor}>
     <TourProvider userId={session?.userId || session?.id || session?.email}>
     <div className="flex h-screen overflow-hidden" style={themeColor ? Object.fromEntries(Object.entries(palette(themeColor)).map(([k, v]) => [`--color-brand-${k}`, v])) : undefined}>
@@ -37,5 +39,6 @@ export function AppShell({ session, aiProvider, gmbProvider, workspace, plan, pe
     </div>
     </TourProvider>
     </ThemeColorProvider>
+    </BrandProvider>
   );
 }

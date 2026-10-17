@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withEngine } from "@/lib/ai/engine.js";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { listTasks } from "@/lib/repo/tasks.js";
 import { createTask, runTaskPipeline } from "@/lib/ai/orchestrator.js";
@@ -40,8 +41,9 @@ export async function POST(request) {
       createdBy: ctx.userId,
       source: "app",
     });
-    const result = await runTaskPipeline(taskId);
-    await audit(ctx, "TASK_GENERATED", { entity: "task", entityId: taskId, meta: { credits: result.credits } });
+    // manual run: the user picked Ollama or Gemini for the text
+    const result = await withEngine(body.engine, () => runTaskPipeline(taskId));
+    await audit(ctx, "TASK_GENERATED", { entity: "task", entityId: taskId, meta: { credits: result.credits, engine: body.engine || "auto" } });
     return NextResponse.json({ ok: result.ok, taskId, ...result });
   } catch (err) {
     return apiError(err);

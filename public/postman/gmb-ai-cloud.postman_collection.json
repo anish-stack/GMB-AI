@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "GMB AI Cloud - Public API",
+    "name": "HBS Suite - Public API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Authenticate with an API key from Dashboard → API & developers.\n\nErrors:\n- 400 VALIDATION_ERROR: A parameter is missing or invalid.\n- 401 INVALID_API_KEY: Missing, malformed, revoked or unknown key. Also KEY_DISABLED / KEY_EXPIRED.\n- 403 INSUFFICIENT_SCOPE: The key lacks the scope this endpoint needs. PLAN_NO_API when the plan has no API access.\n- 404 NOT_FOUND: The record doesn't exist in your workspace.\n- 422 WEEKLY_LIMIT: Posting plan cap hit. Also TOTAL_LIMIT, PLAN_EXPIRED, OUTSIDE_PLAN, NOT_A_POSTING_DAY, NO_POSTING_PLAN.\n- 429 RATE_LIMITED: Too many requests. Wait until X-RateLimit-Reset (see Retry-After).\n- 503 MAINTENANCE: Platform maintenance. Retry later. API_DISABLED when the API is switched off."
   },

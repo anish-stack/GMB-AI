@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
+import { BrandMark } from "@/components/brand";
+import { Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button, Field, Input } from "@/components/ui";
 
 export default function ForgotPasswordPage() {
@@ -60,10 +61,7 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-white p-7 shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
       >
         <Link href="/" className="mb-6 flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
-            <Sparkles className="h-4 w-4 text-white" />
-          </span>
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">GMB AI Cloud</span>
+          <BrandMark />
         </Link>
 
         {step === "done" ? (

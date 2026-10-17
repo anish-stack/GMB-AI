@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { listClients } from "@/lib/repo/clients.js";
@@ -8,6 +9,7 @@ import { ClientsTable } from "@/components/clients-table";
 export const dynamic = "force-dynamic";
 
 export default async function ClientsPage() {
+  await requirePagePermission("client.view");
   const ctx = await requireTenantContext();
   const clients = await listClients(ctx.tenantId);
   return (

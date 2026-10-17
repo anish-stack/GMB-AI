@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { listTasks } from "@/lib/repo/tasks.js";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { dashboardStats } from "@/lib/repo/stats.js";
@@ -8,6 +9,7 @@ import { TaskQueueTable } from "@/components/task-queue-table";
 export const dynamic = "force-dynamic";
 
 export default async function TasksPage({ searchParams }) {
+  await requirePagePermission("task.view");
   const ctx = await requireTenantContext();
   const sp = await searchParams;
   const status = sp?.status || "";

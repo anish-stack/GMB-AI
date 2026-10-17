@@ -137,7 +137,7 @@ export function TenantList({ tenants, plans }) {
               <td className="px-4 py-2">
                 <div className="flex flex-wrap gap-1">
                   <Badge tone={t.status === "ACTIVE" ? "emerald" : "red"}>{t.status}</Badge>
-                  {t.sub_status ? <Badge tone={t.sub_status === "ACTIVE" ? "blue" : "amber"}>{t.sub_status}</Badge> : null}
+                  {t.account_type === "INTERNAL" ? <Badge tone="emerald">Own company</Badge> : t.sub_status ? <Badge tone={t.sub_status === "ACTIVE" ? "blue" : "amber"}>{t.sub_status}</Badge> : null}
                 </div>
               </td>
               <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{t.client_count}</td>

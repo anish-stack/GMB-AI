@@ -3,10 +3,12 @@ import "./globals.css";
 import { getSettings } from "@/lib/saas/settings.js";
 import { publicAnalyticsId } from "@/lib/integrations/store.js";
 import { PwaClient } from "@/components/pwa/pwa-client";
+import { BrandProvider } from "@/components/brand";
+import { platformBrand } from "@/lib/branding.js";
 
 export async function generateMetadata() {
   const s = await getSettings();
-  const name = s.platform_name || "GMB AI Cloud";
+  const name = s.platform_name || "HBS Suite";
   return {
     title: { default: s.seo_title || name, template: `%s · ${name}` },
     description: s.seo_description || s.site_tagline,
@@ -39,13 +41,14 @@ const NO_FLASH_SCRIPT = `
 
 export default async function RootLayout({ children }) {
   const ga = await publicAnalyticsId().catch(() => null);
+  const brand = await platformBrand().catch(() => ({ name: "HBS Suite", logo: null }));
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </head>
       <body>
-        {children}
+        <BrandProvider value={{ name: brand.name, logo: brand.logo, whiteLabel: false }}>{children}</BrandProvider>
         <PwaClient />
         {ga && /^G-[A-Z0-9]+$/.test(ga) ? (
           <>

@@ -117,7 +117,7 @@ async function main() {
   // ---------- platform settings ----------
   console.log("> platform settings...");
   const settings = {
-    platform_name: "GMB AI Cloud",
+    platform_name: "HBS Suite",
     support_email: "support@hovermedia.in",
     currency: "INR",
     tax_percent: 18,

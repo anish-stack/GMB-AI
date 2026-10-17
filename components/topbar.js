@@ -8,20 +8,24 @@ import { GlobalSearch } from "@/components/global-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TourButton } from "@/components/tour/tour";
+import { useEngineChoice } from "@/components/engine-choice";
 
 export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsLeft = null }) {
   const router = useRouter();
   const [running, setRunning] = useState(false);
   const [msg, setMsg] = useState("");
+  const [engineDialog, askEngine] = useEngineChoice();
 
   async function runNightly() {
+    const engine = await askEngine();
+    if (!engine) return;
     setRunning(true);
     setMsg("");
     try {
       const res = await fetch("/api/ai/nightly", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: new Date().toISOString().slice(0, 10) }),
+        body: JSON.stringify({ date: new Date().toISOString().slice(0, 10), engine }),
       });
       const data = await res.json();
       setMsg(
@@ -45,6 +49,7 @@ export function Topbar({ session, aiProvider, gmbProvider, onMenuClick, creditsL
 
   return (
     <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200/70 bg-white/70 px-4 py-3 backdrop-blur-md md:px-5 dark:border-zinc-800/70 dark:bg-zinc-900/70">
+      {engineDialog}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <button
           onClick={onMenuClick}

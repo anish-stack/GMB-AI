@@ -8,6 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { POST_TYPES } from "@/lib/constants";
+import { useEngineChoice } from "@/components/engine-choice";
 
 /**
  * Creates a task for one client
@@ -19,8 +20,11 @@ export function GenerateNow({ clientId }) {
   const [postType, setPostType] = useState("Service");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [engineDialog, askEngine] = useEngineChoice();
 
   async function run() {
+    const engine = await askEngine();
+    if (!engine) return;
     setBusy(true);
     setMsg("");
 
@@ -33,6 +37,7 @@ export function GenerateNow({ clientId }) {
         body: JSON.stringify({
           clientId,
           postType,
+          engine,
         }),
       });
 
@@ -55,6 +60,7 @@ export function GenerateNow({ clientId }) {
 
   return (
     <div className="flex flex-col gap-1.5">
+      {engineDialog}
       <div className="flex items-center gap-1.5">
 
         {/* POST TYPE SELECT */}

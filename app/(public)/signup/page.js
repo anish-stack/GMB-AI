@@ -27,7 +27,7 @@ export default async function SignupPage({ searchParams }) {
       initialCycle={cycle}
       taxPercent={Number(settings.tax_percent || 0)}
       onlinePayments={rp.enabled}
-      platformName={settings.platform_name || "GMB AI Cloud"}
+      platformName={settings.platform_name || "HBS Suite"}
       supportEmail={settings.support_email || ""}
       google={google}
     />

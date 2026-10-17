@@ -16,7 +16,7 @@ export const GET = route({ permission: "client.view" }, async ({ ctx, params }) 
 
 /** Why automation may not be posting - shown in the card. */
 async function diagnostics(clientId, c) {
-  const beats = await query("SELECT name, status, last_ok_at, last_run_at FROM system_heartbeats WHERE name IN ('nightly_job','auto_publish','scheduler')").catch(() => []);
+  const beats = await query("SELECT name, status, last_ok_at, last_run_at FROM system_heartbeats WHERE name IN ('nightly_job','auto_publish','scheduler','calendar_post')").catch(() => []);
   const beat = (n) => {
     const b = beats.find((x) => x.name === n);
     return b ? { ...b, mins_ago: b.last_ok_at ? Math.round((Date.now() - new Date(b.last_ok_at).getTime()) / 60000) : null } : null;
@@ -26,7 +26,8 @@ async function diagnostics(clientId, c) {
   const waiting = await one("SELECT COUNT(*) n FROM ai_tasks WHERE client_id=? AND status IN ('READY_FOR_REVIEW','APPROVED','NEEDS_REVIEW')", [clientId]);
   const { getSettings } = await import("@/lib/saas/settings.js");
   const mode = (await getSettings()).auto_schedule_mode === "manual" ? "manual" : "plan";
-  return { auto_schedule: Boolean(c.auto_schedule), schedule_mode: mode, plan, next, waiting: Number(waiting?.n || 0), scheduler: { nightly: beat("nightly_job"), autopublish: beat("auto_publish"), heartbeat: beat("scheduler") } };
+  const calendarAuto = Number((await getSettings({ fresh: true })).calendar_autopost ?? 1) === 1;
+  return { auto_schedule: Boolean(c.auto_schedule), schedule_mode: mode, calendar_autopost: calendarAuto, plan, next, waiting: Number(waiting?.n || 0), scheduler: { nightly: beat("nightly_job"), autopublish: beat("auto_publish"), heartbeat: beat("scheduler"), calendar: beat("calendar_post") } };
 }
 
 /** PUT { enabled, min_score (80-100) } - owner / manager only (client.edit). */

@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClient } from "@/lib/repo/clients.js";
@@ -15,6 +16,7 @@ import { requireTenantContext } from "@/lib/saas/context.js";
 export const dynamic = "force-dynamic";
 
 export default async function ClientDetailPage({ params, searchParams }) {
+  await requirePagePermission("client.view");
   const ctx = await requireTenantContext();
   const { id } = await params;
   const sp = await searchParams;
@@ -91,12 +93,14 @@ export default async function ClientDetailPage({ params, searchParams }) {
         </Card>
       </div>
 
-      <GoogleConnect client={JSON.parse(JSON.stringify({
-        id: client.id,
-        google_email: client.google_email,
-        google_location_name: client.google_location_name,
-        google_connected_at: client.google_connected_at,
-      }))} />
+      {ctx.can("gmb.connect") ? (
+        <GoogleConnect client={JSON.parse(JSON.stringify({
+          id: client.id,
+          google_email: client.google_email,
+          google_location_name: client.google_location_name,
+          google_connected_at: client.google_connected_at,
+        }))} />
+      ) : null}
 
       <Card>
         <CardHeader title="Keywords" subtitle="Client keywords plus AI suggestions (no search-volume source connected)" />

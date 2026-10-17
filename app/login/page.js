@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BrandMark, useBrand } from "@/components/brand";
 import {
-  Sparkles,
   Mail,
   Lock,
   Eye,
@@ -21,6 +21,7 @@ import { GoogleButton, GoogleAuthError } from "@/components/google-button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const brand = useBrand();
   const [step, setStep] = useState("credentials"); // "credentials" | "otp"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -114,12 +115,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex h-full flex-col">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-500 shadow-lg shadow-rose-500/30">
-              <Sparkles className="h-5 w-5 text-white" />
-            </span>
-            <span className="text-lg font-semibold text-white">
-              GMB AI Cloud
-            </span>
+            <BrandMark size="lg" textClass="text-white" />
           </Link>
 
           <div className="grid flex-1 items-center gap-10 xl:grid-cols-[1fr_320px]">
@@ -246,7 +242,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center gap-4 pt-8 text-xs text-zinc-500">
-            <span>© {new Date().getFullYear()} GMB AI Cloud</span>
+            <span>© {new Date().getFullYear()} {brand.name}</span>
             <span className="h-1 w-1 rounded-full bg-zinc-700" />
             <Link href="/pricing" className="hover:text-zinc-300">
               Plans &amp; pricing
@@ -280,12 +276,7 @@ export default function LoginPage() {
         >
           {/* mobile-only logo */}
           <Link href="/" className="mb-6 flex items-center gap-2.5 lg:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500">
-              <Sparkles className="h-4 w-4 text-white" />
-            </span>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              GMB AI Cloud
-            </span>
+            <BrandMark />
           </Link>
 
           {step === "otp" ? (

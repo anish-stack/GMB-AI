@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { notFound } from "next/navigation";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { one } from "@/lib/db";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Add service" };
 
 export default async function Page({ params, searchParams }) {
+  await requirePagePermission("gmb.edit");
   const ctx = await requireTenantContext();
   const { id } = await params;
   const sp = await searchParams;

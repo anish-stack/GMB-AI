@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
@@ -8,6 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
+  await requirePagePermission("analytics.view");
   const ctx = await requireTenantContext();
   const T = ctx.tenantId;
   const [stats, perf, clients, breakdown, daily] = await Promise.all([

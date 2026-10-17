@@ -6,8 +6,8 @@ export default async function manifest() {
   const s = await getSettings();
   return {
     id: "/",
-    name: s.platform_name || "GMB AI Cloud",
-    short_name: (s.platform_name || "GMB AI").slice(0, 12),
+    name: s.platform_name || "HBS Suite",
+    short_name: (s.platform_name || "HBS Suite").slice(0, 12),
     description: s.seo_description || s.site_tagline || "",
     start_url: "/dashboard?source=pwa",
     scope: "/",

@@ -43,7 +43,8 @@ export function AutoPublishCard({ clientId }) {
     [planActive, planActive ? `Posting plan active: ${data.plan.posts_per_week}/week until ${new Date(data.plan.end_date).toLocaleDateString("en-IN")}` : "No active posting plan - edit the client and set one"],
     [data.schedule_mode === "manual" ? false : data.auto_schedule, data.schedule_mode === "manual" ? "Admin set post automation to MANUAL - only calendar entries are written" : data.auto_schedule ? "Calendar is filled automatically from the plan" : "Auto-schedule is off - posts only come from the calendar you fill"],
     [Boolean(sched.nightly?.last_ok_at), sched.nightly?.last_ok_at ? `AI writing job last ran ${ago(sched.nightly.mins_ago)}` : "AI writing job hasn't run yet (runs nightly, or use Run AI job)"],
-    [data.enabled ? data.allowed : true, data.enabled ? (data.allowed ? `Auto-publish on - QA ${data.min_score}+ posts go live at their time` : `Auto-publish blocked: ${data.reason}`) : "Auto-publish off - you approve and publish each post"],
+    [data.calendar_autopost !== false, data.calendar_autopost !== false ? `Calendar posts go live on Google at their time (default 05:00) - no approval needed${sched.calendar?.mins_ago != null ? ` · last run ${ago(sched.calendar.mins_ago)}` : ""}` : "Calendar auto-post is switched off by the platform admin - calendar posts wait for approval"],
+    [data.enabled ? data.allowed : true, data.enabled ? (data.allowed ? `Posts made outside the calendar (Generate AI) also go live when QA is ${data.min_score}+` : `Auto-publish blocked: ${data.reason}`) : "Posts made outside the calendar (Generate AI) wait for you to publish"],
   ];
 
   return (
@@ -53,7 +54,7 @@ export function AutoPublishCard({ clientId }) {
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/30"><Zap className="h-5 w-5" /></span>
           <div>
             <p className="font-semibold text-zinc-900 dark:text-white">Post automation</p>
-            <p className="text-xs text-zinc-500">Plan → calendar → AI writes the post → auto-publish when the quality score is high enough.</p>
+            <p className="text-xs text-zinc-500">Plan → calendar → AI writes the post → it goes live on Google at its time (default 05:00).</p>
           </div>
         </div>
       </div>
@@ -61,14 +62,14 @@ export function AutoPublishCard({ clientId }) {
         <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
           <div>
             <p className="flex items-center gap-1.5 text-sm font-semibold"><CalendarClock className="h-4 w-4 text-sky-500" /> Auto-schedule from plan</p>
-            <p className="text-xs text-zinc-500">Creates calendar posts on the plan&apos;s days at 10:00</p>
+            <p className="text-xs text-zinc-500">Creates calendar posts on the plan&apos;s days at 05:00</p>
           </div>
           <Switch on={data.auto_schedule && data.schedule_mode !== "manual"} disabled={Boolean(busy) || data.schedule_mode === "manual"} onClick={() => save({ auto_schedule: !data.auto_schedule }, "sched")} />
         </div>
         <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
           <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-sm font-semibold"><Zap className="h-4 w-4 text-brand-500" /> Auto-publish</p>
-            <p className="text-xs text-zinc-500">Publishes posts scoring</p>
+            <p className="flex items-center gap-1.5 text-sm font-semibold"><Zap className="h-4 w-4 text-brand-500" /> Auto-publish other posts</p>
+            <p className="text-xs text-zinc-500">Non-calendar posts scoring</p>
           </div>
           <div className="flex items-center gap-2">
             <Select value={data.min_score} disabled={Boolean(busy) || !data.enabled} onChange={(e) => save({ min_score: Number(e.target.value) }, "score")} className="!w-auto !py-1.5 text-xs" aria-label="Minimum QA score">

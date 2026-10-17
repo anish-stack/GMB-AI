@@ -12,7 +12,8 @@
     "billing": "node --conditions=react-server scripts/scheduler.js --billing",
     "cleanup-images": "node --conditions=react-server scripts/scheduler.js --cleanup-images",
     "mail-worker": "node --conditions=react-server scripts/mailWorker.js",
-    "postman": "node scripts/build-postman.mjs"
+    "postman": "node scripts/build-postman.mjs",
+    "own-company": "node --conditions=react-server scripts/create-own-company.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.685.0",

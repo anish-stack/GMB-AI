@@ -23,6 +23,7 @@ const ServicesPanel = dynamic(() => import("./services-panel").then((m) => m.Ser
 const ProductsPanel = dynamic(() => import("./products-panel").then((m) => m.ProductsPanel), { loading: Loading });
 const LinksPanel = dynamic(() => import("./links-panel").then((m) => m.LinksPanel), { loading: Loading });
 const TrackedKeywords = dynamic(() => import("./tracked-keywords").then((m) => m.TrackedKeywords), { loading: Loading });
+const ImageStyleCard = dynamic(() => import("./image-style-card").then((m) => m.ImageStyleCard), { loading: Loading });
 const SocialPanel = dynamic(() => import("./social-panel").then((m) => m.SocialPanel), { loading: Loading });
 const WebsitePanel = dynamic(() => import("./website-panel").then((m) => m.WebsitePanel), { loading: Loading });
 const AutoPublishCard = dynamic(() => import("./auto-publish-card").then((m) => m.AutoPublishCard), { loading: () => null });
@@ -62,6 +63,7 @@ export function GmbDetailTabs({ clientId, initialTab = "overview", overview, pos
     posts: (
       <div className="space-y-5">
         <AutoPublishCard clientId={clientId} />
+        <ImageStyleCard clientId={clientId} />
         {posts}
       </div>
     ),

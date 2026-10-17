@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { ClientForm } from "@/components/client-form";
 import { listEmployeesForAssignment } from "@/lib/repo/employees.js";
 import { requireTenantContext } from "@/lib/saas/context.js";
@@ -6,6 +7,7 @@ import { QuotaNotice } from "@/components/quota-notice";
 export const dynamic = "force-dynamic";
 
 export default async function NewClientPage() {
+  await requirePagePermission("client.create");
   const ctx = await requireTenantContext();
   const employees = await listEmployeesForAssignment(ctx.tenantId);
   return (

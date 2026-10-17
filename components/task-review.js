@@ -1,5 +1,7 @@
 "use client";
 
+import { ImageStylePicker } from "@/components/image-style-picker";
+
 import { Fragment, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -30,6 +32,7 @@ import {
 import { StatusBadge, MockBadge } from "@/components/status-badge";
 import { formatDate } from "@/lib/utils";
 import { POST_TYPES, IMAGE_REGEN_LIMIT } from "@/lib/constants";
+import { useEngineChoice } from "@/components/engine-choice";
 
 const CHECK_LABELS = {
   business_accuracy: "Business verified",
@@ -232,7 +235,16 @@ const fields = () => ({
   scheduled_date: form.scheduled_date || null,
 });
 
+  const [imgStyle, setImgStyle] = useState("");
+  const [engineDialog, askEngine] = useEngineChoice();
+
   async function act(action, extra = {}, busyKey = action) {
+    if (action === "regenerate" && !extra.engine) {
+      // manual run: ask which AI writes the text
+      const engine = await askEngine();
+      if (!engine) return;
+      extra = { ...extra, engine };
+    }
     setBusy(busyKey);
     setNotice(null);
     try {
@@ -347,6 +359,7 @@ const fields = () => ({
 
   return (
     <div className="space-y-4">
+      {engineDialog}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link
@@ -660,6 +673,7 @@ const fields = () => ({
                       variant="secondary"
                       onClick={() => act("regenerate")}
                       disabled={busy || isPostDeleted}
+                      title={task.image_url ? "Rewrites the text only - the current image is kept" : "Rewrites the post"}
                     >
                       <RefreshCw
                         className={
@@ -668,7 +682,7 @@ const fields = () => ({
                             : "h-3.5 w-3.5"
                         }
                       />{" "}
-                      Regenerate
+                      {task.image_url ? "Regenerate text" : "Regenerate"}
                     </Button>
                     <Button
                       variant="danger"
@@ -995,11 +1009,12 @@ const fields = () => ({
 
               {!isPublished ? (
                 <>
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <ImageStylePicker value={imgStyle} onChange={setImgStyle} />
+                  <div className="grid grid-cols-1 gap-1.5">
                     <Button
                       type="button"
                       variant="secondary"
-                      onClick={() => act("regenerate_image")}
+                      onClick={() => act("regenerate_image", imgStyle ? { style_id: imgStyle } : {})}
                       disabled={
                         busy ||
                         (task.image_regen_count || 0) >= IMAGE_REGEN_LIMIT
@@ -1012,32 +1027,13 @@ const fields = () => ({
                             : "h-3.5 w-3.5"
                         }
                       />
-                      {busy === "regenerate_image" ? "..." : "Regenerate"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() =>
-                        act("generate_image_options", { count: 3 })
-                      }
-                      disabled={Boolean(busy)}
-                    >
-                      <ImageIcon
-                        className={
-                          busy === "generate_image_options"
-                            ? "h-3.5 w-3.5 animate-spin"
-                            : "h-3.5 w-3.5"
-                        }
-                      />
-                      {busy === "generate_image_options"
-                        ? "..."
-                        : "Generate 3 options"}
+                      {busy === "regenerate_image" ? "..." : "Regenerate image (1 new)"}
                     </Button>
                   </div>
                   <p className="text-center text-[11px] text-zinc-400">
                     {(task.image_regen_count || 0) >= IMAGE_REGEN_LIMIT
                       ? `Regeneration limit reached (${IMAGE_REGEN_LIMIT}/${IMAGE_REGEN_LIMIT}) for this post - upload your own image instead.`
-                      : `${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0)} AI regeneration${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0) === 1 ? "" : "s"} left. "Generate options" doesn't count against this.`}
+                      : `${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0)} AI image regeneration${IMAGE_REGEN_LIMIT - (task.image_regen_count || 0) === 1 ? "" : "s"} left. "Regenerate text" keeps this image.`}
                   </p>
                 </>
               ) : null}

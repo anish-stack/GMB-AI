@@ -1,30 +1,32 @@
 "use client";
 
+import { BrandMark } from "@/components/brand";
+
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, MapPin, CalendarDays, ListChecks,
-  KeyRound, Bot, BarChart3, Settings, Sparkles, X, CreditCard, UsersRound, Bell, FileText, LifeBuoy, Code2, Inbox, ShieldAlert, Radar,
+  KeyRound, Bot, BarChart3, Settings, X, CreditCard, UsersRound, Bell, FileText, LifeBuoy, Code2, Inbox, ShieldAlert, Radar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/gmb/tasks", label: "Review queue", icon: ListChecks },
-  { href: "/gmb/calendar", label: "Content calendar", icon: CalendarDays },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/gmb", label: "GMB profiles", icon: MapPin },
-  { href: "/keywords", label: "Keywords", icon: KeyRound },
-  { href: "/ai-runs", label: "AI runs", icon: Bot },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/reviews", label: "Review inbox", icon: Inbox },
-  { href: "/listing-health", label: "Listing health", icon: ShieldAlert },
-  { href: "/rank-tracker", label: "Rank tracker", icon: Radar },
-  { href: "/reports", label: "Shared reports", icon: FileText },
+  { href: "/gmb/tasks", label: "Review queue", icon: ListChecks, perm: "task.view" },
+  { href: "/gmb/calendar", label: "Content calendar", icon: CalendarDays, perm: "calendar.view" },
+  { href: "/clients", label: "Clients", icon: Users, perm: "client.view" },
+  { href: "/gmb", label: "GMB profiles", icon: MapPin, perm: "gmb.view" },
+  { href: "/keywords", label: "Keywords", icon: KeyRound, perm: "keyword.view" },
+  { href: "/ai-runs", label: "AI runs", icon: Bot, perm: "task.view" },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, perm: "analytics.view" },
+  { href: "/reviews", label: "Review inbox", icon: Inbox, perm: "gmb.view" },
+  { href: "/listing-health", label: "Listing health", icon: ShieldAlert, perm: "gmb.view" },
+  { href: "/rank-tracker", label: "Rank tracker", icon: Radar, perm: "gmb.view" },
+  { href: "/reports", label: "Shared reports", icon: FileText, perm: "analytics.view" },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/support", label: "Support", icon: LifeBuoy },
-  { href: "/developers", label: "API & developers", icon: Code2, perm: "billing.view" },
+  { href: "/developers", label: "API & developers", icon: Code2, perm: "apikey.manage" },
   { href: "/team", label: "Team", icon: UsersRound, perm: "team.view" },
   { href: "/billing", label: "Billing & plan", icon: CreditCard, perm: "billing.view" },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -59,15 +61,7 @@ function NavList({ pathname, onNavigate, perms = [] }) {
 function Brand({ trailing, workspace, plan }) {
   return (
     <div className="flex items-center justify-between gap-2.5 px-5 py-5">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 shadow-lg shadow-brand-500/30">
-          <Sparkles className="h-4.5 w-4.5 text-white" />
-        </span>
-        <div>
-          <p className="max-w-36 truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{workspace || "GMB AI Cloud"}</p>
-          <p className="text-[11px] text-zinc-400">{plan ? `${plan} plan` : "Workspace"}</p>
-        </div>
-      </div>
+      <BrandMark sub={[workspace, plan ? `${plan} plan` : null].filter(Boolean).join(" · ") || "Workspace"} />
       {trailing}
     </div>
   );

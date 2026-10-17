@@ -2,14 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
-import { Card, CardBody, CardHeader, Table, EmptyRow, Badge, Button, Field, Input, Select } from "@/components/ui";
+import { Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Card, CardBody, CardHeader, Table, EmptyRow, Badge, Button, Field, Input, Select, Modal } from "@/components/ui";
+import { PermissionChecklist, parsePerms } from "@/components/team-permissions";
+import { DEFAULT_MEMBER_PERMISSIONS, ALL_TENANT_PERMISSIONS } from "@/lib/saas/constants.js";
 import { ROLE_LABEL } from "@/lib/saas/constants.js";
 import { formatDate } from "@/lib/utils";
 
-const EMPTY = { name: "", email: "", password: "", phone: "", role: "MEMBER", department: "SEO", capacity: 40 };
+const EMPTY = { name: "", email: "", password: "", phone: "", role: "MEMBER", department: "SEO", capacity: 40, permissions: [...DEFAULT_MEMBER_PERMISSIONS] };
 
-export function TeamManager({ users, canInvite, canEdit, limit, used }) {
+export function TeamManager({ users, canInvite, canEdit, isOwner = false, limit, used }) {
+  const [permUser, setPermUser] = useState(null);
+  const [permDraft, setPermDraft] = useState([]);
+  const [permBusy, setPermBusy] = useState(false);
+  const openPerms = (u) => {
+    setPermUser(u);
+    setPermDraft(parsePerms(u.permissions, u.role));
+  };
+  async function savePerms() {
+    setPermBusy(true);
+    await patch(permUser.id, { permissions: permDraft });
+    setPermBusy(false);
+    setPermUser(null);
+    setMsg(`Permissions updated for ${permUser.name}`);
+  }
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [open, setOpen] = useState(false);
@@ -33,7 +49,7 @@ export function TeamManager({ users, canInvite, canEdit, limit, used }) {
     const res = await fetch("/api/team", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(isOwner && form.role !== "OWNER" ? form : { ...form, permissions: undefined }),
     });
     const json = await res.json();
     setBusy(false);
@@ -106,12 +122,17 @@ export function TeamManager({ users, canInvite, canEdit, limit, used }) {
               <Field label="Phone"><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
               <Field label="Role">
                 <Select value={form.role} onChange={(e) => set("role", e.target.value)}>
-                  <option value="MEMBER">Member - review and edit posts</option>
-                  <option value="MANAGER">Manager - clients, publishing, team view</option>
-                  <option value="OWNER">Owner - full access including billing</option>
+                  <option value="MEMBER">Team member - access you choose below</option>
+                  {isOwner ? <option value="OWNER">Owner - full access including billing</option> : null}
                 </Select>
               </Field>
               <Field label="Department"><Input value={form.department} onChange={(e) => set("department", e.target.value)} /></Field>
+              {isOwner && form.role !== "OWNER" ? (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="mb-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300">What can this member access?</p>
+                  <PermissionChecklist value={form.permissions} onChange={(v) => set("permissions", v)} />
+                </div>
+              ) : null}
               <div className="sm:col-span-2 lg:col-span-3">
                 <Button type="submit" disabled={busy}>{busy ? "Adding..." : "Add member"}</Button>
               </div>
@@ -126,15 +147,19 @@ export function TeamManager({ users, canInvite, canEdit, limit, used }) {
               <td className="px-4 py-2 font-medium text-zinc-800 dark:text-zinc-100">{u.name}</td>
               <td className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400">{u.email}</td>
               <td className="px-4 py-2">
-                {canEdit ? (
-                  <Select value={u.role} className="!w-32 !py-1 text-xs" onChange={(e) => patch(u.id, { role: e.target.value })}>
-                    <option value="MEMBER">Member</option>
-                    <option value="MANAGER">Manager</option>
+                {isOwner ? (
+                  <Select value={u.role === "MANAGER" ? "MEMBER" : u.role} className="!w-36 !py-1 text-xs" onChange={(e) => patch(u.id, { role: e.target.value })}>
+                    <option value="MEMBER">Team member</option>
                     <option value="OWNER">Owner</option>
                   </Select>
                 ) : (
                   <Badge tone={u.role === "OWNER" ? "indigo" : "slate"}>{ROLE_LABEL[u.role]}</Badge>
                 )}
+                {u.role !== "OWNER" ? (
+                  <p className="mt-1 text-[11px] text-zinc-400">
+                    {u.permissions ? `${parsePerms(u.permissions, u.role).length}/${ALL_TENANT_PERMISSIONS.length} permissions` : "Default access"}
+                  </p>
+                ) : <p className="mt-1 text-[11px] text-zinc-400">Full access</p>}
               </td>
               <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{u.department || "-"}</td>
               <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{u.clients || 0}</td>
@@ -145,6 +170,11 @@ export function TeamManager({ users, canInvite, canEdit, limit, used }) {
               <td className="px-4 py-2 text-right">
                 {canEdit ? (
                   <div className="flex justify-end gap-1.5">
+                    {isOwner && u.role !== "OWNER" ? (
+                      <Button variant="secondary" className="!py-1 text-xs" onClick={() => openPerms(u)}>
+                        <ShieldCheck className="h-3.5 w-3.5" /> Permissions
+                      </Button>
+                    ) : null}
                     <Button variant="ghost" className="!py-1 text-xs" onClick={() => { setResetId(resetId === u.id ? null : u.id); setNewPassword(""); }}>
                       Reset password
                     </Button>
@@ -182,6 +212,15 @@ export function TeamManager({ users, canInvite, canEdit, limit, used }) {
             : null}
         </Table>
       </Card>
+
+      <Modal open={Boolean(permUser)} onClose={() => setPermUser(null)} size="xl" title={permUser ? `Permissions - ${permUser.name}` : ""}
+        footer={<>
+          <Button variant="secondary" onClick={() => setPermUser(null)}>Cancel</Button>
+          <Button onClick={savePerms} disabled={permBusy}>{permBusy ? "Saving..." : "Save permissions"}</Button>
+        </>}>
+        <p className="mb-3 text-sm text-zinc-500">Ticked items are allowed. Changes apply on the member&apos;s next click - no re-login needed. Owners always have full access.</p>
+        <PermissionChecklist value={permDraft} onChange={setPermDraft} />
+      </Modal>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { AccountForm } from "@/components/account-form";
 
 import { AppearanceCard } from "@/components/appearance-card";
+import { BrandCard } from "@/components/brand-card";
 import { listTenantUsers } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,10 @@ export default async function SettingsPage() {
         canEditWorkspace={ctx.can("settings.edit")}
       />
 
-      <AppearanceCard canEdit={ctx.can("settings.edit")} />
+      {ctx.can("settings.view") ? <BrandCard canEdit={ctx.can("settings.edit")} /> : null}
+      {ctx.can("settings.view") ? <AppearanceCard canEdit={ctx.can("settings.edit")} /> : null}
+      {ctx.can("settings.view") ? (
+        <>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -131,6 +135,8 @@ export default async function SettingsPage() {
           </CardBody>
         </Card>
       </div>
+        </>
+      ) : null}
     </div>
   );
 }

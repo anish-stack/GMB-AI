@@ -22,7 +22,8 @@ const STATUS_COLOR = {
   FAILED: "bg-rose-700",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }) {
+  const denied = (await searchParams)?.denied || null;
   const ctx = await requireTenantContext();
   const T = ctx.tenantId;
   const [stats, breakdown, tasks, clients, trend] = await Promise.all([
@@ -40,6 +41,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {denied ? (
+        <p className="rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+          You don&apos;t have access to that page. Ask the workspace owner to enable it in Team → Permissions.
+        </p>
+      ) : null}
       <div>
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Dashboard</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -47,8 +53,12 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <ExpiryAlert ent={ctx.ent} />
-      <PlanSummary ent={JSON.parse(JSON.stringify(ctx.ent))} />
+      {ctx.can("billing.view") && !ctx.ent.internal ? (
+        <>
+          <ExpiryAlert ent={ctx.ent} />
+          <PlanSummary ent={JSON.parse(JSON.stringify(ctx.ent))} />
+        </>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Clients" value={stats.total_clients} sub={`${stats.total_profiles} GMB profiles`} tone="indigo" />

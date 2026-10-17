@@ -145,6 +145,16 @@ export function TenantDetail({ tenant, ent, plans }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
+        <Card className={tenant.account_type === "INTERNAL" ? "ring-2 ring-emerald-400" : ""}>
+          <CardHeader title="Own company account" subtitle="Unlimited AI credits, clients, team and features. Never billed, never expires. For your own agency only." />
+          <CardBody className="flex items-center justify-between gap-3">
+            <p className="text-sm">{tenant.account_type === "INTERNAL" ? "✓ This is an own-company account" : "Normal paying customer"}</p>
+            <Button variant={tenant.account_type === "INTERNAL" ? "dangerGhost" : "primary"} disabled={busy === "internal"}
+              onClick={() => (tenant.account_type === "INTERNAL" || window.confirm("Make this an own-company account? It gets unlimited credits and is never billed.")) && call({ action: "account_type", internal: tenant.account_type !== "INTERNAL" }, "internal")}>
+              {tenant.account_type === "INTERNAL" ? "Make normal customer" : "Make own company"}
+            </Button>
+          </CardBody>
+        </Card>
         <Card>
           <CardHeader title="Facebook & Instagram (test mode)" subtitle="Only tenants enabled here see the Social tab: Facebook page posting and Instagram auto-DM" />
           <CardBody className="flex items-center justify-between gap-3">

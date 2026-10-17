@@ -1,4 +1,4 @@
-# GMB AI Cloud
+# HBS Suite
 
 Multi-tenant SaaS for agencies that manage Google Business Profiles (GBP) with AI.
 Tenants (agencies) add clients (businesses), connect each client's Google account, and the
@@ -483,3 +483,85 @@ Run `mysql -u root -p gmb_ai < db/upgrade-v10-keywords-reviews-autopay.sql` (and
   Razorpay account must have Subscriptions enabled (Dashboard -> Subscriptions).
 
 Tests: `node --conditions=react-server scripts/test-v10.mjs` (server on :3258) - 43/43.
+
+## v11 - HBS Suite: team permissions, admin prompts & image styles, white-label, own company
+
+Run `mysql -u root -p gmb_ai < db/upgrade-v11-roles-prompts-brand.sql` (safe to run twice; also adds the v10.1
+review-collection columns if they were missed), then build + restart.
+
+- **Name** - the product is now **HBS Suite**. Name, logo and favicon: Admin -> Web & maintenance.
+- **Team permissions** - Team -> **Permissions** per member (checkbox groups: clients, posts & AI, calendar,
+  keywords, GMB profiles, analytics, team, billing, workspace settings). New members default to **everything
+  except billing, workspace settings, API keys and managing the team**. Only an owner can change permissions,
+  add owners or touch owner accounts. Changes apply on the next click (read per request from `users.permissions`).
+  Pages a member can't open redirect to the dashboard with a notice; every API route checks the same permission.
+- **AI prompts** - Admin -> AI prompts: every agent's system prompt + "extra instructions" (appended to each
+  request), and the shared rule blocks (GBP rules, writing rules, search intent, voice & banned words). Stored in
+  `ai_prompts` as overrides of the defaults in `lib/ai/prompts/*`; applied in `runAI()`; cached 30 s; Reset = default.
+- **Image styles** - Admin -> Image styles: presets that decide how post images are made -
+  `BRANDED_PHOTO` (AI photo + our logo/headline/button overlay - the classic look), `AI_POSTER` (the AI designs the
+  whole ad: headline, 4 points with icons, call button, photo on the side; only the client's logo is added) and
+  `PHOTO_ONLY`. Prompt templates use `{{business}} {{city}} {{headline}} {{point1..4}} {{cta}} {{brand_color}}…`.
+  "Generate test image" previews a style on any client without using credits. Workspaces choose a style per GMB
+  profile (Posts tab -> Post image style) or for a single post while reviewing (Regenerate / Generate 3 options).
+- **White-label** - Settings -> Your brand: an agency sets its own brand name + logo. Its panel (sidebar, browser
+  tab), emails (`%%BRAND%%` in templates) and PDF reports show that brand instead of HBS Suite.
+- **Own company account** - `tenants.account_type = INTERNAL`: unlimited credits (usage still counted), no plan
+  limits, unlimited team, every feature, never billed or expired. Admin -> Tenants -> tenant -> "Make own company",
+  or create it from the command line:
+
+  ```bash
+  npm run own-company -- --email=owner@yourcompany.com --password='StrongPass#1' --name="Your Name"
+  # company name defaults to "HOVER BUSINESS SERVICES LLP" (--company="..." to change)
+  ```
+
+Tests: `node --conditions=react-server scripts/test-v11.mjs` (server on :3258, seed data) - 47 checks.
+
+### v11.1 - calendar auto-post at the scheduled time
+
+- Every **calendar entry is published to Google at its date + time** - no approval, no quality-score gate, no
+  per-client switch. Posts without a time use **05:00** (`APP_TIMEZONE`, default Asia/Kolkata).
+- `lib/posting/calendarPublisher.js`, run every 2 minutes by the scheduler through `POST /api/cron/calendar-post`
+  (header `x-scheduler-key` = `SESSION_SECRET`; it runs inside the app so image rendering works):
+  1. posts due in the next 3 hours (`CALENDAR_PREPARE_MINUTES`) are written by the AI ahead of time,
+  2. posts whose time has come are published (written on the spot if still missing).
+  A post the team **rejected** is never published. Each entry is claimed with a conditional UPDATE, so it can't be
+  published twice. Slots missed for more than 2 days are left alone. Success / failure -> notification.
+- Admin -> Web & maintenance -> **Calendar auto-post** (On by default) switches it off for everyone.
+- The old QA-based auto-publish now only handles posts made outside the calendar.
+- **The scheduler must be running** - nothing posts without it:
+  `pm2 start npm --name hbs-scheduler -- run scheduler` (check: GMB profile -> Posts -> Automation check).
+- Team members without "Connect / disconnect Google" no longer see the connect card, Sync, Remove connection or
+  "Import all listings"; removing a connection now needs that permission too.
+
+Tests: `node --conditions=react-server scripts/test-v11-1.mjs` - 17 checks.
+
+
+## v11.2 - Ollama for text, Gemini for images, one image per post
+
+- **Text + embeddings run on Ollama** (`AI_PROVIDER=auto`, `OLLAMA_ENABLED=true`). Ollama off / down /
+  timeout -> that agent goes straight to **Gemini** (no retries on Ollama; marked down for 60 s, re-pinged
+  every 30 s). `AI_PROVIDER=ollama` = Ollama -> Gemini -> Mock. `OLLAMA_ENABLED` accepts `true` or `1`
+  (Admin -> Integrations), base URL works with or without `/v1`. Native `/api/chat` with
+  `OLLAMA_NUM_CTX` (default 8192) so long prompts are not cut; `OLLAMA_TIMEOUT_MS` (default 180000).
+- **Images: Gemini only** (`IMAGE_PROVIDER=gemini`, default; `auto` = old Gemini -> OpenAI -> HF).
+- **One image per post**: no second "duplicate image" retry (flagged for review instead), "Generate 3 options"
+  removed, `IMAGE_OPTIONS_COUNT=1`, `IMAGE_OPTIONS_COUNT_MAX=1` (API clamps).
+- **Regenerate (post) = text only**: the existing image is reused, no image call, no image credits.
+  "Regenerate image (1 new)" still makes one new image (IMAGE_REGEN_LIMIT).
+- Provider chain rebuilds automatically when AI env / integrations change (no restart).
+
+Tests: `node --conditions=react-server scripts/test-v11-2.mjs` - 17/17 (Part B needs the app on :3258).
+
+### v11.2.1 - short Ollama posts
+- Post text under 1200 chars from Ollama -> one **expand** call on Ollama (rewrite + lengthen its own text).
+- Still short -> **one Gemini call** for that post's content (`OLLAMA_SHORT_FALLBACK=gemini`, `off` to disable).
+- Humanize can no longer shorten a post below 1200 chars (or a short post by more than 5%).
+- `runAI({ exclude: ["ollama"] })` skips providers for one call. Ollama integration Test checks models are pulled.
+
+### v11.2.3 - pick the AI for manual runs
+- Background (nightly job, calendar auto-post, auto-schedule, API): text on **Ollama** (Gemini only if Ollama is down).
+- Manual (Generate AI, Regenerate / Retry, Run AI job, calendar "run day", admin Regenerate): a dialog asks
+  **Ollama (free, slower)** or **Gemini (fast, paid)**. Only one configured -> no dialog.
+- Engine travels with the run (`lib/ai/engine.js`, AsyncLocalStorage) - every agent + embedding of that run
+  uses it; parallel runs keep their own. Images are always Gemini. `GET /api/ai/engines` feeds the dialog.

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withEngine } from "@/lib/ai/engine.js";
 import { guard, apiError } from "@/lib/saas/guard.js";
 import { approveTask, rejectTask, publishTask, deletePublishedPost, getTask } from "@/lib/repo/tasks.js";
 import { runTaskPipeline } from "@/lib/ai/orchestrator.js";
@@ -52,7 +53,7 @@ export async function POST(request) {
             break;
           case "regenerate": {
             await query("UPDATE ai_tasks SET regenerate_count=regenerate_count+1 WHERE id=?", [id]);
-            const r = await runTaskPipeline(id, { regenerate: true });
+            const r = await withEngine(body.engine, () => runTaskPipeline(id, { regenerate: true }));
             if (!r.ok) throw new Error(r.error || "Regeneration failed");
             break;
           }

@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import { query } from "@/lib/db";
 import { requireTenantContext } from "@/lib/saas/context.js";
 import { CalendarBoard } from "@/components/calendar-board";
@@ -5,6 +6,7 @@ import { CalendarBoard } from "@/components/calendar-board";
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
+  await requirePagePermission("calendar.view");
   const ctx = await requireTenantContext();
   const now = new Date();
   const from = new Date(now.getFullYear(), now.getMonth() - 1, 1)

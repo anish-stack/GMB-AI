@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withEngine } from "@/lib/ai/engine.js";
 import { safeEqual } from "@/lib/security/crypto.js";
 import { beat } from "@/lib/system/heartbeat.js";
 import { maintenanceState } from "@/lib/system/maintenance.js";
@@ -23,7 +24,7 @@ export async function POST(request) {
   const fromScheduler = Boolean(key && process.env.SESSION_SECRET && safeEqual(key, process.env.SESSION_SECRET));
 
   if (!ctx && !fromScheduler) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  if (ctx && !fromScheduler && !can(ctx.role, "task.generate")) {
+  if (ctx && !fromScheduler && !can(ctx.role, "task.generate", ctx.perms)) {
     return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   }
 
@@ -43,12 +44,14 @@ export async function POST(request) {
   }
 
   try {
-    const result = await runNightlyJob({
+    // scheduler (background) -> default chain, Ollama first. In-app button -> the engine the user picked.
+    const run = () => runNightlyJob({
       date: body.date || null,
       clientId: body.clientId ? Number(body.clientId) : null,
       tenantId: fromScheduler ? (body.tenantId ? Number(body.tenantId) : null) : ctx?.tenantId || null,
       limit: Number(body.limit || 100),
     });
+    const result = fromScheduler ? await run() : await withEngine(body.engine, run);
     if (fromScheduler) await beat("nightly_job", { ok: true, message: `${result.generated}/${result.scheduled} generated, ${result.skipped} skipped` });
     if (ctx) {
       await audit(ctx, "AI_JOB_RUN", { meta: { generated: result.generated, credits: result.credits } });

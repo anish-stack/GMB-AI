@@ -1,3 +1,4 @@
+import { requirePagePermission } from "@/lib/saas/context.js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, AlertTriangle, XCircle, MapPin, Star, Image as ImageIcon, Tag, ExternalLink } from "lucide-react";
@@ -14,6 +15,7 @@ const ICON = { ok: [CheckCircle2, "text-emerald-500"], warn: [AlertTriangle, "te
 const ring = (s) => (s >= 80 ? "#10b981" : s >= 60 ? "#f59e0b" : "#f43f5e");
 
 export default async function AuditPage({ params }) {
+  await requirePagePermission("gmb.view");
   const ctx = await requireTenantContext();
   const { id } = await params;
   const c = await one("SELECT id FROM clients WHERE id=? AND tenant_id=?", [Number(id), ctx.tenantId]);

@@ -6,11 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, Layers, CreditCard, Receipt, Coins, TicketPercent,
   Activity, ScrollText, UsersRound, Settings, ShieldCheck, LogOut, Menu, X, Send, MapPin,
-  Megaphone, LifeBuoy, FileText, PlugZap, Globe, HeartPulse, Gauge, KeyRound,
+  Megaphone, LifeBuoy, FileText, PlugZap, Globe, HeartPulse, Gauge, KeyRound, Bot, ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -32,6 +33,8 @@ const NAV = [
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
   { href: "/admin/settings", label: "Billing settings", icon: Settings },
   { href: "/admin/web-settings", label: "Web & maintenance", icon: Globe },
+  { href: "/admin/prompts", label: "AI prompts", icon: Bot },
+  { href: "/admin/image-styles", label: "Image styles", icon: ImageIcon },
   { href: "/admin/integrations", label: "Integrations", icon: PlugZap },
   { href: "/admin/health", label: "System health", icon: HeartPulse },
 ];
@@ -75,15 +78,7 @@ export function AdminShell({ session, platformName, children }) {
 
   const brand = (
     <div className="flex items-center justify-between gap-2 px-5 py-5">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-zinc-900 dark:bg-zinc-100">
-          <ShieldCheck className="h-4.5 w-4.5 text-white dark:text-zinc-900" />
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{platformName}</p>
-          <p className="text-[11px] text-zinc-400">Super admin console</p>
-        </div>
-      </div>
+      <BrandMark sub="Super admin console" />
       <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 text-zinc-400 md:hidden">
         <X className="h-4 w-4" />
       </button>
