@@ -73,7 +73,7 @@ ok("text chain: ollama -> gemini -> openai -> mock", chain.join(">") === "ollama
 ok("OLLAMA_ENABLED=1 accepted", chain[0] === "ollama");
 ok("images: Gemini only", ai.getImageChain().map((p) => p.name).join(",") === "gemini", ai.getImageChain().map((p) => p.name).join(","));
 
-let r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
+let r = await ai.runAI({ agent: "research", system: "s", prompt: "p" });
 ok("text runs on Ollama", r.provider === "ollama" && r.data?.from === "ollama", JSON.stringify(r.data));
 ok("Ollama num_ctx 8192 + base URL without /v1 works", calls.ctx === 8192 && calls.chat === 1, calls.ctx);
 const v = await ai.embed("hello");
@@ -82,7 +82,7 @@ ok("embeddings on Ollama", calls.embed === 1 && v.length === 768);
 // Ollama goes down -> straight to Gemini, no retries on Ollama
 process.env.OLLAMA_BASE_URL = "http://127.0.0.1:11999";
 const t0 = Date.now();
-r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
+r = await ai.runAI({ agent: "research", system: "s", prompt: "p" });
 ok("Ollama down -> Gemini", r.provider === "gemini" && r.data?.from === "gemini", r.provider);
 ok("fallback is fast (no retry wait)", Date.now() - t0 < 4000, `${Date.now() - t0} ms`);
 const g0 = geminiCalls;
@@ -108,6 +108,7 @@ process.env.OLLAMA_BASE_URL = "http://127.0.0.1:11556";
 process.env.OPENAI_API_KEY = "";
 
 const { runContentAgent } = await import("../lib/ai/agents/content.js");
+const { withEngine } = await import("../lib/ai/engine.js");
 const { DESC_MIN_CHARS } = await import("../lib/ai/textPolicy.js");
 const { buildKnowledge } = await import("../lib/repo/knowledge.js");
 const kb = await buildKnowledge(1);
@@ -118,21 +119,20 @@ const op = new OllamaProvider();
 for (let i = 0; i < 70 && !(await op.available()); i++) await new Promise((r) => setTimeout(r, 1000));
 mode.content = true; mode.expandLen = 1300; mode.geminiLong = true;
 let g1 = geminiCalls;
-let c = await runContentAgent(kb, input, { seed: "t1" });
+let c = await withEngine("ollama", () => runContentAgent(kb, input, { seed: "t1" }));
 ok("short Ollama post -> expanded on Ollama to >= 1200", c.description.length >= DESC_MIN_CHARS && calls.expand >= 1 && geminiCalls === g1, `${c.description.length} chars, expand=${calls.expand}, gemini=${geminiCalls - g1}`);
 mode.expandLen = 0;
 g1 = geminiCalls;
-c = await runContentAgent(kb, input, { seed: "t2" });
+c = await withEngine("ollama", () => runContentAgent(kb, input, { seed: "t2" }));
 ok("expand still short -> one Gemini call fixes it", c.description.length >= DESC_MIN_CHARS && geminiCalls === g1 + 1, `${c.description.length} chars, gemini=${geminiCalls - g1}`);
 process.env.OLLAMA_SHORT_FALLBACK = "off";
 g1 = geminiCalls;
-c = await runContentAgent(kb, input, { seed: "t3" });
+c = await withEngine("ollama", () => runContentAgent(kb, input, { seed: "t3" }));
 ok("OLLAMA_SHORT_FALLBACK=off -> no Gemini call", geminiCalls === g1, `${c.description.length} chars`);
 process.env.OLLAMA_SHORT_FALLBACK = "";
 mode.content = false;
 
 // ---- engine choice: background = Ollama, manual pick = that engine ----
-const { withEngine } = await import("../lib/ai/engine.js");
 r = await ai.runAI({ agent: "research", system: "s", prompt: "p" });
 ok("background run (no engine) -> Ollama", r.provider === "ollama", r.provider);
 r = await withEngine("gemini", () => ai.runAI({ agent: "research", system: "s", prompt: "p" }));
@@ -144,6 +144,25 @@ r = await withEngine("ollama", async () => { await new Promise((z) => setTimeout
 ok("manual pick Ollama -> Ollama (survives awaits)", r.provider === "ollama", r.provider);
 const both = await Promise.all([withEngine("gemini", () => ai.runAI({ agent: "a", system: "s", prompt: "p" })), ai.runAI({ agent: "b", system: "s", prompt: "p" })]);
 ok("parallel runs keep their own engine", both[0].provider === "gemini" && both[1].provider === "ollama", both.map((x) => x.provider).join(","));
+
+// hybrid (background default): post text on Gemini, the rest on Ollama
+r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
+ok("background = hybrid: content -> Gemini", r.provider === "gemini", r.provider);
+r = await ai.runAI({ agent: "humanize", system: "s", prompt: "p" });
+ok("hybrid: humanize -> Gemini", r.provider === "gemini", r.provider);
+r = await ai.runAI({ agent: "keywords", system: "s", prompt: "p" });
+ok("hybrid: keywords/topic/QA -> Ollama", r.provider === "ollama", r.provider);
+const ge1 = geminiCalls;
+await ai.embed("y");
+ok("hybrid: embeddings on Ollama", geminiCalls === ge1);
+r = await withEngine("ollama", () => ai.runAI({ agent: "content", system: "s", prompt: "p" }));
+ok("manual Ollama: content on Ollama", r.provider === "ollama", r.provider);
+r = await withEngine("hybrid", () => ai.runAI({ agent: "content", system: "s", prompt: "p" }));
+ok("manual Hybrid: content on Gemini", r.provider === "gemini", r.provider);
+process.env.AI_BACKGROUND_ENGINE = "ollama";
+r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
+ok("AI_BACKGROUND_ENGINE=ollama -> content on Ollama", r.provider === "ollama", r.provider);
+process.env.AI_BACKGROUND_ENGINE = "";
 
 fake.close();
 globalThis.fetch = realFetch;
@@ -178,6 +197,19 @@ if (up) {
   x = await act(id, { action: "generate_image_options", count: 3 });
   ok("image options capped at 1 per click", x.status === 200 && x.data?.candidates?.length === 1, x.data?.candidates?.length ?? x.data?.error);
   sql(`DELETE FROM ai_tasks WHERE id=${id}`);
+  // research + keywords reused for the next post of the same client
+  const mk = async () => {
+    const res = await realFetch(`${B}/api/tasks`, { method: "POST", headers: { cookie: owner, "content-type": "application/json" }, body: JSON.stringify({ clientId: 1, postType: "Service" }) });
+    return (await res.json().catch(() => ({}))).taskId;
+  };
+  const a1 = await mk();
+  const a2 = await mk();
+  const runs = (id, ag) => Number(sql(`select count(*) from ai_executions where task_id=${id} and agent='${ag}'`));
+  ok("2nd post of a client reuses research + keywords (no AI call)", a2 && runs(a2, "research") === 0 && runs(a2, "keywords") === 0 && sql(`select research is not null from ai_tasks where id=${a2}`) === "1", `research=${runs(a2, "research")} keywords=${runs(a2, "keywords")}`);
+  const before = runs(a2, "research") + runs(a2, "keywords");
+  await act(a2, { action: "regenerate" });
+  ok("Regenerate reuses the task's research + keywords", runs(a2, "research") + runs(a2, "keywords") === before);
+  sql(`DELETE FROM ai_tasks WHERE id IN (${a1},${a2})`);
   const eng = await realFetch(`${B}/api/ai/engines`, { headers: { cookie: owner } }).then((q) => q.json()).catch(() => null);
   ok("/api/ai/engines answers for the picker", eng && "ollama" in eng && "gemini" in eng, JSON.stringify(eng));
   const t = await realFetch(`${B}/api/tasks`, { method: "POST", headers: { cookie: owner, "content-type": "application/json" }, body: JSON.stringify({ clientId: 1, postType: "Service", engine: "gemini" }) });

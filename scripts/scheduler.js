@@ -19,7 +19,9 @@
 import "dotenv/config";
 import cron from "node-cron";
 
-const APP_URL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+// Scheduler talks to the app directly (SCHEDULER_URL, e.g. http://127.0.0.1:3258) so long AI runs
+// don't go through Cloudflare / Nginx time limits. Falls back to APP_URL.
+const APP_URL = (process.env.SCHEDULER_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 const KEY = process.env.SESSION_SECRET || "";
 const EXPR = {
   ai: process.env.NIGHTLY_CRON || "0 0 * * *",

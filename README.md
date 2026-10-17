@@ -565,3 +565,10 @@ Tests: `node --conditions=react-server scripts/test-v11-2.mjs` - 17/17 (Part B n
   **Ollama (free, slower)** or **Gemini (fast, paid)**. Only one configured -> no dialog.
 - Engine travels with the run (`lib/ai/engine.js`, AsyncLocalStorage) - every agent + embedding of that run
   uses it; parallel runs keep their own. Images are always Gemini. `GET /api/ai/engines` feeds the dialog.
+
+### v11.2.4 - Hybrid engine + research reuse
+- **Hybrid** (`AI_BACKGROUND_ENGINE=hybrid`, default for nightly / calendar): post text (`content`, `humanize`
+  - `HYBRID_GEMINI_AGENTS`) on Gemini, research / keywords / topic / QA / embeddings on Ollama, image Gemini.
+  Manual dialog: Hybrid (recommended) / Ollama / Gemini.
+- **Research + keywords are reused**: Regenerate uses the task's own; a new post reuses the client's latest
+  research (< `RESEARCH_CACHE_DAYS`, 7) and keywords (< `KEYWORD_CACHE_DAYS`, 3). 0 = always run.
