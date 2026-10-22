@@ -39,7 +39,8 @@ export function AutoPublishCard({ clientId }) {
   const heartbeatOk = sched.heartbeat?.mins_ago != null && sched.heartbeat.mins_ago < 10;
   const planActive = data.plan?.status === "ACTIVE";
   const checks = [
-    [heartbeatOk, heartbeatOk ? `Scheduler running (last beat ${ago(sched.heartbeat.mins_ago)})` : "Scheduler is NOT running - start it: pm2 start npm --name scheduler -- run scheduler"],
+    ...(data.paused ? [[false, "Auto-publishing is PAUSED by the platform admin - posts are still written, nothing goes to Google until it is resumed"]] : []),
+    [heartbeatOk, heartbeatOk ? `Scheduler running (last beat ${ago(sched.heartbeat.mins_ago)})` : "Scheduler is NOT running - start it: pm2 start ecosystem.config.cjs --only hbs-scheduler"],
     [planActive, planActive ? `Posting plan active: ${data.plan.posts_per_week}/week until ${new Date(data.plan.end_date).toLocaleDateString("en-IN")}` : "No active posting plan - edit the client and set one"],
     [data.schedule_mode === "manual" ? false : data.auto_schedule, data.schedule_mode === "manual" ? "Admin set post automation to MANUAL - only calendar entries are written" : data.auto_schedule ? "Calendar is filled automatically from the plan" : "Auto-schedule is off - posts only come from the calendar you fill"],
     [Boolean(sched.nightly?.last_ok_at), sched.nightly?.last_ok_at ? `AI writing job last ran ${ago(sched.nightly.mins_ago)}` : "AI writing job hasn't run yet (runs nightly, or use Run AI job)"],

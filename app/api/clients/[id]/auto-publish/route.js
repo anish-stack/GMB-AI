@@ -26,8 +26,10 @@ async function diagnostics(clientId, c) {
   const waiting = await one("SELECT COUNT(*) n FROM ai_tasks WHERE client_id=? AND status IN ('READY_FOR_REVIEW','APPROVED','NEEDS_REVIEW')", [clientId]);
   const { getSettings } = await import("@/lib/saas/settings.js");
   const mode = (await getSettings()).auto_schedule_mode === "manual" ? "manual" : "plan";
-  const calendarAuto = Number((await getSettings({ fresh: true })).calendar_autopost ?? 1) === 1;
-  return { auto_schedule: Boolean(c.auto_schedule), schedule_mode: mode, calendar_autopost: calendarAuto, plan, next, waiting: Number(waiting?.n || 0), scheduler: { nightly: beat("nightly_job"), autopublish: beat("auto_publish"), heartbeat: beat("scheduler"), calendar: beat("calendar_post") } };
+  const _s = await getSettings({ fresh: true });
+  const calendarAuto = Number(_s.calendar_autopost ?? 1) === 1;
+  const paused = Number(_s.autopublish_paused || 0) === 1;
+  return { auto_schedule: Boolean(c.auto_schedule), schedule_mode: mode, calendar_autopost: calendarAuto, paused, plan, next, waiting: Number(waiting?.n || 0), scheduler: { nightly: beat("nightly_job"), autopublish: beat("auto_publish"), heartbeat: beat("scheduler"), calendar: beat("calendar_post") } };
 }
 
 /** PUT { enabled, min_score (80-100) } - owner / manager only (client.edit). */

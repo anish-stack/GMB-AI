@@ -16,7 +16,7 @@ const ok = (n, c, i = "") => R.push([c ? "PASS" : "FAIL", n, String(i).slice(0, 
 
 // ---------------- Part A: provider chains ----------------
 const calls = { chat: 0, embed: 0, ctx: null, expand: 0 };
-const mode = { content: false, expandLen: 0, geminiLong: false };
+const mode = { content: false, expandLen: 0, geminiLong: false, geminiFail: false };
 const fake = http.createServer((req, res) => {
   let b = "";
   req.on("data", (c) => (b += c));
@@ -49,6 +49,7 @@ let geminiCalls = 0;
 globalThis.fetch = async (url, opt) => {
   if (String(url).includes("generativelanguage.googleapis.com")) {
     geminiCalls++;
+    if (mode.geminiFail) return new Response(JSON.stringify({ error: { code: 404, message: "models/gemini-x is not found" } }), { status: 404, headers: { "content-type": "application/json" } });
     if (String(url).includes(":embedContent")) return new Response(JSON.stringify({ embedding: { values: Array(768).fill(0.2) } }), { headers: { "content-type": "application/json" } });
     const text = mode.geminiLong ? JSON.stringify({ title: "Gemini post", description: "Detailed Gemini post text for local customers. ".repeat(30) }) : '{"from":"gemini"}';
     return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text }] }, finishReason: "STOP" }], usageMetadata: { promptTokenCount: 5, candidatesTokenCount: 3 } }), { headers: { "content-type": "application/json" } });
@@ -164,6 +165,17 @@ r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
 ok("AI_BACKGROUND_ENGINE=ollama -> content on Ollama", r.provider === "ollama", r.provider);
 process.env.AI_BACKGROUND_ENGINE = "";
 
+// Gemini fails in hybrid -> Ollama writes it, never the Mock template
+mode.geminiFail = true;
+r = await ai.runAI({ agent: "content", system: "s", prompt: "p" });
+ok("hybrid + Gemini down -> content falls back to Ollama (not Mock)", r.provider === "ollama" && /not found/.test(r.fallbackReason || ""), `${r.provider} / ${r.fallbackReason}`);
+process.env.OLLAMA_BASE_URL = "http://127.0.0.1:11998"; // Ollama down too
+let thrown = null;
+try { await runContentAgent(kb, input, { seed: "allfail" }); } catch (e) { thrown = e.message; }
+ok("all AI down -> task fails with reason, no template post", Boolean(thrown) && /all providers failed/.test(thrown), thrown);
+process.env.OLLAMA_BASE_URL = "http://127.0.0.1:11556";
+mode.geminiFail = false;
+
 fake.close();
 globalThis.fetch = realFetch;
 
@@ -198,6 +210,7 @@ if (up) {
   ok("image options capped at 1 per click", x.status === 200 && x.data?.candidates?.length === 1, x.data?.candidates?.length ?? x.data?.error);
   sql(`DELETE FROM ai_tasks WHERE id=${id}`);
   // research + keywords reused for the next post of the same client
+  sql("UPDATE client_posting_plans SET status='ACTIVE', start_date=CURDATE()-INTERVAL 3 DAY, end_date=CURDATE()+INTERVAL 60 DAY, posts_per_week=500, total_posts=5000, posting_days=NULL WHERE client_id=1 AND status<>'REPLACED'");
   const mk = async () => {
     const res = await realFetch(`${B}/api/tasks`, { method: "POST", headers: { cookie: owner, "content-type": "application/json" }, body: JSON.stringify({ clientId: 1, postType: "Service" }) });
     return (await res.json().catch(() => ({}))).taskId;

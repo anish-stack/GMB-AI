@@ -5,6 +5,7 @@ import { platformUsage } from "@/lib/saas/usage.js";
 import { Card, CardBody, CardHeader, Stat, Table, EmptyRow, Badge } from "@/components/ui";
 import { BarTrend, DistributionBar } from "@/components/charts";
 import { formatDate } from "@/lib/utils";
+import { AutoPublishSwitch } from "@/components/admin/autopublish-switch";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,8 @@ export default async function AdminOverviewPage() {
         <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Platform overview</h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">Every tenant, subscription and rupee in one place.</p>
       </div>
+
+      <AutoPublishSwitch />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Monthly recurring revenue" value={`₹${Number(stats.mrr || 0).toLocaleString("en-IN")}`} sub={`₹${Number(stats.revenue || 0).toLocaleString("en-IN")} collected all-time`} tone="emerald" icon={IndianRupee} />

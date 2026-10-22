@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardHeader, CardBody, Button, Field, Input, Textarea, Select, Alert, Skeleton } from "@/components/ui";
 import { useApi, apiFetch } from "@/lib/hooks/use-api";
+import { AutoPublishSwitch } from "@/components/admin/autopublish-switch";
 
 export function WebSettingsAdmin() {
   const { data, error, loading, mutate } = useApi("/api/admin/web-settings");
@@ -51,6 +52,8 @@ export function WebSettingsAdmin() {
         <Button onClick={() => save()} disabled={busy || !Object.keys(draft).length}>{busy ? "Saving…" : "Save changes"}</Button>
       </div>
       {msg ? <Alert tone={msg.tone}>{msg.text}</Alert> : null}
+
+      <AutoPublishSwitch />
 
       <Card className={maint ? "ring-2 ring-amber-400" : ""}>
         <CardHeader title="Maintenance mode" subtitle="Locks every tenant panel and tenant API. Super admins and allow-listed users/IPs keep working." />
@@ -125,6 +128,7 @@ export function WebSettingsAdmin() {
           <Field label="Post automation (platform)" hint="Plan = calendar filled automatically from each client's posting plan. Manual = posts only from calendar entries you add."><Select value={s.auto_schedule_mode || "plan"} onChange={set("auto_schedule_mode")}><option value="plan">Auto - from posting plans</option><option value="manual">Manual - only calendar entries</option></Select></Field>
           <Field label="Auto-publish posts (platform switch)" hint="Allows tenants to auto-post QA ≥ 80 posts on schedule (plan feature also required)"><Select value={String(s.auto_publish_enabled ?? 1)} onChange={set("auto_publish_enabled")}><option value="1">Allowed</option><option value="0">Disabled for everyone</option></Select></Field>
           <Field label="Review auto-reply (platform switch)" hint="When off, no client can auto-publish AI review replies"><Select value={String(s.review_auto_reply_enabled ?? 1)} onChange={set("review_auto_reply_enabled")}><option value="1">Allowed</option><option value="0">Disabled for everyone</option></Select></Field>
+          <Field label="Button on post images" hint='Draw a call-to-action button ("Book", "Call now") on AI post images. Google already shows the post button under the image.'><Select value={String(s.image_cta_button ?? 0)} onChange={set("image_cta_button")}><option value="0">Off - no button on the image</option><option value="1">On - draw the button</option></Select></Field>
           <Field label="Humanize AI posts"><Select value={String(s.ai_humanize_enabled ?? 1)} onChange={set("ai_humanize_enabled")}><option value="1">Rewrite when AI-like</option><option value="0">Off</option></Select></Field>
           <Field label="Humanize when AI score above" hint="0-100, default 35"><Input type="number" min={5} max={95} value={s.ai_humanize_threshold ?? 35} onChange={set("ai_humanize_threshold")} /></Field>
           <Field label="AI review drafts"><Select value={String(s.review_auto_draft ?? 1)} onChange={set("review_auto_draft")}><option value="1">Draft replies automatically</option><option value="0">Off</option></Select></Field>

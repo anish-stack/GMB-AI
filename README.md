@@ -572,3 +572,29 @@ Tests: `node --conditions=react-server scripts/test-v11-2.mjs` - 17/17 (Part B n
   Manual dialog: Hybrid (recommended) / Ollama / Gemini.
 - **Research + keywords are reused**: Regenerate uses the task's own; a new post reuses the client's latest
   research (< `RESEARCH_CACHE_DAYS`, 7) and keywords (< `KEYWORD_CACHE_DAYS`, 3). 0 = always run.
+
+### v11.2.5 - no template text in real posts
+- Engine choice is now an ORDER, not a filter: Hybrid/Gemini try Gemini first, then Ollama, then Mock.
+- If every real provider fails, the content agent FAILS the task with the reasons
+  ("gemini: 404 model not found | ollama: ...") instead of saving Mock's template text.
+  Humanize ignores Mock output. `runAI()` returns `fallbackReason`.
+
+### v11.3 - Admin master switch: auto-publish ON / OFF
+- Admin -> Overview (and Web settings) -> **Turn auto-publish OFF / ON** (`POST /api/admin/autopublish {paused}`).
+- OFF: calendar auto-post and auto-publish publish nothing for every tenant; AI keeps writing posts.
+  Tenants see "paused by the platform admin" in their Automation check. Audited.
+- ON: only posts due AFTER the resume time go out automatically - posts missed during the pause stay
+  in the queue for a manual publish (no flood). Settings: autopublish_paused / _paused_at / _resume_from.
+Tests: `node --conditions=react-server scripts/test-v11-3.mjs` - 10/10.
+
+### v11.3.1 - no "Looking for…" opener, no opening hours in posts
+- Prompts (content + humanize) forbid a "Looking for / Are you looking for" opening and any opening hours / timings.
+- Safety filter on every AI post text (`stripTimingsAndOpeners`): drops sentences with hours/timings
+  ("Open 10am to 7pm", "Timings: Mon-Sat 9-6"...) and a leading "Looking for ...?" sentence. QA warns if they remain.
+- Mock template no longer uses either. Tests: `node scripts/test-v11-3-1.mjs` - 15/15.
+
+### v11.3.2 - no button on post images
+- New Admin -> Web settings -> **Button on post images** (`image_cta_button`, default **Off**).
+  Off: branded overlay draws no CTA pill; AI poster / any style prompt has its button line removed plus a
+  hard "do NOT draw any button" rule (works for admin-edited prompts too). Google's own post button stays.
+- Run `mysql -u root -p gmb_ai < db/upgrade-v11-3-no-image-button.sql` (also appended to schema.sql).
