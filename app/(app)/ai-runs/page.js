@@ -1,26 +1,38 @@
 import { requirePagePermission } from "@/lib/saas/context.js";
 import { query } from "@/lib/db";
-import { requireTenantContext } from "@/lib/saas/context.js";
-import { agentUsage, dashboardStats } from "@/lib/repo/stats.js";
+import { agentUsage } from "@/lib/repo/stats.js";
 import { Card, CardHeader, Table, EmptyRow, Stat } from "@/components/ui";
 import { AiRunsTable } from "@/components/ai-runs-table";
 
 export const dynamic = "force-dynamic";
 
 export default async function AiRunsPage() {
-  await requirePagePermission("task.view");
-  const ctx = await requireTenantContext();
-  const [runs, agents, stats] = await Promise.all([
+  // requirePagePermission already returns the (request-cached) tenant context
+  const ctx = await requirePagePermission("task.view");
+  const [runs, agents] = await Promise.all([
+    // Only the columns the table shows; previews are cut in SQL so we never ship LONGTEXT to the browser
     query(
-      `SELECT e.*, c.business_name FROM ai_executions e
+      `SELECT e.id, e.created_at, e.task_id, e.agent, e.provider, e.model,
+              e.duration_ms, e.status, LEFT(e.error, 120) AS error,
+              LEFT(e.output_preview, 120) AS output_preview, c.business_name
+         FROM ai_executions e
          LEFT JOIN clients c ON c.id=e.client_id
         WHERE e.tenant_id=?
         ORDER BY e.id DESC LIMIT 200`,
       [ctx.tenantId]
     ),
     agentUsage(ctx.tenantId),
-    dashboardStats(ctx.tenantId),
   ]);
+
+  // Top stat cards come from the per-agent GROUP BY rows - no extra queries
+  const total = agents.reduce((n, a) => n + Number(a.calls || 0), 0);
+  const failed = agents.reduce((n, a) => n + Number(a.failures || 0), 0);
+  const stats = {
+    ai_calls: total,
+    ai_errors: failed,
+    ai_success_rate: total ? Math.round(((total - failed) / total) * 100) : 100,
+    credits_used: agents.reduce((n, a) => n + Number(a.credits || 0), 0),
+  };
 
   return (
     <div className="space-y-5">

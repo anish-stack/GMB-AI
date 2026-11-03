@@ -32,7 +32,7 @@ export function AiRunsTable({ runs }) {
               <option value="">All statuses</option>
               <option value="SUCCESS">Success</option>
               <option value="FALLBACK">Fallback</option>
-              <option value="ERROR">Error</option>
+              <option value="FAILED">Failed</option>
             </Select>
           </div>
         }
