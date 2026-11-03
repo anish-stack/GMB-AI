@@ -8,6 +8,7 @@ const nextConfig = {
     "/api/reports/**": ["./lib/reports/fonts/**"],
   },
   poweredByHeader: false,
+   compress: false,
   // security headers are set in proxy.js
 };
 
