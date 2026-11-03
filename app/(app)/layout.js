@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic";
 
 /** White-label: the browser tab shows the agency's brand name. */
 export async function generateMetadata() {
-  const { getContext } = await import("@/lib/saas/context.js");
-  const ctx = await getContext().catch(() => null);
+  const { getPageContext } = await import("@/lib/saas/context.js");
+  const ctx = await getPageContext().catch(() => null);
   const b = await tenantBrand(ctx?.tenant || null).catch(() => null);
   return b ? { title: { absolute: b.name, template: `%s · ${b.name}` }, applicationName: b.name } : {};
 }
